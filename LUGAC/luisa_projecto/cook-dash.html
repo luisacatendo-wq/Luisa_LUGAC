@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUGAC–COZINHA | Painel Operacional</title>
+  <!-- Bootstrap 5 + Font Awesome + Google Fonts (Times New Roman fallback) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ---------- GLOBAL & TEMAS ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+    :root {
+      --bg-body: #f4f7fc;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-topbar: #ffffff;
+      --text-primary: #1a2639;
+      --text-secondary: #5e6f8d;
+      --border-light: #e9edf4;
+      --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.02), 0 4px 8px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.04);
+      --primary: #e65c1e;
+      --primary-soft: #ffefe8;
+      --success: #2b8f5e;
+      --warning: #e6a017;
+      --danger: #d64545;
+      --info: #2c7da0;
+      --gray: #9aa9b9;
+      --sidebar-width: 280px;
+      --sidebar-collapsed: 82px;
+      --radius: 20px;
+      --radius-sm: 14px;
+    }
+    body.dark {
+      --bg-body: #0e1217;
+      --bg-sidebar: #161c24;
+      --bg-card: #1e2630;
+      --bg-topbar: #161c24;
+      --text-primary: #eef2f8;
+      --text-secondary: #a3b3c9;
+      --border-light: #2a3440;
+      --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.5);
+      --primary-soft: #2f221c;
+      --gray: #6b7b8f;
+    }
+
+    /* IMAGEM DE FUNDO GLOBAL */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.08;
+      z-index: -1;
+      pointer-events: none;
+    }
+    body.dark::before {
+      opacity: 0.04;
+    }
+
+    /* ---------- LAYOUT PRINCIPAL ---------- */
+    .app-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+      z-index: 1050;
+      position: relative;
+    }
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+    }
+    .sidebar-header {
+      padding: 1.5rem 1rem 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .logo-icon {
+      width: 200px;
+      height: 200px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+
+    }
+    .logo-text span {
+      font-weight: 400;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      display: block;
+      line-height: 1.2;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 6px;
+      background: var(--bg-body);
+      border-radius: 40px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .user-profile:hover {
+      background: var(--primary-soft);
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 40px;
+      background: var(--primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--primary);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .user-info {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .user-info h6 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .user-info small {
+      font-size: 0.7rem;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sidebar.collapsed .user-info,
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .user-profile .user-info {
+      display: none;
+    }
+    .sidebar.collapsed .user-profile {
+      justify-content: center;
+      padding: 6px;
+    }
+    .sidebar.collapsed .logo-area {
+      justify-content: center;
+    }
+    /* NAV */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.15s;
+      white-space: nowrap;
+      position: relative;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 1rem;
+    }
+    .nav-item i {
+      font-size: 1.2rem;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .nav-item span {
+      font-size: 0.95rem;
+    }
+    .nav-item:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 16px rgba(230, 92, 30, 0.25);
+    }
+    .nav-item.active i {
+      color: white;
+    }
+    .sidebar.collapsed .nav-item span {
+      display: none;
+    }
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding: 12px 8px;
+    }
+    .sidebar.collapsed .nav-item i {
+      margin: 0;
+    }
+    /* Tooltip no collapsed */
+    .sidebar.collapsed .nav-item::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 70px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-light);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.15s;
+      z-index: 1200;
+    }
+    .sidebar.collapsed .nav-item:hover::after {
+      opacity: 1;
+    }
+    .expand-btn {
+      margin: 0.5rem 1rem 1rem;
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border-light);
+      background: transparent;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: 500;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 0.9rem;
+    }
+    .expand-btn:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    /* MAIN */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: transparent;
+    }
+    /* TOPBAR */
+    .topbar {
+      background: var(--bg-topbar);
+      border-bottom: 1px solid var(--border-light);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 1040;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-left h5 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .breadcrumb {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 6px;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .connection-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 40px;
+      background: var(--bg-body);
+      border: 1px solid var(--border-light);
+    }
+    .connection-badge.online i { color: var(--success); }
+    .connection-badge.offline i { color: var(--danger); }
+    .session-timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      background: var(--bg-body);
+      padding: 6px 16px;
+      border-radius: 40px;
+      border: 1px solid var(--border-light);
+      font-size: 0.9rem;
+    }
+    .session-timer i { color: var(--primary); }
+    .theme-toggle, .notif-btn, .profile-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 40px;
+      background: var(--bg-body);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-primary);
+      position: relative;
+      transition: 0.2s;
+    }
+    .theme-toggle:hover, .notif-btn:hover, .profile-btn:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .notif-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger);
+      color: white;
+      font-size: 0.6rem;
+      border-radius: 40px;
+      padding: 2px 6px;
+      font-weight: 700;
+    }
+    /* TABS */
+    .tabs-container {
+      padding: 0.8rem 1.5rem 0;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      background: var(--bg-topbar);
+      border-bottom: 1px solid var(--border-light);
+      scrollbar-width: none;
+    }
+    .tab-item {
+      padding: 8px 20px;
+      border-radius: 40px 40px 0 0;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.1s;
+      border-bottom: 2px solid transparent;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .tab-item.active {
+      background: var(--bg-body);
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      font-weight: 600;
+    }
+    .tab-item i {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    .tab-close {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-left: 6px;
+    }
+    .tab-close:hover { opacity: 1; color: var(--danger); }
+    /* ÁREA PRINCIPAL */
+    .content-area {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      background: transparent;
+    }
+    /* CARDS */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1.2rem 1.2rem;
+      transition: transform 0.1s, box-shadow 0.2s;
+      height: 100%;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(43, 143, 94, 0.15); color: var(--success); }
+    .badge-yellow { background: rgba(230, 160, 23, 0.15); color: var(--warning); }
+    .badge-red { background: rgba(214, 69, 69, 0.15); color: var(--danger); }
+    .badge-blue { background: rgba(44, 125, 160, 0.15); color: var(--info); }
+    .order-card {
+      border-left: 6px solid var(--gray);
+      transition: 0.2s;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .order-card.status-new { border-left-color: var(--info); }
+    .order-card.status-preparing { border-left-color: var(--warning); }
+    .order-card.status-ready { border-left-color: var(--success); }
+    .order-card.status-late { border-left-color: var(--danger); }
+    .timer-badge {
+      font-family: monospace;
+      background: var(--bg-body);
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    /* Modo parede */
+    .wall-mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .wall-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      border-top: 6px solid var(--info);
+    }
+    /* ingredientes imagens */
+    .ingredient-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-right: 12px;
+      border: 2px solid var(--border-light);
+    }
+    /* modal timer */
+    .modal-session .modal-content {
+      border-radius: 30px;
+      border: none;
+      background: var(--bg-card);
+    }
+    /* utilitários */
+    .text-secondary { color: var(--text-secondary) !important; }
+    .bg-primary-soft { background: var(--primary-soft); }
+    .btn-primary {
+      background: var(--primary);
+      border: none;
+      border-radius: 40px;
+      padding: 8px 20px;
+      font-weight: 500;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .btn-primary:hover { background: #c94d14; }
+    .btn-outline-secondary {
+      border-radius: 40px;
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .btn-outline-secondary:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    /* scroll */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 10px; }
+    /* responsivo */
+    @media (max-width: 992px) {
+      .sidebar { width: var(--sidebar-collapsed); }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span { display: none; }
+      .sidebar .nav-item { justify-content: center; }
+      .sidebar .nav-item::after { display: none; }
+      .sidebar .user-profile { justify-content: center; }
+      .sidebar .logo-area { justify-content: center; }
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        transition: left 0.3s ease;
+      }
+      .sidebar.mobile-open { left: 0; }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span { display: block; }
+      .sidebar .nav-item { justify-content: flex-start; }
+      .sidebar .user-profile { justify-content: flex-start; }
+      .sidebar .logo-area { justify-content: flex-start; }
+      .sidebar .nav-item::after { display: none; }
+      .content-area { padding: 1rem; }
+      .topbar { padding: 0.6rem 1rem; }
+    }
+    .hidden { display: none !important; }
+    /* Profile modal submenu */
+    .profile-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+      color: var(--text-primary);
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 1rem;
+    }
+    .profile-menu-item:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    .profile-menu-item i {
+      width: 24px;
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+    .profile-menu-item:hover i {
+      color: var(--primary);
+    }
+    .profile-menu-item.danger:hover {
+      background: rgba(214, 69, 69, 0.1);
+      color: var(--danger);
+    }
+    .profile-menu-item.danger:hover i {
+      color: var(--danger);
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 1.5rem;
+      background: var(--primary-soft);
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+    .profile-header .avatar-lg {
+      width: 64px;
+      height: 64px;
+      border-radius: 60px;
+      overflow: hidden;
+      border: 3px solid var(--primary);
+      flex-shrink: 0;
+    }
+    .profile-header .avatar-lg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* ingredient card */
+    .ingredient-card {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      margin-bottom: 10px;
+      transition: 0.2s;
+    }
+    .ingredient-card:hover {
+      box-shadow: var(--shadow-sm);
+      transform: translateX(4px);
+    }
+    .ingredient-card .ing-info {
+      flex: 1;
+    }
+    .ingredient-card .ing-info h6 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .ingredient-card .ing-info small {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <a href="login.html">
+          <img src="images/lugac-logo.png" class="logo-icon" />
+        </a>
+      </div>
+      <div class="user-profile" id="userProfileSidebar">
+        <div class="user-avatar">
+          <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef">
+        </div>
+        <div class="user-info">
+          <h6>Luisa Catendo</h6>
+          <small><i class="fas fa-circle" style="font-size: 0.5rem; color: var(--success);"></i> Online</small>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-page="dashboard" data-title="Dashboard">
+        <i class="fas fa-home"></i><span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-page="pedidos" data-title="Pedidos">
+        <i class="fas fa-utensils"></i><span>Pedidos</span>
+      </button>
+      <button class="nav-item" data-page="preparacao" data-title="Em Preparação">
+        <i class="fas fa-fire"></i><span>Em Preparação</span>
+      </button>
+      <button class="nav-item" data-page="prontos" data-title="Pedidos Prontos">
+        <i class="fas fa-check-circle"></i><span>Pedidos Prontos</span>
+      </button>
+      <button class="nav-item" data-page="tempo" data-title="Controle de Tempo">
+        <i class="fas fa-clock"></i><span>Controle de Tempo</span>
+      </button>
+      <button class="nav-item" data-page="fichas" data-title="Fichas Técnicas">
+        <i class="fas fa-clipboard-list"></i><span>Fichas Técnicas</span>
+      </button>
+      <button class="nav-item" data-page="ingredientes" data-title="Ingredientes">
+        <i class="fas fa-carrot"></i><span>Ingredientes</span>
+      </button>
+      <button class="nav-item" data-page="faltas" data-title="Faltas de Ingredientes">
+        <i class="fas fa-exclamation-triangle"></i><span>Faltas Ingredientes</span>
+      </button>
+      <button class="nav-item" data-page="desperdicios" data-title="Desperdícios">
+        <i class="fas fa-trash-alt"></i><span>Desperdícios</span>
+      </button>
+      <button class="nav-item" data-page="notificacoes" data-title="Notificações">
+        <i class="fas fa-bell"></i><span>Notificações</span>
+      </button>
+      <button class="nav-item" data-page="producao" data-title="Produção">
+        <i class="fas fa-chart-line"></i><span>Produção</span>
+      </button>
+      <button class="nav-item" data-page="historico" data-title="Histórico">
+        <i class="fas fa-history"></i><span>Histórico</span>
+      </button>
+      <button class="nav-item" data-page="definicoes" data-title="Definições">
+        <i class="fas fa-cog"></i><span>Definições</span>
+      </button>
+    </nav>
+    <button class="expand-btn" id="toggleSidebar"><i class="fas fa-chevron-left"></i> <span>Expandir</span></button>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-outline-secondary d-md-none" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+        <h5 id="pageTitle">Dashboard da Cozinha</h5>
+        <div class="breadcrumb" id="breadcrumb">Início / Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="connection-badge online" id="connectionBadge"><i class="fas fa-circle"></i> <span>Online</span></div>
+        <div class="session-timer" id="sessionTimerDisplay"><i class="fas fa-hourglass-half"></i> <span id="timerText">15:00</span></div>
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema"><i class="fas fa-moon"></i></button>
+        <button class="notif-btn" id="notifBtn"><i class="fas fa-bell"></i><span class="notif-badge" id="notifCount">3</span></button>
+        <button class="profile-btn" id="profileBtn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <!-- TABS -->
+    <div class="tabs-container" id="tabsContainer">
+      <div class="tab-item active" data-tab="dashboard">Dashboard <i class="fas fa-times tab-close"></i></div>
+      <div class="tab-item" data-tab="pedidos">Pedidos <i class="fas fa-times tab-close"></i></div>
+      <div class="tab-item" data-tab="preparacao">Em Preparação <i class="fas fa-times tab-close"></i></div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-area" id="contentArea">
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page-content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+          <div>
+            <h4 class="fw-bold mb-1">Dashboard da Cozinha</h4>
+            <p class="text-secondary">Visão geral da produção em tempo real</p>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold" id="currentDate">Terça-feira, 22 de Setembro de 2026</div>
+            <div class="fs-4 fw-bold" id="currentTime">10:08:32</div>
+          </div>
+        </div>
+
+        <!-- cards de estatísticas -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">28</div><div class="stat-label">Pedidos Hoje</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-info">06</div><div class="stat-label">Pedidos Novos</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-warning">08</div><div class="stat-label">Em Preparação</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">11</div><div class="stat-label">Pedidos Prontos</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">03</div><div class="stat-label">Pedidos Atrasados</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">02</div><div class="stat-label">Ingredientes em Falta</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">1,8 kg</div><div class="stat-label">Desperdício Hoje</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">18 min</div><div class="stat-label">Tempo Médio</div></div></div>
+        </div>
+
+        <!-- Estado da Cozinha Agora -->
+        <div class="card mb-4 bg-primary-soft" style="border-left: 6px solid var(--primary);">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-circle text-success fs-4"></i>
+            <div>
+              <h5 class="fw-bold mb-1">Estado da Cozinha Agora</h5>
+              <div class="d-flex flex-wrap gap-4">
+                <span>🟢 <strong>18</strong> pedidos</span>
+                <span>🔥 <strong>6</strong> em preparação</span>
+                <span>✅ <strong>4</strong> prontos</span>
+                <span>🔴 <strong>2</strong> atrasados</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel de Produção Inteligente -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold m-0"><i class="fas fa-fire me-2" style="color: var(--primary);"></i>Painel de Produção Inteligente</h5>
+          <button class="btn btn-outline-secondary btn-sm" id="wallModeBtn"><i class="fas fa-tv me-1"></i> Modo Parede</button>
+        </div>
+        <div class="row g-3" id="orderListDashboard"></div>
+      </div>
+
+      <!-- PEDIDOS -->
+      <div id="page-pedidos" class="page-content hidden">
+        <h4>Gestão de Pedidos</h4>
+        <div id="orderListPedidos" class="row g-3 mt-2"></div>
+      </div>
+
+      <!-- PREPARAÇÃO -->
+      <div id="page-preparacao" class="page-content hidden">
+        <h4>Em Preparação</h4>
+        <div id="orderListPreparacao" class="row g-3 mt-2"></div>
+      </div>
+
+      <!-- PRONTOS -->
+      <div id="page-prontos" class="page-content hidden">
+        <h4>Pedidos Prontos</h4>
+        <div id="orderListProntos" class="row g-3 mt-2"></div>
+      </div>
+
+      <!-- CONTROLE DE TEMPO -->
+      <div id="page-tempo" class="page-content hidden">
+        <h4>Controle de Tempo</h4>
+        <p class="text-secondary">Monitorização de tempos de preparação.</p>
+        <div class="row g-3 mt-2" id="timeControlList"></div>
+      </div>
+
+      <!-- FICHAS TÉCNICAS -->
+      <div id="page-fichas" class="page-content hidden">
+        <h4>Fichas Técnicas</h4>
+        <p class="text-secondary">Ingredientes e modo de preparação.</p>
+        <div class="row g-3 mt-2" id="fichasList"></div>
+      </div>
+
+      <!-- INGREDIENTES -->
+      <div id="page-ingredientes" class="page-content hidden">
+        <h4>Ingredientes</h4>
+        <p class="text-secondary">Consulta e gestão de ingredientes.</p>
+        <div class="row g-3 mt-2" id="ingredientesList"></div>
+      </div>
+
+      <!-- FALTAS -->
+      <div id="page-faltas" class="page-content hidden">
+        <h4>Faltas de Ingredientes</h4>
+        <p class="text-secondary">Registo de faltas e reposição.</p>
+        <div class="row g-3 mt-2" id="faltasList"></div>
+      </div>
+
+      <!-- DESPERDÍCIOS -->
+      <div id="page-desperdicios" class="page-content hidden">
+        <h4>Desperdícios</h4>
+        <p class="text-secondary">Registo e análise de desperdícios.</p>
+        <div class="row g-3 mt-2" id="desperdiciosList"></div>
+      </div>
+
+      <!-- NOTIFICAÇÕES -->
+      <div id="page-notificacoes" class="page-content hidden">
+        <h4>Notificações</h4>
+        <p class="text-secondary">Alertas e eventos recentes.</p>
+        <div id="notificacoesList" class="mt-3"></div>
+      </div>
+
+      <!-- PRODUÇÃO -->
+      <div id="page-producao" class="page-content hidden">
+        <h4>Produção</h4>
+        <p class="text-secondary">Indicadores de produção.</p>
+        <div class="row g-3 mt-2" id="producaoStats"></div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div id="page-historico" class="page-content hidden">
+        <h4>Histórico</h4>
+        <p class="text-secondary">Histórico de operações.</p>
+        <div id="historicoList" class="mt-3"></div>
+      </div>
+
+      <!-- DEFINIÇÕES -->
+      <div id="page-definicoes" class="page-content hidden">
+        <h4>Definições</h4>
+        <p class="text-secondary">Configurações do módulo de cozinha.</p>
+        <div class="row g-3 mt-3" id="definicoesContent">
+          <div class="col-md-6">
+            <div class="card">
+              <h6 class="fw-bold mb-3"><i class="fas fa-palette me-2"></i>Aparência</h6>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+                <label class="form-check-label" for="darkModeSwitch">Modo Escuro</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="wallModeSwitch" checked>
+                <label class="form-check-label" for="wallModeSwitch">Modo Parede automático</label>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <h6 class="fw-bold mb-3"><i class="fas fa-bell me-2"></i>Notificações</h6>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="notifSound" checked>
+                <label class="form-check-label" for="notifSound">Som de alerta</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="notifLate" checked>
+                <label class="form-check-label" for="notifLate">Alertas de atraso</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SESSÃO -->
+<div class="modal fade modal-session" id="sessionModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-hourglass-end me-2 text-warning"></i>Sessão prestes a terminar</h5>
+      </div>
+      <div class="modal-body">
+        A sua sessão irá terminar em breve. Deseja continuar a trabalhar?
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" id="endSessionBtn">Encerrar Sessão</button>
+        <button class="btn btn-primary" id="continueSessionBtn">Continuar Sessão</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PEDIDO DETALHE -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card);">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="orderModalTitle">Pedido #1025</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="orderModalBody"></div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="acceptOrderBtn">Aceitar Pedido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL COM SUBMENU -->
+<div class="modal fade" id="profileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-circle me-2" style="color: var(--primary);"></i>Perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <!-- Cabeçalho do perfil -->
+        <div class="profile-header">
+          <div class="avatar-lg">
+            <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef">
+          </div>
+          <div>
+            <h5 class="fw-bold mb-0">António Diogo</h5>
+            <p class="text-secondary mb-1">Chef Executivo</p>
+            <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> Online</span>
+          </div>
+        </div>
+        <!-- Submenu -->
+        <div class="profile-menu-item" onclick="alert('A abrir Meu Perfil...')">
+          <i class="fas fa-id-card"></i>
+          <div>
+            <div class="fw-bold">Meu Perfil</div>
+            <small class="text-secondary">Ver e editar informações pessoais</small>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir Estado da Sessão...')">
+          <i class="fas fa-signal"></i>
+          <div>
+            <div class="fw-bold">Estado da Sessão</div>
+            <small class="text-secondary">Tempo restante e atividade</small>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir Atividade...')">
+          <i class="fas fa-history"></i>
+          <div>
+            <div class="fw-bold">Atividade</div>
+            <small class="text-secondary">Últimas ações realizadas</small>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir Definições...')">
+          <i class="fas fa-cog"></i>
+          <div>
+            <div class="fw-bold">Definições</div>
+            <small class="text-secondary">Preferências do sistema</small>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir Ajuda...')">
+          <i class="fas fa-question-circle"></i>
+          <div>
+            <div class="fw-bold">Ajuda & Suporte</div>
+            <small class="text-secondary">FAQ e contacto</small>
+          </div>
+        </div>
+        <hr class="my-2" style="border-color: var(--border-light);">
+        <div class="profile-menu-item danger" onclick="alert('Sessão terminada. A redirecionar para login...')">
+          <i class="fas fa-sign-out-alt"></i>
+          <div>
+            <div class="fw-bold">Terminar Sessão</div>
+            <small class="text-secondary">Sair da conta atual</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICAÇÕES -->
+<div class="modal fade" id="notifModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-bell me-2" style="color: var(--primary);"></i>Notificações</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="notifModalBody">
+        <!-- preenchido via js -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  (function(){
+    // ---------- STORAGE SERVICE ----------
+    const StorageService = {
+      get(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch(e) { return fallback; }
+      },
+      set(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+    };
+
+    // ---------- DADOS SIMULADOS ----------
+    const initialOrders = [
+      { id: 1001, mesa: 5, hora: '10:02', itens: ['Frango grelhado', 'Arroz', 'Salada'], qtd: 3, prioridade: 'alta', tempoEstimado: 20, tempoDecorrido: 14, estado: 'preparacao', obs: 'Sem picante', alergias: 'Amendoim', statusColor: 'warning' },
+      { id: 1002, mesa: 8, hora: '10:05', itens: ['Bife', 'Batata frita', 'Salada'], qtd: 3, prioridade: 'normal', tempoEstimado: 25, tempoDecorrido: 8, estado: 'novo', obs: '', alergias: '', statusColor: 'info' },
+      { id: 1003, mesa: 12, hora: '09:55', itens: ['Peixe grelhado', 'Legumes'], qtd: 2, prioridade: 'alta', tempoEstimado: 18, tempoDecorrido: 25, estado: 'atrasado', obs: 'Sem sal', alergias: 'Lactose', statusColor: 'danger' },
+      { id: 1004, mesa: 3, hora: '10:10', itens: ['Hambúrguer', 'Batata'], qtd: 2, prioridade: 'normal', tempoEstimado: 15, tempoDecorrido: 2, estado: 'novo', obs: '', alergias: '', statusColor: 'info' },
+      { id: 1005, mesa: 7, hora: '09:50', itens: ['Frango', 'Arroz', 'Salada'], qtd: 3, prioridade: 'baixa', tempoEstimado: 20, tempoDecorrido: 35, estado: 'pronto', obs: 'Molho separado', alergias: '', statusColor: 'success' },
+      { id: 1006, mesa: 2, hora: '10:12', itens: ['Caldo verde', 'Pão de alho'], qtd: 2, prioridade: 'normal', tempoEstimado: 12, tempoDecorrido: 1, estado: 'novo', obs: '', alergias: 'Glúten', statusColor: 'info' },
+      { id: 1007, mesa: 9, hora: '09:45', itens: ['Lasanha', 'Salada'], qtd: 2, prioridade: 'alta', tempoEstimado: 22, tempoDecorrido: 18, estado: 'preparacao', obs: 'Sem queijo extra', alergias: 'Lactose', statusColor: 'warning' },
+      { id: 1008, mesa: 4, hora: '10:15', itens: ['Sopa de peixe', 'Arroz'], qtd: 1, prioridade: 'baixa', tempoEstimado: 15, tempoDecorrido: 0, estado: 'novo', obs: '', alergias: '', statusColor: 'info' }
+    ];
+    let orders = StorageService.get('lugac_orders', null) || initialOrders;
+
+    const initialIngredients = [
+      { id: 1, nome: 'Frango', categoria: 'Carnes', stock: '12 kg', minStock: '5 kg', img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?q=80&w=200&auto=format&fit=crop', status: 'ok' },
+      { id: 2, nome: 'Bife de vaca', categoria: 'Carnes', stock: '8 kg', minStock: '4 kg', img: 'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?q=80&w=200&auto=format&fit=crop', status: 'ok' },
+      { id: 3, nome: 'Peixe fresco', categoria: 'Peixes', stock: '3 kg', minStock: '5 kg', img: 'https://images.unsplash.com/photo-1534948216015-6c23b1e3b9b1?q=80&w=200&auto=format&fit=crop', status: 'baixo' },
+      { id: 4, nome: 'Arroz', categoria: 'Cereais', stock: '20 kg', minStock: '10 kg', img: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop', status: 'ok' },
+      { id: 5, nome: 'Batata', categoria: 'Legumes', stock: '15 kg', minStock: '8 kg', img: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=200&auto=format&fit=crop', status: 'ok' },
+      { id: 6, nome: 'Tomate', categoria: 'Legumes', stock: '6 kg', minStock: '4 kg', img: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?q=80&w=200&auto=format&fit=crop', status: 'ok' },
+      { id: 7, nome: 'Queijo', categoria: 'Lacticínios', stock: '2 kg', minStock: '3 kg', img: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?q=80&w=200&auto=format&fit=crop', status: 'baixo' },
+      { id: 8, nome: 'Alface', categoria: 'Legumes', stock: '4 kg', minStock: '3 kg', img: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?q=80&w=200&auto=format&fit=crop', status: 'ok' }
+    ];
+
+    const initialFaltas = [
+      { id: 1, ingrediente: 'Peixe fresco', quantidade: '2 kg', urgencia: 'alta', data: '2026-09-22', responsavel: 'António Diogo' },
+      { id: 2, ingrediente: 'Queijo', quantidade: '1 kg', urgencia: 'média', data: '2026-09-22', responsavel: 'Maria Santos' }
+    ];
+
+    const initialDesperdicios = [
+      { id: 1, item: 'Arroz', quantidade: '0.5 kg', motivo: 'Queimado', data: '2026-09-22', turno: 'Manhã' },
+      { id: 2, item: 'Frango', quantidade: '0.3 kg', motivo: 'Sobras', data: '2026-09-22', turno: 'Manhã' },
+      { id: 3, item: 'Legumes', quantidade: '1.0 kg', motivo: 'Má conservação', data: '2026-09-21', turno: 'Tarde' }
+    ];
+
+    const initialNotificacoes = [
+      { id: 1, tipo: 'atraso', mensagem: 'Pedido #1003 está atrasado (25 min)', data: '10:05', lida: false },
+      { id: 2, tipo: 'stock', mensagem: 'Ingrediente "Peixe fresco" abaixo do stock mínimo', data: '09:50', lida: false },
+      { id: 3, tipo: 'novo', mensagem: 'Novo pedido #1008 recebido', data: '10:15', lida: false },
+      { id: 4, tipo: 'info', mensagem: 'Turno da manhã iniciado', data: '08:00', lida: true }
+    ];
+
+    // ---------- TEMA ----------
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('lugac_theme') || 'light';
+    if (savedTheme === 'dark') document.body.classList.add('dark');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('lugac_theme', isDark ? 'dark' : 'light');
+      themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ---------- SIDEBAR TOGGLE ----------
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('toggleSidebar');
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      toggleBtn.innerHTML = isCollapsed ? '<i class="fas fa-chevron-right"></i> <span>Expandir</span>' : '<i class="fas fa-chevron-left"></i> <span>Compactar</span>';
+    });
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+    });
+
+    // ---------- NAVEGAÇÃO / TABS ----------
+    const navItems = document.querySelectorAll('.nav-item');
+    const pageContents = document.querySelectorAll('.page-content');
+    const pageTitle = document.getElementById('pageTitle');
+    const breadcrumb = document.getElementById('breadcrumb');
+    const tabsContainer = document.getElementById('tabsContainer');
+    const openTabs = [{ id: 'dashboard', label: 'Dashboard' }];
+
+    function switchPage(pageId, label) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const nav = Array.from(navItems).find(n => n.dataset.page === pageId);
+      if (nav) nav.classList.add('active');
+      pageContents.forEach(p => p.classList.add('hidden'));
+      const target = document.getElementById(`page-${pageId}`);
+      if (target) target.classList.remove('hidden');
+      if (label) {
+        pageTitle.textContent = label;
+        breadcrumb.textContent = `Início / ${label}`;
+      }
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      const existingTab = Array.from(document.querySelectorAll('.tab-item')).find(t => t.dataset.tab === pageId);
+      if (existingTab) existingTab.classList.add('active');
+      if (!openTabs.some(t => t.id === pageId)) {
+        openTabs.push({ id: pageId, label: label || pageId });
+        renderTabs();
+      }
+      resetSessionTimer();
+    }
+
+    function renderTabs() {
+      tabsContainer.innerHTML = '';
+      openTabs.forEach(tab => {
+        const div = document.createElement('div');
+        div.className = `tab-item ${tab.id === 'dashboard' ? 'active' : ''}`;
+        div.dataset.tab = tab.id;
+        div.innerHTML = `${tab.label} <i class="fas fa-times tab-close" data-tab="${tab.id}"></i>`;
+        div.addEventListener('click', (e) => {
+          if (e.target.classList.contains('tab-close')) {
+            if (tab.id === 'dashboard') return;
+            openTabs.splice(openTabs.findIndex(t => t.id === tab.id), 1);
+            renderTabs();
+            if (tab.id === document.querySelector('.tab-item.active')?.dataset.tab) {
+              switchPage('dashboard', 'Dashboard');
+            }
+            return;
+          }
+          switchPage(tab.id, tab.label);
+        });
+        tabsContainer.appendChild(div);
+      });
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        const label = item.dataset.title || page;
+        switchPage(page, label);
+        resetSessionTimer();
+      });
+    });
+
+    // ---------- RELÓGIO ----------
+    function updateClock() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-PT', options);
+      document.getElementById('currentTime').textContent = now.toLocaleTimeString('pt-PT');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ---------- SESSÃO TIMER ----------
+    let sessionSeconds = 15 * 60;
+    let sessionInterval;
+    let sessionModalShown = false;
+    const timerText = document.getElementById('timerText');
+    const sessionModal = new bootstrap.Modal(document.getElementById('sessionModal'));
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function startSessionTimer() {
+      clearInterval(sessionInterval);
+      sessionInterval = setInterval(() => {
+        if (sessionSeconds <= 0) {
+          clearInterval(sessionInterval);
+          window.location.href = '508.html';
+          return;
+        }
+        sessionSeconds--;
+        timerText.textContent = formatTime(sessionSeconds);
+        if (sessionSeconds === 120 && !sessionModalShown) {
+          sessionModalShown = true;
+          sessionModal.show();
+        }
+      }, 1000);
+    }
+
+    function resetSessionTimer() {
+      sessionSeconds = 15 * 60;
+      timerText.textContent = formatTime(sessionSeconds);
+      sessionModalShown = false;
+      if (sessionModal) sessionModal.hide();
+      startSessionTimer();
+    }
+
+    document.getElementById('continueSessionBtn').addEventListener('click', () => {
+      sessionModal.hide();
+      resetSessionTimer();
+    });
+    document.getElementById('endSessionBtn').addEventListener('click', () => {
+      sessionModal.hide();
+      clearInterval(sessionInterval);
+      localStorage.removeItem('lugac_session');
+      window.location.href = 'login.html';
+    });
+
+    startSessionTimer();
+
+    // ---------- ONLINE / OFFLINE ----------
+    function updateConnectionStatus() {
+      const badge = document.getElementById('connectionBadge');
+      if (navigator.onLine) {
+        badge.className = 'connection-badge online';
+        badge.innerHTML = '<i class="fas fa-circle"></i> <span>Online</span>';
+      } else {
+        badge.className = 'connection-badge offline';
+        badge.innerHTML = '<i class="fas fa-circle"></i> <span>Offline — Dados locais</span>';
+      }
+    }
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    updateConnectionStatus();
+
+    // ---------- RENDERIZAR PEDIDOS ----------
+    function getStatusClass(estado) {
+      if (estado === 'novo') return 'status-new';
+      if (estado === 'preparacao') return 'status-preparing';
+      if (estado === 'pronto') return 'status-ready';
+      return 'status-late';
+    }
+    function getBadgeClass(estado) {
+      if (estado === 'novo') return 'badge-blue';
+      if (estado === 'preparacao') return 'badge-yellow';
+      if (estado === 'pronto') return 'badge-green';
+      return 'badge-red';
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('orderListDashboard');
+      if (!container) return;
+      container.innerHTML = '';
+      orders.slice(0, 6).forEach(order => {
+        const col = document.createElement('div');
+        col.className = 'col-lg-4 col-md-6';
+        col.innerHTML = `
+          <div class="card order-card ${getStatusClass(order.estado)}" data-id="${order.id}">
+            <div class="d-flex justify-content-between">
+              <span class="fw-bold">#${order.id}</span>
+              <span class="badge-status ${getBadgeClass(order.estado)}">
+                ${order.estado.toUpperCase()}
+              </span>
+            </div>
+            <div class="mt-1"><i class="fas fa-chair me-1"></i> Mesa ${order.mesa} • ${order.hora}</div>
+            <div class="small text-secondary">${order.itens.join(', ')}</div>
+            <div class="d-flex justify-content-between mt-2">
+              <span class="timer-badge"><i class="far fa-clock me-1"></i>${order.tempoDecorrido} min</span>
+              <span class="text-secondary small">Prev: ${order.tempoEstimado} min</span>
+            </div>
+            ${order.alergias ? `<div class="mt-1 small text-danger"><i class="fas fa-exclamation-triangle"></i> Alergia: ${order.alergias}</div>` : ''}
+          </div>
+        `;
+        col.querySelector('.order-card').addEventListener('click', () => openOrderModal(order.id));
+        container.appendChild(col);
+      });
+    }
+
+    function openOrderModal(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      document.getElementById('orderModalTitle').textContent = `Pedido #${order.id}`;
+      document.getElementById('orderModalBody').innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <p><strong>Mesa:</strong> ${order.mesa}</p>
+            <p><strong>Horário:</strong> ${order.hora}</p>
+            <p><strong>Prioridade:</strong> ${order.prioridade}</p>
+            <p><strong>Quantidade:</strong> ${order.qtd} itens</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Tempo estimado:</strong> ${order.tempoEstimado} min</p>
+            <p><strong>Tempo decorrido:</strong> ${order.tempoDecorrido} min</p>
+            <p><strong>Estado:</strong> <span class="badge-status ${getBadgeClass(order.estado)}">${order.estado}</span></p>
+          </div>
+        </div>
+        <hr>
+        <p><strong>Itens:</strong> ${order.itens.join(', ')}</p>
+        <p><strong>Observações:</strong> ${order.obs || 'Nenhuma'}</p>
+        <p><strong>Alergias:</strong> ${order.alergias || 'Nenhuma'}</p>
+      `;
+      const modal = new bootstrap.Modal(document.getElementById('orderModal'));
+      modal.show();
+      document.getElementById('acceptOrderBtn').onclick = () => {
+        if (order.estado === 'novo') {
+          order.estado = 'preparacao';
+          order.statusColor = 'warning';
+          StorageService.set('lugac_orders', orders);
+          renderOrders();
+          renderSecondaryPages();
+          modal.hide();
+          alert(`Pedido #${order.id} aceite e em preparação.`);
+        } else {
+          alert('Pedido já em preparação ou concluído.');
+        }
+      };
+    }
+
+    // ---------- RENDERIZAÇÃO DAS OUTRAS PÁGINAS ----------
+    function renderSecondaryPages() {
+      // Pedidos
+      const pedidosList = document.getElementById('orderListPedidos');
+      if (pedidosList) {
+        pedidosList.innerHTML = orders.map(o => `
+          <div class="col-md-6">
+            <div class="card order-card ${getStatusClass(o.estado)} mb-2">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold">#${o.id}</span>
+                <span class="badge-status ${getBadgeClass(o.estado)}">${o.estado}</span>
+              </div>
+              <div>Mesa ${o.mesa} • ${o.hora}</div>
+              <div class="small text-secondary">${o.itens.join(', ')}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Preparação
+      const prepList = document.getElementById('orderListPreparacao');
+      if (prepList) {
+        const prepOrders = orders.filter(o => o.estado === 'preparacao');
+        prepList.innerHTML = prepOrders.length ? prepOrders.map(o => `
+          <div class="col-md-6">
+            <div class="card order-card status-preparing mb-2">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold">#${o.id}</span>
+                <span class="badge-status badge-yellow">EM PREPARAÇÃO</span>
+              </div>
+              <div>Mesa ${o.mesa} • ${o.hora}</div>
+              <div class="small text-secondary">${o.itens.join(', ')}</div>
+              <div class="timer-badge mt-2"><i class="far fa-clock me-1"></i>${o.tempoDecorrido} min</div>
+            </div>
+          </div>
+        `).join('') : '<div class="empty-state"><i class="fas fa-fire"></i><p>Nenhum pedido em preparação.</p></div>';
+      }
+
+      // Prontos
+      const prontosList = document.getElementById('orderListProntos');
+      if (prontosList) {
+        const prontosOrders = orders.filter(o => o.estado === 'pronto');
+        prontosList.innerHTML = prontosOrders.length ? prontosOrders.map(o => `
+          <div class="col-md-6">
+            <div class="card order-card status-ready mb-2">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold">#${o.id}</span>
+                <span class="badge-status badge-green">PRONTO</span>
+              </div>
+              <div>Mesa ${o.mesa} • ${o.hora}</div>
+              <div class="small text-secondary">${o.itens.join(', ')}</div>
+            </div>
+          </div>
+        `).join('') : '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum pedido pronto.</p></div>';
+      }
+
+      // Controle de Tempo
+      const timeList = document.getElementById('timeControlList');
+      if (timeList) {
+        timeList.innerHTML = orders.map(o => {
+          const pct = Math.min(100, Math.round((o.tempoDecorrido / o.tempoEstimado) * 100));
+          const barColor = pct >= 100 ? 'bg-danger' : pct >= 75 ? 'bg-warning' : 'bg-success';
+          return `
+            <div class="col-md-6">
+              <div class="card mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="fw-bold">#${o.id} - Mesa ${o.mesa}</span>
+                  <span>${o.tempoDecorrido}/${o.tempoEstimado} min</span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 10px;">
+                  <div class="progress-bar ${barColor}" style="width: ${pct}%"></div>
+                </div>
+                <small class="text-secondary mt-1">${pct}% do tempo estimado</small>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Fichas Técnicas
+      const fichasList = document.getElementById('fichasList');
+      if (fichasList) {
+        const fichas = [
+          { nome: 'Frango Grelhado', ingredientes: ['Frango', 'Sal', 'Azeite', 'Limão'], tempo: 20 },
+          { nome: 'Bife com Batata', ingredientes: ['Bife', 'Batata', 'Sal', 'Alho'], tempo: 25 },
+          { nome: 'Peixe Grelhado', ingredientes: ['Peixe', 'Sal', 'Azeite', 'Limão'], tempo: 18 },
+          { nome: 'Hambúrguer', ingredientes: ['Carne picada', 'Pão', 'Queijo', 'Alface'], tempo: 15 }
+        ];
+        fichasList.innerHTML = fichas.map(f => `
+          <div class="col-md-6">
+            <div class="card mb-2">
+              <h6 class="fw-bold"><i class="fas fa-clipboard-list me-2" style="color: var(--primary);"></i>${f.nome}</h6>
+              <p class="small text-secondary mb-1">Tempo: ${f.tempo} min</p>
+              <div>${f.ingredientes.map(i => `<span class="badge-status badge-blue me-1 mb-1">${i}</span>`).join('')}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Ingredientes
+      const ingList = document.getElementById('ingredientesList');
+      if (ingList) {
+        ingList.innerHTML = initialIngredients.map(ing => `
+          <div class="col-md-6">
+            <div class="ingredient-card">
+              <img src="${ing.img}" alt="${ing.nome}" class="ingredient-img">
+              <div class="ing-info">
+                <h6>${ing.nome}</h6>
+                <small>${ing.categoria} • Stock: ${ing.stock} (mín: ${ing.minStock})</small>
+              </div>
+              <span class="badge-status ${ing.status === 'ok' ? 'badge-green' : 'badge-yellow'}">${ing.status === 'ok' ? 'OK' : 'Baixo'}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Faltas
+      const faltasList = document.getElementById('faltasList');
+      if (faltasList) {
+        faltasList.innerHTML = initialFaltas.map(f => `
+          <div class="col-md-6">
+            <div class="card mb-2">
+              <div class="d-flex justify-content-between">
+                <h6 class="fw-bold">${f.ingrediente}</h6>
+                <span class="badge-status ${f.urgencia === 'alta' ? 'badge-red' : 'badge-yellow'}">${f.urgencia}</span>
+              </div>
+              <p class="small text-secondary mb-1">Quantidade: ${f.quantidade} • Data: ${f.data}</p>
+              <small>Responsável: ${f.responsavel}</small>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Desperdícios
+      const despList = document.getElementById('desperdiciosList');
+      if (despList) {
+        despList.innerHTML = initialDesperdicios.map(d => `
+          <div class="col-md-6">
+            <div class="card mb-2">
+              <div class="d-flex justify-content-between">
+                <h6 class="fw-bold">${d.item}</h6>
+                <span class="badge-status badge-red">${d.quantidade}</span>
+              </div>
+              <p class="small text-secondary mb-1">Motivo: ${d.motivo}</p>
+              <small>Data: ${d.data} • Turno: ${d.turno}</small>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Notificações
+      const notifList = document.getElementById('notificacoesList');
+      if (notifList) {
+        notifList.innerHTML = initialNotificacoes.map(n => `
+          <div class="card mb-2" style="border-left: 4px solid ${n.tipo === 'atraso' ? 'var(--danger)' : n.tipo === 'stock' ? 'var(--warning)' : 'var(--info)'};">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <i class="fas ${n.tipo === 'atraso' ? 'fa-exclamation-triangle text-danger' : n.tipo === 'stock' ? 'fa-box text-warning' : 'fa-info-circle text-info'} me-2"></i>
+                ${n.mensagem}
+              </div>
+              <small class="text-secondary">${n.data}</small>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Produção
+      const prodStats = document.getElementById('producaoStats');
+      if (prodStats) {
+        prodStats.innerHTML = `
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">28</div><div class="stat-label">Total Pedidos</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">11</div><div class="stat-label">Concluídos</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-warning">8</div><div class="stat-label">Em Curso</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">3</div><div class="stat-label">Atrasados</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">18 min</div><div class="stat-label">Tempo Médio</div></div></div>
+          <div class="col-md-3 col-6"><div class="card"><div class="stat-value">1.8 kg</div><div class="stat-label">Desperdício</div></div></div>
+        `;
+      }
+
+      // Histórico
+      const histList = document.getElementById('historicoList');
+      if (histList) {
+        const historico = [
+          { acao: 'Pedido #1008 criado', hora: '10:15', user: 'Sistema' },
+          { acao: 'Pedido #1001 aceite', hora: '10:08', user: 'António Diogo' },
+          { acao: 'Pedido #1005 marcado como pronto', hora: '10:05', user: 'Maria Santos' },
+          { acao: 'Pedido #1003 marcado como atrasado', hora: '10:00', user: 'Sistema' },
+          { acao: 'Ingrediente "Peixe fresco" atualizado', hora: '09:55', user: 'Carlos Silva' }
+        ];
+        histList.innerHTML = historico.map(h => `
+          <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid var(--border-light);">
+            <div><i class="fas fa-circle me-2" style="font-size: 0.4rem; color: var(--primary);"></i>${h.acao}</div>
+            <div class="text-secondary small">${h.hora} • ${h.user}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ---------- NOTIFICAÇÕES MODAL ----------
+    const notifModal = new bootstrap.Modal(document.getElementById('notifModal'));
+    document.getElementById('notifBtn').addEventListener('click', () => {
+      const body = document.getElementById('notifModalBody');
+      body.innerHTML = initialNotificacoes.map(n => `
+        <div class="d-flex align-items-start gap-3 py-2" style="border-bottom: 1px solid var(--border-light);">
+          <i class="fas ${n.tipo === 'atraso' ? 'fa-exclamation-triangle text-danger' : n.tipo === 'stock' ? 'fa-box text-warning' : n.tipo === 'novo' ? 'fa-plus-circle text-info' : 'fa-info-circle text-secondary'} mt-1"></i>
+          <div class="flex-grow-1">
+            <div style="font-weight: ${n.lida ? '400' : '600'};">${n.mensagem}</div>
+            <small class="text-secondary">${n.data}</small>
+          </div>
+          ${!n.lida ? '<span class="badge-status badge-blue">Nova</span>' : ''}
+        </div>
+      `).join('');
+      notifModal.show();
+    });
+
+    // ---------- PROFILE MODAL ----------
+    const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+    document.getElementById('profileBtn').addEventListener('click', () => {
+      profileModal.show();
+    });
+    // Abrir perfil pelo clique no user-profile da sidebar
+    document.getElementById('userProfileSidebar')?.addEventListener('click', () => {
+      profileModal.show();
+    });
+
+    // ---------- MODO PAREDE ----------
+    document.getElementById('wallModeBtn')?.addEventListener('click', () => {
+      alert('Modo Parede ativado (simulação): visualização em grelha de pedidos críticos.');
+    });
+
+    // ---------- DEFINIÇÕES SWITCHES ----------
+    document.getElementById('darkModeSwitch')?.addEventListener('change', function() {
+      document.body.classList.toggle('dark', this.checked);
+      localStorage.setItem('lugac_theme', this.checked ? 'dark' : 'light');
+      themeToggle.innerHTML = this.checked ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ---------- INICIALIZAÇÃO ----------
+    renderOrders();
+    renderSecondaryPages();
+    renderTabs();
+
+    // Atividade reinicia sessão
+    document.addEventListener('click', () => { resetSessionTimer(); });
+
+    // salvar pedidos
+    window.addEventListener('beforeunload', () => StorageService.set('lugac_orders', orders));
+  })();
+</script>
+</body>
+</html>

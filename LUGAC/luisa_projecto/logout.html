@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>LUGAC | Logout</title>
+    <!-- Bootstrap 5 + Icons + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ========== TEMA CLARO ========== */
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0.50);
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+            --text-primary: #1a2e2a;
+            --text-secondary: #4a6a5e;
+            --text-light: #ffffff;
+            --input-bg: #f7faf9;
+            --input-border: #dce5e2;
+            --input-focus: #2b7a4b;
+            --accent-green: #2b7a4b;
+            --accent-hover: #1e5a3a;
+            --accent-gradient: linear-gradient(135deg, #2b7a4b 0%, #1e5a3a 100%);
+            --progress-circle-bg: #e0e7e5;
+            --card-radius: 24px;
+            --input-radius: 12px;
+        }
+
+        /* ========== TEMA ESCURO ========== */
+        body.dark {
+            --bg-overlay: rgba(0, 0, 0, 0.70);
+            --glass-bg: rgba(20, 30, 28, 0.88);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            --text-primary: #eef4f0;
+            --text-secondary: #b8d0c2;
+            --input-bg: #2a3c36;
+            --input-border: #3a4f48;
+            --input-focus: #4c9f70;
+            --accent-green: #4c9f70;
+            --accent-hover: #6bb886;
+            --accent-gradient: linear-gradient(135deg, #4c9f70 0%, #2b7a4b 100%);
+            --progress-circle-bg: #2a3c36;
+        }
+
+        /* ========== WRAPPER ========== */
+        .logout-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-image: url('images/logout.jpg');
+            background-position: center 30%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .logout-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay);
+            z-index: 0;
+        }
+
+        /* ========== SLOGAN ========== */
+        .slogan-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+            padding: 0 2rem;
+            max-width: 650px;
+            pointer-events: none;
+        }
+
+        .slogan-overlay .logo-slogan {
+            max-height: 60px;
+            width: auto;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4));
+            margin-bottom: 0.5rem;
+        }
+
+        .slogan-overlay h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .slogan-overlay p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            margin-bottom: 0;
+        }
+
+        /* ========== PAINEL PRINCIPAL ========== */
+        .form-panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .logout-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: var(--card-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 2.5rem 2.5rem 2rem;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        /* ========== HEADER ========== */
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header-custom .brand-icon {
+            font-size: 3rem;
+            color: var(--accent-green);
+            display: inline-block;
+            background: rgba(43, 122, 75, 0.12);
+            padding: 0.6rem;
+            border-radius: 16px;
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .card-header-custom .brand-icon {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .card-header-custom p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* ========== AÇÕES SUPERIORES ========== */
+        .top-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-btn {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: 0.2s;
+            padding: 0.35rem 0.5rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+        }
+
+        body.dark .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+            color: var(--text-light);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.08);
+            background: rgba(43, 122, 75, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        body.dark .action-btn:hover {
+            background: rgba(76, 159, 112, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .dropdown-menu-custom {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.4rem;
+            min-width: 160px;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(43, 122, 75, 0.1);
+            color: var(--accent-green);
+        }
+
+        body.dark .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        /* ========== CÍRCULO DE PROGRESSO ========== */
+        .timer-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 1.5rem auto;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-ring__circle {
+            fill: transparent;
+            stroke: var(--progress-circle-bg);
+            stroke-width: 6;
+        }
+
+        .progress-ring__circle-fill {
+            fill: transparent;
+            stroke: var(--accent-green);
+            stroke-width: 6;
+            stroke-dasharray: 527.52;
+            stroke-dashoffset: 527.52;
+            transition: stroke-dashoffset 0.2s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .timer-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* ========== BOTÃO MANUAL ========== */
+        .btn-manual-redirect {
+            background: transparent;
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+            border-radius: var(--input-radius);
+            padding: 0.6rem 1.5rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-manual-redirect:hover {
+            background: var(--accent-green);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(43, 122, 75, 0.25);
+        }
+
+        body.dark .btn-manual-redirect:hover {
+            box-shadow: 0 6px 20px rgba(76, 159, 112, 0.3);
+        }
+
+        /* ========== TOAST ========== */
+        .toast-custom {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1090;
+            min-width: 280px;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-left: 5px solid var(--accent-green);
+            box-shadow: var(--glass-shadow);
+            padding: 1rem 1.25rem;
+        }
+
+        .toast-custom .toast-body {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .toast-custom .btn-close {
+            filter: var(--text-primary) === '#ffffff' ? 'invert(1)' : 'invert(0.4)';
+        }
+
+        body.dark .toast-custom .btn-close {
+            filter: invert(1);
+        }
+
+        .text-muted-custom {
+            font-size: 0.7rem;
+            color: var(--text-secondary) !important;
+            opacity: 0.8;
+        }
+
+        /* ========== RESPONSIVIDADE ========== */
+        @media (max-width: 576px) {
+            .logout-wrapper {
+                padding: 1rem;
+                background-position: center 50%;
+            }
+
+            .logout-card {
+                padding: 1.75rem 1.25rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .card-header-custom h2 {
+                font-size: 1.35rem;
+            }
+
+            .card-header-custom .brand-icon {
+                font-size: 2.5rem;
+                padding: 0.5rem;
+            }
+
+            .top-actions {
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+            }
+
+            .slogan-overlay {
+                bottom: 20px;
+                padding: 0 1rem;
+                max-width: 90%;
+            }
+
+            .slogan-overlay h2 {
+                font-size: 1.2rem;
+            }
+
+            .slogan-overlay p {
+                font-size: 0.75rem;
+            }
+
+            .slogan-overlay .logo-slogan {
+                max-height: 40px;
+            }
+
+            .timer-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .timer-text {
+                font-size: 2rem;
+            }
+
+            .btn-manual-redirect {
+                font-size: 0.85rem;
+                padding: 0.5rem 1.2rem;
+            }
+
+            .toast-custom {
+                left: 15px;
+                right: 15px;
+                min-width: auto;
+                bottom: 15px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .logout-card {
+                padding: 1.25rem 1rem;
+            }
+
+            .timer-container {
+                width: 130px;
+                height: 130px;
+            }
+
+            .timer-text {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* ========== ANIMAÇÃO ========== */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logout-card {
+            animation: fadeSlideUp 0.6s ease forwards;
+        }
+
+        .slogan-overlay {
+            animation: fadeSlideUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .brand-icon i {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .logo-slogan1{
+            width:  50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logout-wrapper">
+   
+
+    <!-- PAINEL PRINCIPAL -->
+    <div class="form-panel">
+        <div class="logout-card">
+            <!-- AÇÕES SUPERIORES -->
+            <div class="top-actions">
+                <button id="themeToggleBtn" class="action-btn" aria-label="Alternar tema">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="action-btn dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-globe2"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="langDropdown">
+                        <li><a class="dropdown-item lang-option" data-lang="pt" href="#">🇵🇹 Português</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="en" href="#">🇬🇧 English</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="es" href="#">🇪🇸 Español</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <div class="card-header-custom">
+                <div class="brand-icon">
+                    <i class="bi bi-box-arrow-right"></i>
+                </div>
+                <h2 id="logoutTitle">Sessão encerrada</h2>
+                <p id="logoutMessage">Obrigado por utilizar LUGAC.</p>
+            </div>
+
+            <!-- CÍRCULO DE PROGRESSO -->
+            <div class="timer-container">
+                <svg class="progress-ring" viewBox="0 0 180 180">
+                    <circle class="progress-ring__circle" cx="90" cy="90" r="84" stroke-width="6" fill="transparent"/>
+                    <circle class="progress-ring__circle-fill" cx="90" cy="90" r="84" stroke-width="6" fill="transparent"
+                            stroke-dasharray="527.52" stroke-dashoffset="527.52"/>
+                </svg>
+                <div class="timer-text" id="timerSeconds">10</div>
+            </div>
+            <div class="timer-label" id="timerLabel">Redirecionando em segundos...</div>
+
+            <button id="redirectNowBtn" class="btn-manual-redirect">
+                <i class="bi bi-arrow-right-circle"></i> <span id="redirectBtnText">Ir agora para o login</span>
+            </button>
+
+            <div class="text-center mt-3">
+                <small class="text-muted-custom" id="helperText">🔐 Você será redirecionado automaticamente para a página de login.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-custom d-none" id="notificationToast" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-check-circle-fill me-2" style="color: var(--accent-green); font-size: 1.4rem;"></i>
+        <div class="toast-body p-0" id="toastMessage"></div>
+        <button type="button" class="btn-close ms-auto" id="closeToast" aria-label="Close"></button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============================================================
+    //  TRADUÇÕES
+    // ============================================================
+    const translations = {
+        pt: {
+            logoutTitle: "Sessão encerrada",
+            logoutMessage: "Obrigado por utilizar o LUGAC.",
+            timerLabel: "Redirecionando em segundos...",
+            redirectBtnText: "Ir agora para o login",
+            helperText: "🔐 Você será redirecionado automaticamente para a página de login.",
+            toastRedirect: "⏳ Redirecionando agora para o login..."
+        },
+        en: {
+            logoutTitle: "Session ended",
+            logoutMessage: "Thank you for using LUGAC.",
+            timerLabel: "Redirecting in seconds...",
+            redirectBtnText: "Go to login now",
+            helperText: "🔐 You will be automatically redirected to the login page.",
+            toastRedirect: "⏳ Redirecting to login now..."
+        },
+        es: {
+            logoutTitle: "Sesión finalizada",
+            logoutMessage: "Gracias por usar LUGAC.",
+            timerLabel: "Redirigiendo en segundos...",
+            redirectBtnText: "Ir al login ahora",
+            helperText: "🔐 Serás redirigido automáticamente a la página de inicio de sesión.",
+            toastRedirect: "⏳ Redirigiendo ahora al login..."
+        }
+    };
+
+    // ============================================================
+    //  ESTADO GLOBAL
+    // ============================================================
+    let currentLang = localStorage.getItem('kwendaLang') || 'pt';
+    let isDark = localStorage.getItem('kwendaTheme') === 'dark';
+    let countdown = 10;
+    let timerInterval = null;
+    let redirectInProgress = false;
+
+    // ============================================================
+    //  DOM REFS
+    // ============================================================
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const redirectNowBtn = document.getElementById('redirectNowBtn');
+    const timerSecondsSpan = document.getElementById('timerSeconds');
+    const timerLabelSpan = document.getElementById('timerLabel');
+    const logoutTitle = document.getElementById('logoutTitle');
+    const logoutMessage = document.getElementById('logoutMessage');
+    const redirectBtnTextSpan = document.getElementById('redirectBtnText');
+    const helperTextSpan = document.getElementById('helperText');
+    const toastEl = document.getElementById('notificationToast');
+    const toastMessageSpan = document.getElementById('toastMessage');
+    const closeToastBtn = document.getElementById('closeToast');
+    const circleFill = document.querySelector('.progress-ring__circle-fill');
+
+    const radius = 84;
+    const circumference = 2 * Math.PI * radius;
+
+    // ============================================================
+    //  FUNÇÕES DO CÍRCULO
+    // ============================================================
+    function setProgress(percent) {
+        const offset = circumference * (1 - percent);
+        circleFill.style.strokeDashoffset = offset;
+    }
+
+    function updateTimerDisplay() {
+        timerSecondsSpan.innerText = countdown;
+        const progress = countdown / 10;
+        setProgress(progress);
+        if (countdown === 0) {
+            if (timerInterval) clearInterval(timerInterval);
+            if (!redirectInProgress) {
+                redirectToLogin();
+            }
+        }
+    }
+
+    // ============================================================
+    //  REDIRECIONAMENTO
+    // ============================================================
+    function redirectToLogin() {
+        if (redirectInProgress) return;
+        redirectInProgress = true;
+        showToast(translations[currentLang].toastRedirect, false);
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 300);
+    }
+
+    // ============================================================
+    //  CONTADOR
+    // ============================================================
+    function startCountdown() {
+        if (timerInterval) clearInterval(timerInterval);
+        countdown = 10;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            if (countdown <= 1) {
+                clearInterval(timerInterval);
+                countdown = 0;
+                updateTimerDisplay();
+                if (!redirectInProgress) redirectToLogin();
+            } else {
+                countdown--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+
+    function stopCountdown() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    // ============================================================
+    //  FUNÇÕES DE IDIOMA
+    // ============================================================
+    function applyLanguage() {
+        const t = translations[currentLang];
+        if (logoutTitle) logoutTitle.innerText = t.logoutTitle;
+        if (logoutMessage) logoutMessage.innerText = t.logoutMessage;
+        if (timerLabelSpan) timerLabelSpan.innerText = t.timerLabel;
+        if (redirectBtnTextSpan) redirectBtnTextSpan.innerText = t.redirectBtnText;
+        if (helperTextSpan) helperTextSpan.innerText = t.helperText;
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, isError = false) {
+        if (!toastEl) return;
+        toastMessageSpan.innerText = message;
+        toastEl.classList.remove('d-none');
+        toastEl.style.borderLeftColor = isError ? '#e53e3e' : 'var(--accent-green)';
+        setTimeout(() => toastEl.classList.add('d-none'), 3000);
+    }
+
+    // ============================================================
+    //  TEMA
+    // ============================================================
+    function setTheme(enableDark) {
+        if (enableDark) {
+            document.body.classList.add('dark');
+            localStorage.setItem('kwendaTheme', 'dark');
+            themeBtn.querySelector('i').className = 'bi bi-sun-fill';
+        } else {
+            document.body.classList.remove('dark');
+            localStorage.setItem('kwendaTheme', 'light');
+            themeBtn.querySelector('i').className = 'bi bi-moon-stars';
+        }
+    }
+
+    themeBtn.addEventListener('click', () => {
+        isDark = !isDark;
+        setTheme(isDark);
+    });
+
+    // ============================================================
+    //  IDIOMA
+    // ============================================================
+    document.querySelectorAll('.lang-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentLang = option.getAttribute('data-lang');
+            localStorage.setItem('kwendaLang', currentLang);
+            applyLanguage();
+        });
+    });
+
+    // ============================================================
+    //  EVENTOS
+    // ============================================================
+    redirectNowBtn.addEventListener('click', () => {
+        if (!redirectInProgress) {
+            stopCountdown();
+            redirectToLogin();
+        }
+    });
+
+    if (closeToastBtn) {
+        closeToastBtn.addEventListener('click', () => toastEl.classList.add('d-none'));
+    }
+
+    // ============================================================
+    //  INICIALIZAÇÃO
+    // ============================================================
+    setTheme(isDark);
+    applyLanguage();
+    circleFill.style.strokeDasharray = circumference;
+    circleFill.style.strokeDashoffset = circumference;
+    startCountdown();
+</script>
+</body>
+</html>

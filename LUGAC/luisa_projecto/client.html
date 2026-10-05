@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUGAC | Cliente</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; transition:background-color .2s, border-color .2s; }
+    body { font-family:'Times New Roman', Times, serif; background:var(--bg-body); color:var(--text-primary); overflow-x:hidden; }
+    :root{
+      --bg-body:#f4f7fc; --bg-sidebar:#fff; --bg-card:#fff; --bg-topbar:#fff;
+      --text-primary:#1a2639; --text-secondary:#5e6f8d; --border-light:#e9edf4;
+      --shadow-sm:0 8px 20px rgba(0,0,0,.02),0 4px 8px rgba(0,0,0,.02);
+      --shadow-md:0 12px 30px rgba(0,0,0,.04);
+      --primary:#e65c1e; --primary-soft:#ffefe8; --success:#2b8f5e; --warning:#e6a017;
+      --danger:#d64545; --info:#2c7da0; --gray:#9aa9b9; --purple:#7c3aed;
+      --sidebar-width:280px; --sidebar-collapsed:82px; --radius:20px; --radius-sm:14px;
+    }
+    body.dark{
+      --bg-body:#0e1217; --bg-sidebar:#161c24; --bg-card:#1e2630; --bg-topbar:#161c24;
+      --text-primary:#eef2f8; --text-secondary:#a3b3c9; --border-light:#2a3440;
+      --shadow-sm:0 8px 20px rgba(0,0,0,.4); --shadow-md:0 12px 30px rgba(0,0,0,.5);
+      --primary-soft:#2f221c; --gray:#6b7b8f;
+    }
+    body::before{
+      content:''; position:fixed; inset:0;
+      background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-size:cover; background-position:center; background-attachment:fixed;
+      opacity:.08; z-index:-1; pointer-events:none;
+    }
+    body.dark::before{ opacity:.04; }
+    .app-wrapper{ display:flex; min-height:100vh; }
+    .sidebar{
+      width:var(--sidebar-width); background:var(--bg-sidebar); border-right:1px solid var(--border-light);
+      display:flex; flex-direction:column; transition:width .3s cubic-bezier(.2,.9,.3,1);
+      box-shadow:var(--shadow-sm); z-index:1050; position:relative;
+    }
+    .sidebar.collapsed{ width:var(--sidebar-collapsed); }
+    .sidebar-header{ padding:1.5rem 1rem .8rem; display:flex; flex-direction:column; gap:1.2rem; }
+    .logo-area{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.3rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; }
+    .logo-icon{ 
+      
+      width:200px;
+      height:200px;
+      border-radius:90px; 
+      display:flex; 
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem; 
+      flex-shrink:0; 
+      box-shadow:0 
+    }
+    .logo-text span{ font-weight:400; font-size:.7rem; color:var(--text-secondary); display:block; line-height:1.2; }
+    .user-profile{ display:flex; align-items:center; gap:10px; padding:8px 6px; background:var(--bg-body); border-radius:40px; cursor:pointer; }
+    .user-profile:hover{ background:var(--primary-soft); }
+    .user-avatar{ width:40px; height:40px; border-radius:40px; overflow:hidden; flex-shrink:0; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; }
+    .user-avatar img{ width:100%; height:100%; object-fit:cover; }
+    .user-info{ white-space:nowrap; overflow:hidden; }
+    .user-info h6{ margin:0; font-weight:600; font-size:.9rem; }
+    .user-info small{ font-size:.7rem; color:var(--success); display:flex; align-items:center; gap:4px; }
+    .sidebar.collapsed .user-info, .sidebar.collapsed .logo-text, .sidebar.collapsed .user-profile .user-info{ display:none; }
+    .sidebar.collapsed .user-profile{ justify-content:center; padding:6px; }
+    .sidebar.collapsed .logo-area{ justify-content:center; }
+    .sidebar-nav{ flex:1; overflow-y:auto; padding:1rem .5rem; display:flex; flex-direction:column; gap:4px; }
+    .nav-item{
+      display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px;
+      color:var(--text-secondary); font-weight:500; cursor:pointer; white-space:nowrap;
+      position:relative; border:none; background:transparent; width:100%; text-align:left;
+      font-family:'Times New Roman', Times, serif; font-size:1rem;
+    }
+    .nav-item i{ font-size:1.2rem; width:24px; text-align:center; flex-shrink:0; }
+    .nav-item span{ font-size:.95rem; }
+    .nav-item:hover{ background:var(--primary-soft); color:var(--primary); }
+    .nav-item.active{ background:var(--primary); color:#fff; box-shadow:0 8px 16px rgba(230,92,30,.25); }
+    .nav-item.active i{ color:#fff; }
+    .nav-item .nav-badge{ margin-left:auto; background:var(--danger); color:#fff; font-size:.6rem; padding:2px 7px; border-radius:20px; font-weight:700; }
+    .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-item .nav-badge{ display:none; }
+    .sidebar.collapsed .nav-item{ justify-content:center; padding:12px 8px; }
+    .sidebar.collapsed .nav-item::after{
+      content:attr(data-title); position:absolute; left:70px; background:var(--bg-card); color:var(--text-primary);
+      padding:6px 14px; border-radius:30px; font-size:.8rem; font-weight:500; white-space:nowrap;
+      box-shadow:var(--shadow-md); border:1px solid var(--border-light); opacity:0; pointer-events:none; z-index:1200;
+    }
+    .sidebar.collapsed .nav-item:hover::after{ opacity:1; }
+    .expand-btn{
+      margin:.5rem 1rem 1rem; padding:8px 12px; border-radius:30px; border:1px solid var(--border-light);
+      background:transparent; color:var(--text-secondary); display:flex; align-items:center; justify-content:center;
+      gap:8px; cursor:pointer; font-family:'Times New Roman', Times, serif; font-size:.9rem;
+    }
+    .expand-btn:hover{ background:var(--primary-soft); color:var(--primary); border-color:var(--primary); }
+    .main-content{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:transparent; }
+    .topbar{
+      background:var(--bg-topbar); border-bottom:1px solid var(--border-light);
+      padding:.8rem 1.5rem; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; z-index:1040;
+    }
+    .topbar-left{ display:flex; align-items:center; gap:16px; }
+    .topbar-left h5{ margin:0; font-weight:600; font-size:1.1rem; }
+    .breadcrumb{ font-size:.75rem; color:var(--text-secondary); display:flex; gap:6px; }
+    .topbar-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .connection-badge{ display:flex; align-items:center; gap:6px; font-size:.8rem; font-weight:500; padding:6px 14px; border-radius:40px; background:var(--bg-body); border:1px solid var(--border-light); }
+    .connection-badge.online i{ color:var(--success); }
+    .connection-badge.offline i{ color:var(--danger); }
+    .session-timer{ display:flex; align-items:center; gap:8px; font-weight:600; background:var(--bg-body); padding:6px 16px; border-radius:40px; border:1px solid var(--border-light); font-size:.9rem; }
+    .session-timer i{ color:var(--primary); }
+    .theme-toggle, .notif-btn, .profile-btn, .command-btn, .cart-btn{
+      width:42px; height:42px; border-radius:40px; background:var(--bg-body); border:1px solid var(--border-light);
+      display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-primary); position:relative;
+    }
+    .theme-toggle:hover, .notif-btn:hover, .profile-btn:hover, .command-btn:hover, .cart-btn:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    .notif-badge, .cart-badge{ position:absolute; top:-2px; right:-2px; background:var(--danger); color:#fff; font-size:.6rem; border-radius:40px; padding:2px 6px; font-weight:700; }
+    .cart-badge{ background:var(--success); }
+    .tabs-container{
+      padding:.8rem 1.5rem 0; display:flex; gap:6px; overflow-x:auto;
+      background:var(--bg-topbar); border-bottom:1px solid var(--border-light); scrollbar-width:none;
+    }
+    .tabs-container::-webkit-scrollbar{ display:none; }
+    .tab-item{
+      padding:8px 20px; border-radius:40px 40px 0 0; background:transparent; border:none;
+      color:var(--text-secondary); font-weight:500; font-size:.85rem; display:flex; align-items:center;
+      gap:10px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+      font-family:'Times New Roman', Times, serif;
+    }
+    .tab-item.active{ background:var(--bg-body); color:var(--primary); border-bottom:2px solid var(--primary); font-weight:600; }
+    .tab-item i{ font-size:.8rem; opacity:.7; }
+    .tab-close{ font-size:.7rem; opacity:.5; margin-left:6px; }
+    .tab-close:hover{ opacity:1; color:var(--danger); }
+    .content-area{ flex:1; padding:1.5rem; overflow-y:auto; background:transparent; }
+    .card{
+      background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius);
+      box-shadow:var(--shadow-sm); padding:1.2rem; height:100%;
+    }
+    .card:hover{ box-shadow:var(--shadow-md); }
+    .stat-value{ font-size:2rem; font-weight:700; line-height:1.2; color:var(--text-primary); }
+    .stat-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-secondary); font-weight:600; }
+    .badge-status{ padding:4px 10px; border-radius:40px; font-size:.7rem; font-weight:600; }
+    .badge-green{ background:rgba(43,143,94,.15); color:var(--success); }
+    .badge-yellow{ background:rgba(230,160,23,.15); color:var(--warning); }
+    .badge-red{ background:rgba(214,69,69,.15); color:var(--danger); }
+    .badge-blue{ background:rgba(44,125,160,.15); color:var(--info); }
+    .badge-gray{ background:rgba(154,169,185,.15); color:var(--gray); }
+    .badge-purple{ background:rgba(124,58,237,.15); color:var(--purple); }
+    .timer-badge{ font-family:monospace; background:var(--bg-body); padding:4px 8px; border-radius:20px; font-size:.8rem; font-weight:600; }
+    .text-secondary{ color:var(--text-secondary) !important; }
+    .bg-primary-soft{ background:var(--primary-soft); }
+    .btn-primary{ background:var(--primary); border:none; border-radius:40px; padding:8px 20px; font-weight:500; font-family:'Times New Roman', Times, serif; }
+    .btn-primary:hover{ background:#c94d14; }
+    .btn-success{ background:var(--success); border:none; border-radius:40px; padding:8px 20px; font-weight:500; font-family:'Times New Roman', Times, serif; }
+    .btn-outline-secondary{ border-radius:40px; border:1px solid var(--border-light); color:var(--text-primary); font-family:'Times New Roman', Times, serif; }
+    .btn-outline-secondary:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    ::-webkit-scrollbar{ width:5px; height:5px; }
+    ::-webkit-scrollbar-thumb{ background:var(--gray); border-radius:10px; }
+    .hidden{ display:none !important; }
+    .profile-menu-item{
+      display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:14px; cursor:pointer;
+      color:var(--text-primary); border:none; background:transparent; width:100%; text-align:left;
+      font-family:'Times New Roman', Times, serif; font-size:1rem;
+    }
+    .profile-menu-item:hover{ background:var(--primary-soft); color:var(--primary); }
+    .profile-menu-item i{ width:24px; text-align:center; font-size:1.1rem; color:var(--text-secondary); }
+    .profile-menu-item:hover i{ color:var(--primary); }
+    .profile-menu-item.danger:hover{ background:rgba(214,69,69,.1); color:var(--danger); }
+    .profile-menu-item.danger:hover i{ color:var(--danger); }
+    .profile-header{ display:flex; align-items:center; gap:16px; padding:1.5rem; background:var(--primary-soft); border-radius:20px; margin-bottom:1rem; }
+    .profile-header .avatar-lg{ width:64px; height:64px; border-radius:60px; overflow:hidden; border:3px solid var(--primary); flex-shrink:0; }
+    .profile-header .avatar-lg img{ width:100%; height:100%; object-fit:cover; }
+    .empty-state{ text-align:center; padding:3rem 1rem; color:var(--text-secondary); }
+    .empty-state i{ font-size:3rem; margin-bottom:1rem; opacity:.4; }
+    /* ======== MENU GRID / LIST ======== */
+    .menu-toggle{ display:flex; gap:4px; background:var(--bg-body); padding:4px; border-radius:40px; border:1px solid var(--border-light); }
+    .menu-toggle span{ padding:6px 14px; border-radius:30px; font-size:.8rem; font-weight:600; cursor:pointer; }
+    .menu-toggle span.active{ background:var(--primary); color:#fff; }
+    .dish-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    .dish-tile{
+      background:var(--bg-card); border:1px solid var(--border-light); border-radius:18px; overflow:hidden;
+      cursor:pointer; transition:.2s; display:flex; flex-direction:column;
+    }
+    .dish-tile:hover{ transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:var(--primary); }
+    .dish-tile img{ width:100%; height:140px; object-fit:cover; }
+    .dish-tile .dish-body{ padding:12px; flex:1; display:flex; flex-direction:column; gap:6px; }
+    .dish-tile h6{ margin:0; font-weight:700; font-size:1rem; }
+    .dish-tile .dish-meta{ font-size:.75rem; color:var(--text-secondary); }
+    .dish-tile .dish-price{ font-weight:700; color:var(--primary); font-size:1.05rem; }
+    .dish-tile.unavailable{ opacity:.55; }
+    .dish-tile.unavailable img{ filter:grayscale(80%); }
+    .dish-tile .u-tag{ position:absolute; top:8px; right:8px; background:var(--danger); color:#fff; padding:3px 8px; border-radius:20px; font-size:.65rem; font-weight:700; }
+    .dish-list-item{
+      display:flex; gap:14px; padding:14px; border-radius:16px; background:var(--bg-card);
+      border:1px solid var(--border-light); margin-bottom:10px; cursor:pointer; transition:.2s;
+    }
+    .dish-list-item:hover{ border-color:var(--primary); transform:translateX(4px); }
+    .dish-list-item img{ width:80px; height:80px; border-radius:12px; object-fit:cover; flex-shrink:0; }
+    /* ======== CART DRAWER ======== */
+    .cart-drawer{
+      position:fixed; top:0; right:-420px; width:420px; max-width:100vw; height:100vh;
+      background:var(--bg-card); border-left:1px solid var(--border-light); z-index:1090;
+      display:flex; flex-direction:column; transition:right .3s ease; box-shadow:var(--shadow-md);
+    }
+    .cart-drawer.open{ right:0; }
+    .cart-drawer .drawer-head{ padding:1.2rem; border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center; }
+    .cart-drawer .drawer-body{ flex:1; overflow-y:auto; padding:1.2rem; }
+    .cart-drawer .drawer-foot{ padding:1.2rem; border-top:1px solid var(--border-light); }
+    .cart-item{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+    .qty-btn{ width:28px; height:28px; border-radius:50%; background:var(--bg-body); border:1px solid var(--border-light); display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; }
+    .qty-btn:hover{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    /* ======== TRACKING ======== */
+    .track-line{ display:flex; align-items:center; justify-content:space-between; margin:24px 0; position:relative; }
+    .track-line::before{ content:''; position:absolute; top:20px; left:20px; right:20px; height:3px; background:var(--border-light); z-index:0; }
+    .track-line .prog{ position:absolute; top:20px; left:20px; height:3px; background:var(--success); z-index:1; transition:width .5s ease; }
+    .track-step{ flex:1; text-align:center; position:relative; z-index:2; }
+    .track-dot{ width:40px; height:40px; border-radius:50%; background:var(--bg-body); border:3px solid var(--border-light); margin:0 auto; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); }
+    .track-step.done .track-dot{ background:var(--success); border-color:var(--success); color:#fff; }
+    .track-step.active .track-dot{ background:var(--primary); border-color:var(--primary); color:#fff; animation:pulse 1.5s infinite; }
+    @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(230,92,30,.6); } 50%{ box-shadow:0 0 0 12px rgba(230,92,30,0); } }
+    .track-step small{ display:block; margin-top:6px; font-size:.75rem; font-weight:600; color:var(--text-secondary); }
+    .track-step.done small{ color:var(--success); }
+    .track-step.active small{ color:var(--primary); }
+    /* ======== TIMELINE ======== */
+    .tl-item{ display:flex; gap:14px; padding:12px 0; border-bottom:1px solid var(--border-light); }
+    .tl-icon{ width:36px; height:36px; border-radius:40px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    /* ======== DISCOVERY CHIPS ======== */
+    .chip-row{ display:flex; gap:8px; flex-wrap:wrap; }
+    .chip{ padding:8px 16px; border-radius:30px; background:var(--bg-card); border:1px solid var(--border-light); cursor:pointer; font-size:.85rem; font-weight:600; }
+    .chip:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    .chip.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    /* ======== RATING ======== */
+    .rating-star{ font-size:2rem; color:#d1d5db; cursor:pointer; transition:.15s; }
+    .rating-star:hover, .rating-star.active{ color:#f59e0b; }
+    /* ======== AI CHAT ======== */
+    .ai-chat{ display:flex; flex-direction:column; height:460px; }
+    .ai-messages{ flex:1; overflow-y:auto; padding:1rem; background:var(--bg-body); border-radius:var(--radius-sm); margin-bottom:12px; }
+    .ai-msg{ margin-bottom:12px; display:flex; gap:10px; }
+    .ai-msg.user{ flex-direction:row-reverse; }
+    .ai-avatar{ width:36px; height:36px; border-radius:40px; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ai-avatar.user{ background:var(--primary); }
+    .ai-bubble{ background:var(--bg-card); padding:10px 14px; border-radius:14px; max-width:78%; border:1px solid var(--border-light); }
+    .ai-msg.user .ai-bubble{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    .ai-suggestions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .ai-suggest{ padding:5px 12px; border-radius:20px; background:var(--bg-body); border:1px solid var(--border-light); font-size:.8rem; cursor:pointer; }
+    .ai-suggest:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    /* ======== QUICK ACTIONS ======== */
+    .quick-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .quick-action{ padding:10px 16px; border-radius:14px; background:var(--bg-body); border:1px solid var(--border-light); cursor:pointer; font-size:.85rem; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .quick-action:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    /* ======== MODAL ======== */
+    .modal-inner-tab{ padding:6px 14px; border-radius:20px; background:var(--bg-body); border:1px solid var(--border-light); cursor:pointer; font-size:.8rem; font-weight:500; }
+    .modal-inner-tab.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    /* ======== TOAST ======== */
+    .toast-container{ position:fixed; top:80px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast-custom{
+      background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+      padding:12px 18px; box-shadow:var(--shadow-md); display:flex; align-items:center; gap:12px;
+      min-width:280px; animation:slideIn .3s ease;
+    }
+    @keyframes slideIn{ from{ transform:translateX(100%); opacity:0; } to{ transform:translateX(0); opacity:1; } }
+    .toast-custom.success{ border-left:4px solid var(--success); }
+    .toast-custom.error{ border-left:4px solid var(--danger); }
+    .toast-custom.warning{ border-left:4px solid var(--warning); }
+    .toast-custom.info{ border-left:4px solid var(--info); }
+    /* ======== NOTIFICATION ======== */
+    .notif-ready{
+      position:fixed; bottom:24px; right:24px; background:var(--success); color:#fff;
+      padding:16px 22px; border-radius:18px; box-shadow:0 12px 30px rgba(43,143,94,.4);
+      display:flex; align-items:center; gap:14px; z-index:9998; animation:slideIn .3s ease; max-width:400px;
+    }
+    .notif-ready i{ font-size:1.6rem; }
+    /* ======== QR CODE MOCK ======== */
+    .qr-mock{ width:180px; height:180px; background:#fff; padding:12px; border-radius:14px; border:2px solid var(--border-light); }
+    .qr-mock img{ width:100%; height:100%; object-fit:contain; }
+    /* ======== MOBILE ======== */
+    @media (max-width:992px){
+      .sidebar{ width:var(--sidebar-collapsed); }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span, .sidebar .nav-item .nav-badge{ display:none; }
+      .sidebar .nav-item{ justify-content:center; }
+      .sidebar .nav-item::after{ display:none; }
+      .sidebar .user-profile{ justify-content:center; }
+      .sidebar .logo-area{ justify-content:center; }
+    }
+    @media (max-width:768px){
+      .sidebar{ position:fixed; left:-100%; width:280px; height:100vh; transition:left .3s ease; }
+      .sidebar.mobile-open{ left:0; }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span, .sidebar .nav-item .nav-badge{ display:block; }
+      .sidebar .nav-item{ justify-content:flex-start; }
+      .sidebar .user-profile{ justify-content:flex-start; }
+      .sidebar .logo-area{ justify-content:flex-start; }
+      .sidebar .nav-item::after{ display:none; }
+      .content-area{ padding:1rem; }
+      .topbar{ padding:.6rem 1rem; }
+      .cart-drawer{ width:100vw; }
+      .dish-grid{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <a href="login.html">
+          <img src="images/lugac-logo.png" class="logo-icon" />
+        </a>
+        
+      
+      </div>
+      <div class="user-profile" id="userProfileSidebar">
+        <div class="user-avatar">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt="Cliente">
+        </div>
+        <div class="user-info">
+          <h6 id="userName">Visitante</h6>
+          <small><i class="fas fa-circle" style="font-size:.5rem;color:var(--success);"></i> <span id="userMode">Modo Visitante</span></small>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <button class="expand-btn" id="toggleSidebar"><i class="fas fa-chevron-left"></i> <span>Expandir</span></button>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-outline-secondary d-md-none" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+        <h5 id="pageTitle">Descobrir</h5>
+        <div class="breadcrumb" id="breadcrumb">Início / Descobrir</div>
+      </div>
+      <div class="topbar-right">
+        <div class="connection-badge online" id="connectionBadge"><i class="fas fa-circle"></i> <span>Online</span></div>
+        <div class="session-timer"><i class="fas fa-hourglass-half"></i> <span id="timerText">15:00</span></div>
+        <button class="cart-btn" id="cartBtn" title="Carrinho"><i class="fas fa-shopping-cart"></i><span class="cart-badge" id="cartCount">0</span></button>
+        <button class="command-btn" id="commandBtn" title="Ações rápidas"><i class="fas fa-bolt"></i></button>
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema"><i class="fas fa-moon"></i></button>
+        <button class="notif-btn" id="notifBtn"><i class="fas fa-bell"></i><span class="notif-badge" id="notifCount">2</span></button>
+        <button class="profile-btn" id="profileBtn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="tabs-container" id="tabsContainer"></div>
+    <div class="content-area" id="contentArea"></div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-head">
+    <h5 class="fw-bold mb-0"><i class="fas fa-shopping-cart me-2" style="color:var(--primary);"></i>O Meu Pedido</h5>
+    <button class="btn btn-sm btn-outline-secondary" id="closeCart"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-body" id="cartDrawerBody"></div>
+  <div class="drawer-foot" id="cartDrawerFoot"></div>
+</div>
+
+<!-- MODAL SESSÃO -->
+<div class="modal fade" id="sessionModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3" style="border-radius:30px;border:none;background:var(--bg-card);">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-hourglass-end me-2 text-warning"></i>Sessão prestes a terminar</h5></div>
+      <div class="modal-body">A sua sessão irá terminar em breve. Deseja continuar?</div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" id="endSessionBtn">Encerrar Sessão</button>
+        <button class="btn btn-primary" id="continueSessionBtn">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DINÂMICO -->
+<div class="modal fade" id="dynamicModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="dynamicModalTitle">Modal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="dynamicModalBody"></div>
+      <div class="modal-footer border-0" id="dynamicModalFooter">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="dynamicModalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="modal fade" id="profileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-circle me-2" style="color:var(--primary);"></i>O Meu Perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <div class="profile-header">
+          <div class="avatar-lg"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt="Cliente"></div>
+          <div>
+            <h5 class="fw-bold mb-0" id="profileName">Visitante</h5>
+            <p class="text-secondary mb-1" id="profileMode">Modo Visitante</p>
+            <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i> Online</span>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="Cliente.entrarConta()"><i class="fas fa-sign-in-alt"></i><div><div class="fw-bold">Iniciar Sessão</div><small class="text-secondary">Aceder à minha conta KITCHSYNC</small></div></div>
+        <div class="profile-menu-item" onclick="Cliente.criarConta()"><i class="fas fa-user-plus"></i><div><div class="fw-bold">Criar Conta</div><small class="text-secondary">Cadastro rápido por telefone</small></div></div>
+        <div class="profile-menu-item" onclick="openTab('perfil-gastronomico')"><i class="fas fa-heart"></i><div><div class="fw-bold">Perfil Gastronómico</div><small class="text-secondary">Preferências e favoritos</small></div></div>
+        <div class="profile-menu-item" onclick="openTab('historico')"><i class="fas fa-clock-rotate-left"></i><div><div class="fw-bold">Histórico de Pedidos</div><small class="text-secondary">Consultar e repetir</small></div></div>
+        <div class="profile-menu-item" onclick="Cliente.notifPrefs()"><i class="fas fa-bell"></i><div><div class="fw-bold">Notificações</div><small class="text-secondary">Escolher canais preferidos</small></div></div>
+        <div class="profile-menu-item" onclick="openTab('avaliacoes')"><i class="fas fa-star"></i><div><div class="fw-bold">As Minhas Avaliações</div><small class="text-secondary">Ver o que avaliei</small></div></div>
+        <hr class="my-2" style="border-color:var(--border-light);">
+        <div class="profile-menu-item danger" 
+             onclick="Toast.show('Sessão terminada. A voltar ao modo visitante...','warning')">
+          <i class="fas fa-sign-out-alt"></i>
+          <div>
+            <div class="fw-bold">
+              <a href="logout.html">
+                Terminar Sessão
+              </a>
+              
+            </div><small class="text-secondary">Voltar ao modo visitante</small></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICAÇÕES -->
+<div class="modal fade" id="notifModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-bell me-2" style="color:var(--primary);"></i>Notificações</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="notifModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMMAND CENTER -->
+<div class="modal fade" id="commandModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-bolt me-2" style="color:var(--primary);"></i>O que pretende fazer?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="commandModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ---------- TOAST ---------- */
+const Toast = {
+  show(msg, type='success'){
+    const c = document.getElementById('toastContainer');
+    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+    const el = document.createElement('div');
+    el.className = `toast-custom ${type}`;
+    el.innerHTML = `<i class="fas ${icons[type]||icons.info}" style="color:var(--${type==='success'?'success':type==='error'?'danger':type==='warning'?'warning':'info'})"></i><div>${msg}</div>`;
+    c.appendChild(el);
+    setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(100%)'; setTimeout(()=>el.remove(),300); }, 3500);
+  }
+};
+window.Toast = Toast;
+
+/* ---------- ESTADO ---------- */
+const STATE = {
+  user: null,
+  mesa: null,
+  entrada: null, // 'qr','codigo','nfc','app','convite'
+  carrinho: [],
+  pedidoAtivo: null,
+  preferencias: {
+    favoritos: ['Frango Grelhado','Coca-Cola'],
+    sem: ['Cebola'],
+    picante: 'médio',
+    tamanho: 'normal'
+  }
+};
+
+/* ---------- DADOS SIMULADOS ---------- */
+const DB = {
+  pratos: [
+    { id:'P001', nome:'Frango Grelhado', categoria:'Pratos Principais', preco:3500, custo:1850, disponivel:true, tempo:20, desc:'Frango grelhado com arroz e salada', img:'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?q=80&w=400&auto=format&fit=crop', ingredientes:['Frango','Arroz','Salada','Temperos'], alergenios:['Nenhum'], personalizacoes:['Sem sal','Sem cebola','Bem passado'], rating:4.7, pedidos:184, tags:['completo','mais-pedido'] },
+    { id:'P002', nome:'Hambúrguer Especial', categoria:'Pratos Principais', preco:4000, custo:2200, disponivel:true, tempo:15, desc:'Hambúrguer com queijo, alface e batata frita', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop', ingredientes:['Carne picada','Pão','Queijo','Alface','Batata'], alergenios:['Glúten','Lactose'], personalizacoes:['Sem queijo','Extra queijo','Sem cebola'], rating:4.5, pedidos:156, tags:['rapido','mais-pedido'] },
+    { id:'P003', nome:'Peixe Grelhado', categoria:'Pratos Principais', preco:5000, custo:2800, disponivel:false, tempo:22, desc:'Peixe grelhado com legumes salteados', img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=400&auto=format&fit=crop', ingredientes:['Peixe','Legumes','Azeite'], alergenios:['Peixe'], personalizacoes:['Sem sal'], rating:4.8, pedidos:121, tags:['leve'] },
+    { id:'P004', nome:'Massa Bolonhesa', categoria:'Pratos Principais', preco:3800, custo:1600, disponivel:true, tempo:18, desc:'Massa com molho de carne', img:'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?q=80&w=400&auto=format&fit=crop', ingredientes:['Massa','Carne picada','Tomate'], alergenios:['Glúten'], personalizacoes:['Sem queijo'], rating:4.4, pedidos:97, tags:['completo'] },
+    { id:'P005', nome:'Salada Caesar', categoria:'Entradas', preco:2500, custo:900, disponivel:true, tempo:10, desc:'Salada com frango, queijo e molho caesar', img:'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=400&auto=format&fit=crop', ingredientes:['Alface','Frango','Queijo','Molho'], alergenios:['Lactose'], personalizacoes:['Sem queijo','Molho à parte'], rating:4.6, pedidos:88, tags:['leve','rapido'] },
+    { id:'P006', nome:'Sopa de Legumes', categoria:'Entradas', preco:1500, custo:600, disponivel:true, tempo:8, desc:'Sopa cremosa de legumes frescos', img:'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=400&auto=format&fit=crop', ingredientes:['Legumes','Batata','Cebola'], alergenios:['Nenhum'], personalizacoes:[], rating:4.3, pedidos:64, tags:['leve','economico','rapido'] },
+    { id:'P007', nome:'Mousse de Chocolate', categoria:'Sobremesas', preco:1800, custo:600, disponivel:true, tempo:5, desc:'Mousse cremosa de chocolate negro', img:'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?q=80&w=400&auto=format&fit=crop', ingredientes:['Chocolate','Creme','Açúcar'], alergenios:['Lactose'], personalizacoes:[], rating:4.9, pedidos:142, tags:['doce','rapido'] },
+    { id:'P008', nome:'Gelado Artesanal', categoria:'Sobremesas', preco:1500, custo:500, disponivel:true, tempo:3, desc:'Gelado de baunilha com calda', img:'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=400&auto=format&fit=crop', ingredientes:['Leite','Açúcar','Baunilha'], alergenios:['Lactose'], personalizacoes:[], rating:4.5, pedidos:98, tags:['doce','rapido'] },
+    { id:'B001', nome:'Coca-Cola', categoria:'Bebidas', preco:800, custo:300, disponivel:true, tempo:1, desc:'Refrigerante gelado 33cl', img:'https://images.unsplash.com/photo-1554866585-cd94860890b7?q=80&w=400&auto=format&fit=crop', ingredientes:[], alergenios:[], personalizacoes:['Sem gelo'], rating:4.8, pedidos:246, tags:['rapido','mais-pedido'] },
+    { id:'B002', nome:'Água Mineral', categoria:'Bebidas', preco:500, custo:150, disponivel:true, tempo:1, desc:'Água mineral 50cl', img:'https://images.unsplash.com/photo-1523362628745-0c100150b504?q=80&w=400&auto=format&fit=crop', ingredientes:[], alergenios:[], personalizacoes:['Sem gás','Com gás'], rating:4.7, pedidos:188, tags:['rapido','economico'] },
+    { id:'B003', nome:'Sumo Natural', categoria:'Bebidas', preco:1200, custo:400, disponivel:true, tempo:3, desc:'Sumo natural de laranja', img:'https://images.unsplash.com/photo-1600271886742-f049cd451bba?q=80&w=400&auto=format&fit=crop', ingredientes:['Laranja'], alergenios:['Nenhum'], personalizacoes:['Sem açúcar','Sem gelo'], rating:4.6, pedidos:112, tags:['rapido'] }
+  ],
+  categorias: ['Todos','Pratos Principais','Entradas','Sobremesas','Bebidas'],
+  descobertas: [
+    { key:'completo', label:'🍗 Refeição completa' },
+    { key:'leve', label:'🥗 Leve' },
+    { key:'rapido', label:'⚡ Rápido' },
+    { key:'economico', label:'💰 Económico' },
+    { key:'mais-pedido', label:'⭐ Mais pedidos' }
+  ],
+  pedidoAtivoDemo: {
+    id:'#104',
+    estado:'preparacao',
+    steps:['recebido','preparacao','pronto','entregue'],
+    currentStep:1,
+    eta:12,
+    mesa:8,
+    itens:[
+      { nome:'Frango Grelhado', qtd:2, preco:3500 },
+      { nome:'Coca-Cola', qtd:1, preco:800 }
+    ],
+    total:7800,
+    timeline:[
+      { icon:'fa-check', label:'Pedido recebido', time:'19:32', done:true },
+      { icon:'fa-fire', label:'Cozinha iniciou preparação', time:'19:35', done:true },
+      { icon:'fa-utensils', label:'Preparação em curso', time:'19:39', done:true },
+      { icon:'fa-bell', label:'Pedido pronto', time:'—', done:false },
+      { icon:'fa-hand-holding-heart', label:'Pedido entregue', time:'—', done:false }
+    ]
+  },
+  historico: [
+    { id:'#087', data:'15/09/2026', estado:'entregue', total:5300, itens:'Frango Grelhado, Coca-Cola' },
+    { id:'#065', data:'10/09/2026', estado:'entregue', total:7800, itens:'Hambúrguer, Sumo, Mousse' },
+    { id:'#042', data:'02/09/2026', estado:'entregue', total:4300, itens:'Peixe Grelhado, Água' }
+  ],
+  avaliacoes: [
+    { id:'#087', data:'15/09/2026', comida:5, atendimento:5, tempo:4, geral:5, comentario:'Excelente como sempre!' },
+    { id:'#065', data:'10/09/2026', comida:4, atendimento:5, tempo:3, geral:4, comentario:'Um pouco demorado mas saboroso.' }
+  ],
+  notificacoes: [
+    { icon:'fa-fire', color:'warning', titulo:'A cozinha iniciou a preparação', detalhe:'Pedido #104', hora:'19:35' },
+    { icon:'fa-clock', color:'info', titulo:'Tempo estimado: 12 min', detalhe:'Pedido #104', hora:'19:36' }
+  ]
+};
+
+/* ---------- MENU DO CLIENTE ---------- */
+const MENU = [
+  { id:'descobrir',   label:'Descobrir',         icon:'fa-compass', fixed:true },
+  { id:'menu',        label:'Menu',              icon:'fa-book-open' },
+  { id:'pedido',      label:'O Meu Pedido',      icon:'fa-receipt', badge:'1' },
+  { id:'comunicar',   label:'Comunicar',         icon:'fa-comments' },
+  { id:'historico',   label:'Histórico',         icon:'fa-clock-rotate-left' },
+  { id:'avaliacoes',  label:'Avaliações',        icon:'fa-star' },
+  { id:'perfil-gastronomico', label:'Perfil Gastronómico', icon:'fa-heart' },
+  { id:'ai',          label:'Assistente KITCHSYNC', icon:'fa-robot' },
+  { id:'qr',          label:'QR Code / Mesa',    icon:'fa-qrcode' }
+];
+
+let openTabs = [{ id:'descobrir', label:'Descobrir', icon:'fa-compass', fixed:true }];
+let activeTab = 'descobrir';
+
+/* ---------- SIDEBAR ---------- */
+function renderSidebar(){
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = MENU.map(m => {
+    let badge = m.badge;
+    if (m.id === 'pedido' && STATE.pedidoAtivo) badge = '1';
+    return `
+      <button class="nav-item ${m.id===activeTab?'active':''}" data-page="${m.id}" data-title="${m.label}">
+        <i class="fas ${m.icon}"></i><span>${m.label}</span>
+        ${badge ? `<span class="nav-badge">${badge}</span>` : ''}
+      </button>
+    `;
+  }).join('');
+  nav.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => openTab(btn.dataset.page)));
+}
+
+/* ---------- TABS ---------- */
+function renderTabs(){
+  const c = document.getElementById('tabsContainer');
+  c.innerHTML = openTabs.map(t => `
+    <div class="tab-item ${t.id===activeTab?'active':''}" data-tab="${t.id}">
+      <i class="fas ${t.icon}"></i>${t.label}
+      ${t.fixed ? '' : `<i class="fas fa-times tab-close" data-close="${t.id}"></i>`}
+    </div>
+  `).join('');
+  c.querySelectorAll('.tab-item').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.classList.contains('tab-close')) return closeTab(e.target.dataset.close);
+      activateTab(el.dataset.tab);
+    });
+  });
+}
+function openTab(id){
+  const m = MENU.find(x => x.id === id);
+  if (!m) return;
+  if (!openTabs.some(t => t.id === id)) openTabs.push({ id, label:m.label, icon:m.icon, fixed:!!m.fixed });
+  activateTab(id);
+}
+function activateTab(id){
+  activeTab = id;
+  renderTabs(); renderSidebar();
+  const m = MENU.find(x => x.id === id);
+  document.getElementById('pageTitle').textContent = m ? m.label : id;
+  document.getElementById('breadcrumb').textContent = `Início / ${m ? m.label : id}`;
+  renderContent(id);
+  resetSessionTimer();
+}
+function closeTab(id){
+  const idx = openTabs.findIndex(t => t.id === id);
+  if (idx < 0) return;
+  openTabs.splice(idx,1);
+  if (activeTab === id){ const nx = openTabs[idx-1] || openTabs[0]; activeTab = nx ? nx.id : 'descobrir'; }
+  renderTabs(); renderSidebar(); renderContent(activeTab);
+}
+
+/* ---------- HELPERS ---------- */
+function formatKz(v){ return new Intl.NumberFormat('pt-AO').format(v) + ' Kz'; }
+function cartTotal(){ return STATE.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0); }
+function cartCount(){ return STATE.carrinho.reduce((s,i)=>s+i.qtd,0); }
+function updateCartBadge(){ document.getElementById('cartCount').textContent = cartCount(); }
+
+/* ---------- RENDER ---------- */
+function renderContent(id){
+  const r = {
+    'descobrir': renderDescobrir,
+    'menu': renderMenu,
+    'pedido': renderPedido,
+    'comunicar': renderComunicar,
+    'historico': renderHistorico,
+    'avaliacoes': renderAvaliacoes,
+    'perfil-gastronomico': renderPerfilGastronomico,
+    'ai': renderAI,
+    'qr': renderQR
+  }[id] || (()=>'<div class="empty-state"><i class="fas fa-cube"></i><p>Em construção</p></div>');
+  document.getElementById('contentArea').innerHTML = r();
+  if (binders[id]) binders[id]();
+}
+
+/* ============================================================
+   DESCOBRIR (Home inteligente)
+   ============================================================ */
+function renderDescobrir(){
+  const destaques = DB.pratos.filter(p => p.disponivel && p.tags.includes('mais-pedido'));
+  return `
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+      <div>
+        <h4 class="fw-bold mb-1" id="welcomeMsg">Bem-vindo ao KITCHSYNC 👋</h4>
+        <p class="text-secondary mb-0">O que procura hoje?</p>
+      </div>
+      ${STATE.mesa ? `<span class="badge-status badge-green"><i class="fas fa-chair me-1"></i>Mesa ${STATE.mesa}</span>` : `<button class="btn btn-primary btn-sm" onclick="openTab('qr')"><i class="fas fa-qrcode me-1"></i>Identificar mesa</button>`}
+    </div>
+
+    <!-- Personalização / Perfil gastronómico -->
+    <div class="card mb-4" style="background:var(--primary-soft);border:1px solid var(--primary);">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <i class="fas fa-heart" style="font-size:2rem;color:var(--primary);"></i>
+        <div class="flex-grow-1">
+          <h6 class="fw-bold mb-1">Encontrámos opções para si</h6>
+          <small class="text-secondary">Com base nas suas preferências: ${STATE.preferencias.favoritos.join(', ')}</small>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="openTab('perfil-gastronomico')">Ver perfil</button>
+      </div>
+    </div>
+
+    <!-- Descoberta inteligente -->
+    <h6 class="fw-bold mb-2"><i class="fas fa-sparkles me-2" style="color:var(--primary);"></i>O que procura hoje?</h6>
+    <div class="chip-row mb-4">
+      ${DB.descobertas.map(d => `<div class="chip" data-discovery="${d.key}">${d.label}</div>`).join('')}
+    </div>
+
+    <!-- Destaques -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="fw-bold mb-0">⭐ Os mais pedidos</h6>
+      <button class="btn btn-outline-secondary btn-sm" onclick="openTab('menu')">Ver menu completo</button>
+    </div>
+    <div class="dish-grid mb-4">
+      ${destaques.map(p => dishTile(p)).join('')}
+    </div>
+
+    <!-- Recomendações IA -->
+    <div class="card" style="border-left:4px solid var(--purple);">
+      <div class="d-flex gap-3 align-items-start">
+        <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+        <div class="flex-grow-1">
+          <h6 class="fw-bold mb-1">Assistente KITCHSYNC sugere</h6>
+          <p class="mb-2 small text-secondary">Com base no seu histórico, experimente estas opções disponíveis agora:</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.addToCart('P005')">🥗 Salada Caesar</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.addToCart('B003')">🧃 Sumo Natural</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="openTab('ai')">🤖 Perguntar à IA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   MENU (grid + lista)
+   ============================================================ */
+let menuView = 'grid';
+let menuCat = 'Todos';
+let menuSearch = '';
+function renderMenu(){
+  let filtrados = DB.pratos;
+  if (menuCat !== 'Todos') filtrados = filtrados.filter(p => p.categoria === menuCat);
+  if (menuSearch) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(menuSearch.toLowerCase()));
+  return `
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h4 class="mb-0">Menu</h4>
+      <div class="d-flex gap-2 align-items-center">
+        <div class="input-group" style="max-width:260px;">
+          <span class="input-group-text" style="background:var(--bg-body);border:1px solid var(--border-light);"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" id="searchMenu" placeholder="Pesquisar prato..." value="${menuSearch}">
+        </div>
+        <div class="menu-toggle">
+          <span class="${menuView==='grid'?'active':''}" data-view="grid"><i class="fas fa-th"></i> Grade</span>
+          <span class="${menuView==='list'?'active':''}" data-view="list"><i class="fas fa-list"></i> Lista</span>
+        </div>
+      </div>
+    </div>
+    <div class="chip-row mb-3" id="catChips">
+      ${DB.categorias.map(c => `<div class="chip ${c===menuCat?'active':''}" data-cat="${c}">${c}</div>`).join('')}
+    </div>
+    ${filtrados.length ? (menuView==='grid'
+      ? `<div class="dish-grid">${filtrados.map(p=>dishTile(p)).join('')}</div>`
+      : `<div>${filtrados.map(p=>dishListItem(p)).join('')}</div>`
+    ) : '<div class="empty-state"><i class="fas fa-search"></i><p>Nenhum prato encontrado.</p></div>'}
+  `;
+}
+function dishTile(p){
+  return `
+    <div class="dish-tile ${p.disponivel?'':'unavailable'}" data-dish="${p.id}" style="position:relative;">
+      ${!p.disponivel ? '<div class="u-tag">INDISPONÍVEL</div>' : ''}
+      <img src="${p.img}" alt="${p.nome}">
+      <div class="dish-body">
+        <h6>${p.nome}</h6>
+        <div class="dish-meta">⭐ ${p.rating} • ⏱️ ${p.tempo} min</div>
+        <div class="d-flex justify-content-between align-items-center mt-1">
+          <span class="dish-price">${formatKz(p.preco)}</span>
+          ${p.disponivel ? `<button class="btn btn-sm btn-primary" data-add="${p.id}"><i class="fas fa-plus"></i></button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function dishListItem(p){
+  return `
+    <div class="dish-list-item ${p.disponivel?'':'unavailable'}" data-dish="${p.id}">
+      <img src="${p.img}" alt="${p.nome}">
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start">
+          <h6 class="fw-bold mb-1">${p.nome}</h6>
+          ${!p.disponivel ? '<span class="badge-status badge-red">Indisponível</span>' : ''}
+        </div>
+        <div class="small text-secondary mb-1">${p.desc}</div>
+        <div class="dish-meta">⭐ ${p.rating} • ⏱️ ${p.tempo} min</div>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <span class="dish-price">${formatKz(p.preco)}</span>
+          ${p.disponivel ? `<button class="btn btn-sm btn-primary" data-add="${p.id}"><i class="fas fa-plus me-1"></i>Adicionar</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   O MEU PEDIDO (Tracking + ETA)
+   ============================================================ */
+function renderPedido(){
+  const p = STATE.pedidoAtivo;
+  if (!p) {
+    return `
+      <div class="empty-state">
+        <i class="fas fa-receipt"></i>
+        <h5 class="mt-3">Ainda não tem pedido ativo</h5>
+        <p>Explore o menu e faça o seu primeiro pedido.</p>
+        <button class="btn btn-primary" onclick="openTab('menu')"><i class="fas fa-book-open me-1"></i>Ver Menu</button>
+      </div>
+    `;
+  }
+  const stepLabels = ['Recebido','Em Preparação','Pronto','Entregue'];
+  const current = p.currentStep;
+  return `
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+              <h4 class="fw-bold mb-0">Pedido ${p.id}</h4>
+              <small class="text-secondary">Mesa ${p.mesa} • ${p.itens.length} itens</small>
+            </div>
+            <span class="badge-status badge-yellow">${stepLabels[current].toUpperCase()}</span>
+          </div>
+
+          <!-- Linha de progresso visual -->
+          <div class="track-line">
+            <div class="prog" style="width:${(current/(stepLabels.length-1))*100}%"></div>
+            ${stepLabels.map((s,i) => `
+              <div class="track-step ${i<current?'done':i===current?'active':''}">
+                <div class="track-dot"><i class="fas ${i===0?'fa-check':i===1?'fa-fire':i===2?'fa-bell':'fa-hand-holding-heart'}"></i></div>
+                <small>${s}</small>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- ETA dinâmico -->
+          <div class="alert alert-info mt-3 mb-0" style="border-radius:14px;">
+            <i class="fas fa-clock me-2"></i>Preparação estimada: <strong>${p.eta} minutos</strong>
+            <small class="d-block text-secondary mt-1">Estimativa baseada no estado atual da cozinha.</small>
+          </div>
+        </div>
+
+        <!-- Timeline detalhada -->
+        <div class="card">
+          <h6 class="fw-bold mb-3">Linha do tempo</h6>
+          ${p.timeline.map(t => `
+            <div class="tl-item">
+              <div class="tl-icon" style="${t.done?'background:rgba(43,143,94,.15);color:var(--success);':''}"><i class="fas ${t.icon}"></i></div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between">
+                  <strong>${t.label}</strong>
+                  <small class="text-secondary">${t.time}</small>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card mb-3">
+          <h6 class="fw-bold mb-3">Resumo</h6>
+          ${p.itens.map(i => `
+            <div class="d-flex justify-content-between py-2" style="border-bottom:1px solid var(--border-light);">
+              <div>${i.qtd} × ${i.nome}</div>
+              <strong>${formatKz(i.preco*i.qtd)}</strong>
+            </div>
+          `).join('')}
+          <div class="d-flex justify-content-between align-items-center mt-3 pt-2" style="border-top:2px solid var(--border-light);">
+            <span class="fw-bold">Total</span>
+            <span class="fw-bold" style="color:var(--primary);font-size:1.2rem;">${formatKz(p.total)}</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h6 class="fw-bold mb-3">Solicitações rápidas</h6>
+          <div class="quick-actions">
+            <div class="quick-action" data-quick="bebida">🥤 Pedir bebida</div>
+            <div class="quick-action" data-quick="guardanapos">🧻 Guardanapos</div>
+            <div class="quick-action" data-quick="atendimento">👨‍💼 Chamar atendimento</div>
+            <div class="quick-action" data-quick="conta">💳 Solicitar conta</div>
+            <div class="quick-action" data-quick="outro">❓ Outro pedido</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   COMUNICAR (chat + solicitações)
+   ============================================================ */
+function renderComunicar(){
+  return `
+    <h4 class="mb-3">Comunicar com o Atendimento</h4>
+    <div class="alert alert-info mb-3" style="border-radius:14px;">
+      <i class="fas fa-info-circle me-2"></i>Comunicação direta e limitada ao atendimento. As suas mensagens são atendidas por um funcionário.
+    </div>
+    <div class="row g-3">
+      <div class="col-md-5">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Solicitações rápidas</h6>
+          <div class="quick-actions">
+            <div class="quick-action" data-quick="bebida">🥤 Pedir bebida</div>
+            <div class="quick-action" data-quick="guardanapos">🧻 Guardanapos</div>
+            <div class="quick-action" data-quick="atendimento">👨‍💼 Chamar atendimento</div>
+            <div class="quick-action" data-quick="conta">💳 Solicitar conta</div>
+            <div class="quick-action" data-quick="alterar">✏️ Alterar pedido</div>
+            <div class="quick-action" data-quick="outro">❓ Outro pedido</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="card" style="display:flex;flex-direction:column;height:420px;">
+          <h6 class="fw-bold mb-3">Chat com atendimento</h6>
+          <div class="ai-messages" id="chatMessages" style="flex:1;">
+            <div class="ai-msg">
+              <div class="ai-avatar" style="background:var(--info);"><i class="fas fa-user-tie"></i></div>
+              <div class="ai-bubble">Olá! Como posso ajudar?</div>
+            </div>
+          </div>
+          <div class="input-group mt-2">
+            <input type="text" class="form-control" id="chatInput" placeholder="Escreva uma mensagem...">
+            <button class="btn btn-primary" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+function renderHistorico(){
+  return `
+    <h4 class="mb-3">Histórico de Pedidos</h4>
+    ${DB.historico.map(h => `
+      <div class="card mb-2">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <h6 class="fw-bold mb-1">Pedido ${h.id}</h6>
+            <small class="text-secondary">${h.data} • ${h.itens}</small>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold mb-1" style="color:var(--primary);">${formatKz(h.total)}</div>
+            <div class="d-flex gap-1">
+              <button class="btn btn-sm btn-outline-secondary" data-repeat="${h.id}"><i class="fas fa-redo me-1"></i>Pedir novamente</button>
+              <button class="btn btn-sm btn-primary" data-avaliar="${h.id}"><i class="fas fa-star me-1"></i>Avaliar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ============================================================
+   AVALIAÇÕES
+   ============================================================ */
+function renderAvaliacoes(){
+  return `
+    <h4 class="mb-3">As Minhas Avaliações</h4>
+    <div class="alert alert-info mb-3" style="border-radius:14px;">
+      <i class="fas fa-info-circle me-2"></i>Cada avaliação está vinculada a um pedido real, garantindo autenticidade.
+    </div>
+    ${DB.avaliacoes.map(a => `
+      <div class="card mb-2">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+          <div><h6 class="fw-bold mb-1">Pedido ${a.id}</h6><small class="text-secondary">${a.data}</small></div>
+          <div class="d-flex gap-2">
+            <span class="badge-status badge-yellow">⭐ ${a.geral}/5</span>
+          </div>
+        </div>
+        <div class="row g-2 small mb-2">
+          <div class="col-3"><strong>Comida:</strong> ${'⭐'.repeat(a.comida)}</div>
+          <div class="col-3"><strong>Atendimento:</strong> ${'⭐'.repeat(a.atendimento)}</div>
+          <div class="col-3"><strong>Tempo:</strong> ${'⭐'.repeat(a.tempo)}</div>
+          <div class="col-3"><strong>Geral:</strong> ${'⭐'.repeat(a.geral)}</div>
+        </div>
+        ${a.comentario ? `<p class="small mb-0"><em>"${a.comentario}"</em></p>` : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ============================================================
+   PERFIL GASTRONÓMICO
+   ============================================================ */
+function renderPerfilGastronomico(){
+  const p = STATE.preferencias;
+  return `
+    <h4 class="mb-3"><i class="fas fa-heart me-2" style="color:var(--primary);"></i>Perfil Gastronómico</h4>
+    <div class="alert alert-info mb-3" style="border-radius:14px;">
+      <i class="fas fa-sparkles me-2"></i>O KITCHSYNC usa estas preferências para sugerir pratos e personalizar a sua experiência. Pode alterar a qualquer momento.
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Pratos favoritos</h6>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            ${p.favoritos.map(f => `<span class="badge-status badge-green">${f}</span>`).join('')}
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" onclick="Toast.show('Selecionar favoritos','info')">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Ingredientes a evitar</h6>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            ${p.sem.map(s => `<span class="badge-status badge-red">Sem ${s}</span>`).join('')}
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" onclick="Toast.show('Selecionar ingredientes','info')">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Nível de picante</h6>
+          <div class="chip-row">
+            ${['sem','leve','médio','forte'].map(n => `<div class="chip ${p.picante===n?'active':''}" data-pref="picante" data-val="${n}">${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Tamanho da refeição</h6>
+          <div class="chip-row">
+            ${['pequena','normal','grande'].map(n => `<div class="chip ${p.tamanho===n?'active':''}" data-pref="tamanho" data-val="${n}">${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   KITCHSYNC AI (Cliente)
+   ============================================================ */
+function renderAI(){
+  return `
+    <h4 class="mb-3"><i class="fas fa-robot me-2" style="color:var(--purple);"></i>Assistente KITCHSYNC</h4>
+    <p class="text-secondary mb-3">Sugestões personalizadas com base apenas no <strong>menu e disponibilidade</strong>. Sem acesso a dados internos.</p>
+    <div class="card">
+      <div class="ai-chat">
+        <div class="ai-messages" id="aiMessages">
+          <div class="ai-msg">
+            <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+            <div class="ai-bubble">
+              Olá! Sou o <strong>Assistente KITCHSYNC</strong>. Posso ajudar a escolher pratos, verificar disponibilidade e sugerir opções segundo as suas preferências.
+              <div class="ai-suggestions">
+                <div class="ai-suggest" data-q="Quero algo sem picante.">Sem picante</div>
+                <div class="ai-suggest" data-q="Qual é o prato mais rápido?">Prato mais rápido</div>
+                <div class="ai-suggest" data-q="Quero uma refeição leve.">Refeição leve</div>
+                <div class="ai-suggest" data-q="Sugira-me algo económico.">Económico</div>
+                <div class="ai-suggest" data-q="Mostre os pratos mais pedidos.">Mais pedidos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="input-group">
+          <input type="text" class="form-control" id="aiInput" placeholder="Pergunte ao assistente...">
+          <button class="btn btn-primary" id="aiSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   QR CODE / MESA
+   ============================================================ */
+function renderQR(){
+  return `
+    <h4 class="mb-3">QR Code / Identificação de Mesa</h4>
+    <div class="alert alert-info mb-3" style="border-radius:14px;">
+      <i class="fas fa-info-circle me-2"></i>Pode entrar de várias formas: <strong>QR Code, Código de mesa, NFC, link de convite ou aplicação</strong>. O QR Code é apenas uma porta de entrada.
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card text-center">
+          <h6 class="fw-bold mb-3">📷 Leia o QR Code da sua mesa</h6>
+          <div class="qr-mock mx-auto mb-3">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=KITCHSYNC-MESA-08" alt="QR Code">
+          </div>
+          <p class="small text-secondary mb-3">Aponte a câmara para o código na mesa para identificação automática.</p>
+          <button class="btn btn-primary" onclick="Cliente.identificarMesa('QR Code')"><i class="fas fa-qrcode me-1"></i>Simular leitura</button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <h6 class="fw-bold mb-3">Ou escolha outra forma</h6>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn btn-outline-secondary text-start" onclick="Cliente.pedirCodigoMesa()"><i class="fas fa-hashtag me-2"></i>Digitar código da mesa</button>
+            <button class="btn btn-outline-secondary text-start" onclick="Cliente.identificarMesa('NFC')"><i class="fas fa-wifi me-2"></i>Aproximar do ponto NFC</button>
+            <button class="btn btn-outline-secondary text-start" onclick="Cliente.identificarMesa('Link de convite')"><i class="fas fa-link me-2"></i>Abrir link de convite</button>
+            <button class="btn btn-outline-secondary text-start" onclick="openTab('descobrir')"><i class="fas fa-globe me-2"></i>Continuar em modo visitante</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   BINDERS
+   ============================================================ */
+const binders = {
+  'descobrir'(){
+    document.querySelectorAll('[data-discovery]').forEach(c => c.addEventListener('click', () => {
+      const k = c.dataset.discovery;
+      openTab('menu');
+      Toast.show(`A mostrar: ${DB.descobertas.find(d=>d.key===k).label}`,'info');
+    }));
+  },
+  'menu'(){
+    document.querySelectorAll('[data-view]').forEach(v => v.addEventListener('click', () => { menuView = v.dataset.view; renderContent('menu'); }));
+    document.querySelectorAll('#catChips .chip').forEach(c => c.addEventListener('click', () => { menuCat = c.dataset.cat; renderContent('menu'); }));
+    document.getElementById('searchMenu')?.addEventListener('input', e => { menuSearch = e.target.value; renderContent('menu'); });
+    document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); Cliente.addToCart(b.dataset.add); }));
+    document.querySelectorAll('[data-dish]').forEach(el => el.addEventListener('click', () => Cliente.viewDish(el.dataset.dish)));
+  },
+  'pedido'(){
+    document.querySelectorAll('[data-quick]').forEach(q => q.addEventListener('click', () => Cliente.solicitacaoRapida(q.dataset.quick)));
+  },
+  'comunicar'(){
+    document.querySelectorAll('[data-quick]').forEach(q => q.addEventListener('click', () => Cliente.solicitacaoRapida(q.dataset.quick)));
+    const send = () => {
+      const inp = document.getElementById('chatInput');
+      const q = inp.value.trim();
+      if (!q) return;
+      chatAdd(q,'user'); inp.value = '';
+      setTimeout(() => chatAdd('Recebido! Um funcionário vai responder em breve.','staff'), 800);
+    };
+    document.getElementById('chatSend')?.addEventListener('click', send);
+    document.getElementById('chatInput')?.addEventListener('keydown', e => { if (e.key==='Enter') send(); });
+  },
+  'historico'(){
+    document.querySelectorAll('[data-repeat]').forEach(b => b.addEventListener('click', () => Cliente.repeatOrder(b.dataset.repeat)));
+    document.querySelectorAll('[data-avaliar]').forEach(b => b.addEventListener('click', () => Cliente.avaliar(b.dataset.avaliar)));
+  },
+  'perfil-gastronomico'(){
+    document.querySelectorAll('[data-pref]').forEach(c => c.addEventListener('click', () => {
+      STATE.preferencias[c.dataset.pref] = c.dataset.val;
+      renderContent('perfil-gastronomico');
+      Toast.show('✓ Preferência guardada','success');
+    }));
+  },
+  'ai'(){ bindAI(); }
+};
+
+/* ============================================================
+   AÇÕES DO CLIENTE
+   ============================================================ */
+window.Cliente = {
+  addToCart(id){
+    const p = DB.pratos.find(x => x.id === id);
+    if (!p) return;
+    if (!p.disponivel){ Toast.show('Este prato está indisponível','warning'); return; }
+    const existing = STATE.carrinho.find(x => x.id === id);
+    if (existing) existing.qtd++;
+    else STATE.carrinho.push({ id:p.id, nome:p.nome, preco:p.preco, img:p.img, qtd:1 });
+    updateCartBadge(); renderCart();
+    Toast.show(`+ ${p.nome}`, 'success');
+    // Sugestões inteligentes
+    if (p.categoria === 'Pratos Principais' && !STATE.carrinho.some(i => i.id === 'B001' || i.id === 'B003')) {
+      setTimeout(() => Cliente.sugerir('Combina bem com uma bebida. Quer adicionar?'), 600);
+    }
+  },
+  sugerir(msg){
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast-custom info';
+    el.innerHTML = `<i class="fas fa-lightbulb" style="color:var(--info)"></i><div><strong>Sugestão</strong><br>${msg}<div class="d-flex gap-1 mt-2"><button class="btn btn-sm btn-outline-secondary" onclick="Cliente.addToCart('B003');this.closest('.toast-custom').remove()">🧃 Sumo</button><button class="btn btn-sm btn-outline-secondary" onclick="Cliente.addToCart('B001');this.closest('.toast-custom').remove()">🥤 Coca-Cola</button><button class="btn btn-sm btn-outline-secondary" onclick="this.closest('.toast-custom').remove()">Não</button></div></div>`;
+    c.appendChild(el);
+    setTimeout(()=>el.remove(), 7000);
+  },
+  viewDish(id){
+    const p = DB.pratos.find(x => x.id === id);
+    if (!p) return;
+    openModal(`${p.nome}`, `
+      <div class="d-flex gap-3 flex-wrap mb-3">
+        <img src="${p.img}" style="width:200px;height:160px;border-radius:18px;object-fit:cover;">
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start">
+            <h4 class="fw-bold mb-1">${p.nome}</h4>
+            <span class="badge-status ${p.disponivel?'badge-green':'badge-red'}">${p.disponivel?'Disponível':'Indisponível'}</span>
+          </div>
+          <p class="text-secondary mb-2">${p.desc}</p>
+          <div class="mb-2"><strong style="color:var(--primary);font-size:1.3rem;">${formatKz(p.preco)}</strong></div>
+          <div class="small text-secondary mb-2">⭐ ${p.rating} • ⏱️ ${p.tempo} min • ${p.pedidos} pedidos</div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mt-3">Ingredientes</h6>
+      <div class="d-flex flex-wrap gap-1 mb-3">${p.ingredientes.map(i=>`<span class="badge-status badge-blue">${i}</span>`).join('') || '<span class="text-secondary small">—</span>'}</div>
+
+      <h6 class="fw-bold">Alergénios</h6>
+      <div class="d-flex flex-wrap gap-1 mb-3">${p.alergenios.map(i=>`<span class="badge-status badge-red">${i}</span>`).join('')}</div>
+
+      ${p.personalizacoes.length ? `<h6 class="fw-bold">Personalizações permitidas</h6>
+      <div class="d-flex flex-wrap gap-1 mb-3">${p.personalizacoes.map(i=>`<span class="badge-status badge-gray">${i}</span>`).join('')}</div>` : ''}
+
+      ${p.disponivel ? `<button class="btn btn-primary w-100" onclick="Cliente.addToCart('${p.id}');bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide()"><i class="fas fa-plus me-1"></i>Adicionar ao pedido</button>` : `<div class="alert alert-warning mb-0" style="border-radius:14px;"><i class="fas fa-triangle-exclamation me-2"></i>Indisponível neste momento.</div>`}
+    `, null, 'Fechar');
+  },
+  solicitacaoRapida(tipo){
+    const labels = { bebida:'Pedir bebida', guardanapos:'Pedir guardanapos', atendimento:'Chamar atendimento', conta:'Solicitar conta', alterar:'Alterar pedido', outro:'Outro pedido' };
+    Toast.show(`✓ Solicitação enviada: ${labels[tipo]||tipo}`, 'success');
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'notif-ready';
+      el.innerHTML = `<i class="fas fa-user-tie"></i><div><div style="font-weight:700;">Atendimento a caminho</div><div style="font-size:.85rem;">${labels[tipo]||tipo}</div></div><button class="btn btn-sm" style="background:rgba(255,255,255,.25);color:#fff;border-radius:20px;margin-left:8px;" onclick="this.parentElement.remove()">OK</button>`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 6000);
+    }, 1500);
+  },
+  repeatOrder(id){
+    const items = DB.historico.find(h => h.id === id);
+    // simular repetir
+    STATE.carrinho = [];
+    Cliente.addToCart('P001');
+    Cliente.addToCart('P001');
+    Cliente.addToCart('B001');
+    Toast.show('✓ Itens do pedido anterior adicionados ao carrinho.', 'success');
+    setTimeout(()=>openCart(), 300);
+  },
+  avaliar(id){
+    openModal(`Avaliar ${id}`, `
+      <div class="mb-3"><label class="form-label">⭐ Comida</label><div>${[1,2,3,4,5].map(n=>`<i class="fas fa-star rating-star" data-rating="comida" data-val="${n}"></i>`).join('')}</div></div>
+      <div class="mb-3"><label class="form-label">⭐ Atendimento</label><div>${[1,2,3,4,5].map(n=>`<i class="fas fa-star rating-star" data-rating="atendimento" data-val="${n}"></i>`).join('')}</div></div>
+      <div class="mb-3"><label class="form-label">⭐ Tempo de espera</label><div>${[1,2,3,4,5].map(n=>`<i class="fas fa-star rating-star" data-rating="tempo" data-val="${n}"></i>`).join('')}</div></div>
+      <div class="mb-3"><label class="form-label">⭐ Experiência geral</label><div>${[1,2,3,4,5].map(n=>`<i class="fas fa-star rating-star" data-rating="geral" data-val="${n}"></i>`).join('')}</div></div>
+      <div class="mb-3"><label class="form-label">Comentário</label><textarea class="form-control" rows="2" placeholder="Opcional"></textarea></div>
+    `, () => {
+      Toast.show('✓ Avaliação registada. Obrigado!','success');
+      return true;
+    }, 'Enviar Avaliação');
+    setTimeout(() => {
+      document.querySelectorAll('.rating-star').forEach(s => s.addEventListener('click', () => {
+        const r = s.dataset.rating, v = +s.dataset.val;
+        s.parentElement.querySelectorAll(`[data-rating="${r}"]`).forEach((x,i)=> x.classList.toggle('active', i<v));
+      }));
+    }, 100);
+  },
+  identificarMesa(metodo){
+    STATE.mesa = 8;
+    STATE.entrada = metodo;
+    Toast.show(`✓ Mesa 8 identificada via ${metodo}`,'success');
+    renderContent('descobrir');
+  },
+  pedirCodigoMesa(){
+    openModal('Código da Mesa', `
+      <div class="mb-3"><label class="form-label">Digite o código da mesa</label><input class="form-control form-control-lg text-center" id="codigoMesa" placeholder="Ex: 08" maxlength="3"></div>
+    `, () => {
+      const v = document.getElementById('codigoMesa').value.trim();
+      if (!v){ Toast.show('Introduza o código','error'); return false; }
+      STATE.mesa = v;
+      Toast.show(`✓ Mesa ${v} identificada.`,'success');
+      renderContent('descobrir');
+      return true;
+    }, 'Confirmar');
+  },
+  entrarConta(){
+    STATE.user = { nome:'António Diogo' };
+    document.getElementById('userName').textContent = 'António Diogo';
+    document.getElementById('userMode').textContent = 'Conta KITCHSYNC';
+    document.getElementById('profileName').textContent = 'António Diogo';
+    document.getElementById('profileMode').textContent = 'Conta KITCHSYNC';
+    Toast.show('✓ Bem-vindo de volta, António!','success');
+  },
+  criarConta(){
+    openModal('Criar Conta KITCHSYNC', `
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nome *</label><input class="form-control" id="c-nome"></div>
+        <div class="col-md-6"><label class="form-label">Telefone *</label><input class="form-control" id="c-tel"></div>
+        <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" id="c-email"></div>
+        <div class="col-md-6"><label class="form-label">Password *</label><input type="password" class="form-control" id="c-pass"></div>
+      </div>
+    `, () => {
+      const nome = document.getElementById('c-nome').value.trim();
+      if (!nome){ Toast.show('Nome obrigatório','error'); return false; }
+      STATE.user = { nome };
+      document.getElementById('userName').textContent = nome;
+      document.getElementById('userMode').textContent = 'Conta KITCHSYNC';
+      Toast.show(`✓ Conta criada. Bem-vindo, ${nome}!`,'success');
+      return true;
+    }, 'Criar Conta');
+  },
+  notifPrefs(){
+    openModal('Preferências de Notificação', `
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Notificação na aplicação</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">SMS</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox"><label class="form-check-label">Email</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Notificação web</label></div>
+    `, null, 'Fechar');
+  }
+};
+
+/* ---------- CART DRAWER ---------- */
+function openCart(){ document.getElementById('cartDrawer').classList.add('open'); renderCart(); }
+function closeCart(){ document.getElementById('cartDrawer').classList.remove('open'); }
+function renderCart(){
+  const body = document.getElementById('cartDrawerBody');
+  const foot = document.getElementById('cartDrawerFoot');
+  if (!STATE.carrinho.length){
+    body.innerHTML = '<div class="empty-state"><i class="fas fa-shopping-cart"></i><p>O carrinho está vazio.</p></div>';
+    foot.innerHTML = '<button class="btn btn-outline-secondary w-100" onclick="closeCart()">Fechar</button>';
+    return;
+  }
+  body.innerHTML = STATE.carrinho.map((it,i) => `
+    <div class="cart-item">
+      <img src="${it.img}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;">
+      <div class="flex-grow-1">
+        <div style="font-weight:600;">${it.nome}</div>
+        <small class="text-secondary">${formatKz(it.preco)}</small>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <div class="qty-btn" onclick="Cliente._qty(${i},-1)"><i class="fas fa-minus"></i></div>
+        <span style="font-weight:700;min-width:22px;text-align:center;">${it.qtd}</span>
+        <div class="qty-btn" onclick="Cliente._qty(${i},1)"><i class="fas fa-plus"></i></div>
+      </div>
+      <div style="font-weight:700;min-width:70px;text-align:right;">${formatKz(it.preco*it.qtd)}</div>
+    </div>
+  `).join('');
+  foot.innerHTML = `
+    <div class="d-flex justify-content-between mb-2"><span class="text-secondary">Subtotal</span><strong>${formatKz(cartTotal())}</strong></div>
+    <div class="d-flex justify-content-between mb-3" style="font-size:1.15rem;"><span class="fw-bold">Total</span><span class="fw-bold" style="color:var(--primary);">${formatKz(cartTotal())}</span></div>
+    <button class="btn btn-primary w-100 mb-2" onclick="Cliente.confirmarPedido()"><i class="fas fa-check me-1"></i>Confirmar Pedido</button>
+    <button class="btn btn-outline-secondary w-100" onclick="Cliente.limparCarrinho()"><i class="fas fa-trash me-1"></i>Limpar</button>
+  `;
+}
+Cliente._qty = function(i, d){
+  if (!STATE.carrinho[i]) return;
+  STATE.carrinho[i].qtd += d;
+  if (STATE.carrinho[i].qtd <= 0) STATE.carrinho.splice(i,1);
+  updateCartBadge(); renderCart();
+};
+Cliente.limparCarrinho = function(){
+  STATE.carrinho = [];
+  updateCartBadge(); renderCart();
+  Toast.show('Carrinho limpo','info');
+};
+Cliente.confirmarPedido = function(){
+  if (!STATE.carrinho.length){ Toast.show('Carrinho vazio','error'); return; }
+  const total = cartTotal();
+  const itens = STATE.carrinho.map(i => ({ nome:i.nome, qtd:i.qtd, preco:i.preco }));
+  openModal('Confirmar Pedido', `
+    <h6 class="fw-bold mb-2">Resumo do Pedido</h6>
+    ${itens.map(i => `<div class="d-flex justify-content-between py-1" style="border-bottom:1px solid var(--border-light);"><span>${i.qtd} × ${i.nome}</span><strong>${formatKz(i.preco*i.qtd)}</strong></div>`).join('')}
+    <div class="d-flex justify-content-between mt-3"><strong>Total</strong><strong style="color:var(--primary);">${formatKz(total)}</strong></div>
+    <div class="mt-3 small text-secondary"><i class="fas fa-clock me-1"></i>Preparação estimada: 12–18 min</div>
+    ${STATE.mesa ? `<div class="mt-1 small text-secondary"><i class="fas fa-chair me-1"></i>Mesa ${STATE.mesa}</div>` : `<div class="alert alert-warning mt-3 mb-0" style="border-radius:14px;"><i class="fas fa-triangle-exclamation me-2"></i>Sem mesa identificada. <a href="#" onclick="bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();openTab('qr')">Identificar</a></div>`}
+    <div class="mt-3"><label class="form-label">Observações</label><textarea class="form-control" id="conf-obs" rows="2" placeholder="Ex: Sem cebola"></textarea></div>
+  `, () => {
+    // criar pedido ativo
+    STATE.pedidoAtivo = {
+      id:'#104',
+      estado:'recebido',
+      steps:['recebido','preparacao','pronto','entregue'],
+      currentStep:0,
+      eta:15,
+      mesa:STATE.mesa||'—',
+      itens,
+      total,
+      timeline:[
+        { icon:'fa-check', label:'Pedido recebido', time:new Date().toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'}), done:true },
+        { icon:'fa-fire', label:'Cozinha iniciou preparação', time:'—', done:false },
+        { icon:'fa-utensils', label:'Preparação em curso', time:'—', done:false },
+        { icon:'fa-bell', label:'Pedido pronto', time:'—', done:false },
+        { icon:'fa-hand-holding-heart', label:'Pedido entregue', time:'—', done:false }
+      ]
+    };
+    STATE.carrinho = [];
+    updateCartBadge(); closeCart();
+    openTab('pedido');
+    Toast.show('✓ Pedido enviado à cozinha!','success');
+    // Simular progressão
+    setTimeout(() => progressOrder(), 3000);
+    setTimeout(() => progressOrder(), 8000);
+    setTimeout(() => progressOrder(), 14000);
+    return true;
+  }, 'Confirmar e Enviar');
+};
+function progressOrder(){
+  const p = STATE.pedidoAtivo;
+  if (!p) return;
+  if (p.currentStep < p.steps.length-1){
+    p.currentStep++;
+    p.timeline[p.currentStep].done = true;
+    p.timeline[p.currentStep].time = new Date().toLocaleTimeString('pt-AO',{hour:'2-digit',minute:'2-digit'});
+    p.eta = Math.max(1, p.eta - 4);
+    p.estado = p.steps[p.currentStep];
+    if (activeTab==='pedido') renderContent('pedido');
+    renderSidebar();
+    const labels = { preparacao:'👨‍🍳 A cozinha iniciou a preparação', pronto:'✅ O seu pedido está pronto!', entregue:'🍽️ Pedido entregue. Bom apetite!' };
+    if (labels[p.estado]) {
+      const el = document.createElement('div');
+      el.className = 'notif-ready';
+      el.innerHTML = `<i class="fas fa-bell"></i><div><div style="font-weight:700;">${labels[p.estado]}</div><div style="font-size:.85rem;">Pedido ${p.id}</div></div><button class="btn btn-sm" style="background:rgba(255,255,255,.25);color:#fff;border-radius:20px;margin-left:8px;" onclick="this.parentElement.remove()">OK</button>`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 7000);
+    }
+  }
+}
+
+/* ---------- CHAT ---------- */
+function chatAdd(text, who){
+  const c = document.getElementById('chatMessages');
+  if (!c) return;
+  const el = document.createElement('div');
+  el.className = `ai-msg ${who==='user'?'user':''}`;
+  el.innerHTML = `<div class="ai-avatar ${who==='user'?'user':''}" style="${who==='staff'?'background:var(--info);':''}"><i class="fas ${who==='user'?'fa-user':who==='staff'?'fa-user-tie':'fa-robot'}"></i></div><div class="ai-bubble">${text}</div>`;
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+}
+
+/* ---------- KITCHSYNC AI (Cliente) ---------- */
+function bindAI(){
+  const send = () => {
+    const inp = document.getElementById('aiInput');
+    const q = inp.value.trim();
+    if (!q) return;
+    aiAdd(q,'user'); inp.value='';
+    setTimeout(() => aiAdd(aiAnswer(q),'ai'), 500);
+  };
+  document.getElementById('aiSend')?.addEventListener('click', send);
+  document.getElementById('aiInput')?.addEventListener('keydown', e => { if (e.key==='Enter') send(); });
+  document.querySelectorAll('.ai-suggest').forEach(s => s.addEventListener('click', () => {
+    const q = s.dataset.q;
+    aiAdd(q,'user');
+    setTimeout(() => aiAdd(aiAnswer(q),'ai'), 500);
+  }));
+}
+function aiAdd(text, who){
+  const c = document.getElementById('aiMessages');
+  if (!c) return;
+  const el = document.createElement('div');
+  el.className = `ai-msg ${who==='user'?'user':''}`;
+  el.innerHTML = `<div class="ai-avatar ${who==='user'?'user':''}"><i class="fas ${who==='user'?'fa-user':'fa-robot'}"></i></div><div class="ai-bubble">${text}</div>`;
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+}
+function aiAnswer(q){
+  const l = q.toLowerCase();
+  const disp = DB.pratos.filter(p => p.disponivel);
+  if (l.includes('picante') || l.includes('sem picante')) {
+    const opts = disp.filter(p => !p.tags.includes('picante'));
+    return `Encontrei <strong>${opts.length} opções disponíveis sem picante</strong>:<br>${opts.slice(0,5).map(p=>`• <strong>${p.nome}</strong> — ${formatKz(p.preco)}`).join('<br>')}`;
+  }
+  if (l.includes('rápido') || l.includes('rapido')) {
+    const opts = [...disp].sort((a,b)=>a.tempo-b.tempo).slice(0,4);
+    return `Entre os pratos disponíveis, os mais rápidos são:<br>${opts.map(p=>`• <strong>${p.nome}</strong> — ~${p.tempo} min`).join('<br>')}`;
+  }
+  if (l.includes('leve')) {
+    const opts = disp.filter(p => p.tags.includes('leve'));
+    return `Opções leves disponíveis:<br>${opts.map(p=>`• <strong>${p.nome}</strong> — ${formatKz(p.preco)}`).join('<br>')}`;
+  }
+  if (l.includes('económico') || l.includes('economico') || l.includes('barato')) {
+    const opts = [...disp].sort((a,b)=>a.preco-b.preco).slice(0,4);
+    return `Opções mais económicas disponíveis:<br>${opts.map(p=>`• <strong>${p.nome}</strong> — ${formatKz(p.preco)}`).join('<br>')}`;
+  }
+  if (l.includes('mais pedido') || l.includes('popular')) {
+    const opts = [...disp].sort((a,b)=>b.pedidos-a.pedidos).slice(0,4);
+    return `Os mais pedidos agora:<br>${opts.map(p=>`• <strong>${p.nome}</strong> — ${p.pedidos} pedidos ⭐ ${p.rating}`).join('<br>')}`;
+  }
+  return `Posso ajudar a escolher entre os pratos disponíveis. Diga-me se procura algo <strong>leve, rápido, económico ou sem picante</strong>.`;
+}
+
+/* ---------- MODAL GENÉRICO ---------- */
+let dynamicModalInstance = null;
+function openModal(title, body, onConfirm, confirmLabel='Fechar'){
+  document.getElementById('dynamicModalTitle').textContent = title;
+  document.getElementById('dynamicModalBody').innerHTML = body;
+  document.getElementById('dynamicModalConfirm').textContent = confirmLabel;
+  const btn = document.getElementById('dynamicModalConfirm');
+  const nb = btn.cloneNode(true);
+  btn.parentNode.replaceChild(nb, btn);
+  nb.addEventListener('click', () => { if (onConfirm && onConfirm()===false) return; dynamicModalInstance.hide(); });
+  dynamicModalInstance = new bootstrap.Modal(document.getElementById('dynamicModal'));
+  dynamicModalInstance.show();
+}
+
+/* ---------- SESSÃO / TEMA / ONLINE / NOTIF / PROFILE / COMMAND ---------- */
+let sessionSeconds = 15*60, sessionInterval, sessionModalShown = false;
+const timerText = document.getElementById('timerText');
+const sessionModal = new bootstrap.Modal(document.getElementById('sessionModal'));
+function formatTime(s){ return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+function startSessionTimer(){
+  clearInterval(sessionInterval);
+  sessionInterval = setInterval(() => {
+    if (sessionSeconds <= 0){ clearInterval(sessionInterval); window.location.href='408.html'; return; }
+    sessionSeconds--; timerText.textContent = formatTime(sessionSeconds);
+    if (sessionSeconds === 120 && !sessionModalShown){ sessionModalShown=true; sessionModal.show(); }
+  },1000);
+}
+function resetSessionTimer(){
+  sessionSeconds = 15*60; timerText.textContent = formatTime(sessionSeconds);
+  sessionModalShown = false; if (sessionModal) sessionModal.hide();
+  startSessionTimer();
+}
+document.getElementById('continueSessionBtn').addEventListener('click', () => { sessionModal.hide(); resetSessionTimer(); });
+document.getElementById('endSessionBtn').addEventListener('click', () => { sessionModal.hide(); clearInterval(sessionInterval); Toast.show('Sessão encerrada','warning'); });
+document.addEventListener('click', () => resetSessionTimer());
+
+const themeToggle = document.getElementById('themeToggle');
+if ((localStorage.getItem('lugac_theme')||'light') === 'dark') document.body.classList.add('dark');
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const d = document.body.classList.contains('dark');
+  localStorage.setItem('lugac_theme', d?'dark':'light');
+  themeToggle.innerHTML = d ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+});
+
+const sidebar = document.getElementById('sidebar');
+document.getElementById('toggleSidebar').addEventListener('click', function(){
+  sidebar.classList.toggle('collapsed');
+  this.innerHTML = sidebar.classList.contains('collapsed') ? '<i class="fas fa-chevron-right"></i> <span>Expandir</span>' : '<i class="fas fa-chevron-left"></i> <span>Compactar</span>';
+});
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => sidebar.classList.toggle('mobile-open'));
+
+function updateConn(){
+  const b = document.getElementById('connectionBadge');
+  if (navigator.onLine){ b.className='connection-badge online'; b.innerHTML='<i class="fas fa-circle"></i> <span>Online</span>'; }
+  else { b.className='connection-badge offline'; b.innerHTML='<i class="fas fa-circle"></i> <span>Offline — Dados locais</span>'; }
+}
+window.addEventListener('online', updateConn); window.addEventListener('offline', updateConn); updateConn();
+
+// CART
+document.getElementById('cartBtn').addEventListener('click', openCart);
+document.getElementById('closeCart').addEventListener('click', closeCart);
+
+const notifModal = new bootstrap.Modal(document.getElementById('notifModal'));
+document.getElementById('notifBtn').addEventListener('click', () => {
+  document.getElementById('notifModalBody').innerHTML = DB.notificacoes.map(n => `
+    <div class="d-flex align-items-start gap-3 py-2" style="border-bottom:1px solid var(--border-light);">
+      <i class="fas ${n.icon} mt-1" style="color:var(--${n.color});"></i>
+      <div><div class="fw-bold">${n.titulo}</div><div class="small text-secondary">${n.detalhe}</div><small class="text-secondary">${n.hora}</small></div>
+    </div>
+  `).join('');
+  notifModal.show();
+});
+
+const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+document.getElementById('profileBtn').addEventListener('click', () => profileModal.show());
+document.getElementById('userProfileSidebar').addEventListener('click', () => profileModal.show());
+
+const commandModal = new bootstrap.Modal(document.getElementById('commandModal'));
+document.getElementById('commandBtn').addEventListener('click', () => {
+  document.getElementById('commandModalBody').innerHTML = `
+    <div class="profile-menu-item" onclick="Command.go('menu')"><i class="fas fa-book-open"></i><div><div class="fw-bold">📖 Ver Menu</div><small class="text-secondary">Todos os pratos disponíveis</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('pedido')"><i class="fas fa-receipt"></i><div><div class="fw-bold">📋 O Meu Pedido</div><small class="text-secondary">Acompanhar em tempo real</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('comunicar')"><i class="fas fa-comments"></i><div><div class="fw-bold">💬 Comunicar</div><small class="text-secondary">Falar com o atendimento</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('historico')"><i class="fas fa-clock-rotate-left"></i><div><div class="fw-bold">📜 Histórico</div><small class="text-secondary">Pedidos anteriores</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('ai')"><i class="fas fa-robot"></i><div><div class="fw-bold">🤖 Assistente</div><small class="text-secondary">Sugestões personalizadas</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('qr')"><i class="fas fa-qrcode"></i><div><div class="fw-bold">📷 QR / Mesa</div><small class="text-secondary">Identificar a sua mesa</small></div></div>
+  `;
+  commandModal.show();
+});
+window.Command = { go: (id) => { commandModal.hide(); setTimeout(()=>openTab(id),200); } };
+
+/* ---------- INICIALIZAÇÃO ---------- */
+updateCartBadge();
+renderSidebar(); renderTabs(); activateTab('descobrir'); startSessionTimer();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>LUGAC | Criar Conta</title>
+    <!-- Bootstrap 5 + Icons + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ========== TEMA CLARO ========== */
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0.50);
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+            --text-primary: #1a2e2a;
+            --text-secondary: #4a6a5e;
+            --text-light: #ffffff;
+            --input-bg: #f7faf9;
+            --input-border: #dce5e2;
+            --input-focus: #2b7a4b;
+            --accent-green: #2b7a4b;
+            --accent-hover: #1e5a3a;
+            --accent-gradient: linear-gradient(135deg, #2b7a4b 0%, #1e5a3a 100%);
+            --progress-weak: #e53e3e;
+            --progress-medium: #ed8936;
+            --progress-strong: #2b7a4b;
+            --error-bg: #fee2e2;
+            --error-text: #b91c1c;
+            --card-radius: 24px;
+            --input-radius: 12px;
+        }
+
+        /* ========== TEMA ESCURO ========== */
+        body.dark {
+            --bg-overlay: rgba(0, 0, 0, 0.70);
+            --glass-bg: rgba(20, 30, 28, 0.88);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            --text-primary: #eef4f0;
+            --text-secondary: #b8d0c2;
+            --input-bg: #2a3c36;
+            --input-border: #3a4f48;
+            --input-focus: #4c9f70;
+            --accent-green: #4c9f70;
+            --accent-hover: #6bb886;
+            --accent-gradient: linear-gradient(135deg, #4c9f70 0%, #2b7a4b 100%);
+            --error-bg: #3b1e1e;
+            --error-text: #fca5a5;
+        }
+
+        /* ========== WRAPPER ========== */
+        .register-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-image: url('images/cadastro.lugac.jpg');
+            background-position: center 30%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .register-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay);
+            z-index: 0;
+        }
+
+        /* ========== SLOGAN ========== */
+        .slogan-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+            padding: 0 2rem;
+            max-width: 650px;
+            pointer-events: none;
+        }
+
+        .slogan-overlay  {
+            max-height: 60px;
+            width: auto;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4));
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo-slogan{
+            width: 200px;
+            height: 200px;
+        }
+
+        .slogan-overlay h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .slogan-overlay p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            margin-bottom: 0;
+        }
+
+        /* ========== PAINEL PRINCIPAL ========== */
+        .form-panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .register-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: var(--card-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 2.5rem 2.5rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        /* ========== HEADER ========== */
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-header-custom .brand-icon {
+            font-size: 2.6rem;
+            color: var(--accent-green);
+            display: inline-block;
+            
+            padding: 0.6rem;
+            border-radius: 90px;
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .card-header-custom .brand-icon {
+         
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .card-header-custom p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* ========== AÇÕES SUPERIORES ========== */
+        .top-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-btn {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: 0.2s;
+            padding: 0.35rem 0.5rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+        }
+
+        body.dark .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+            color: var(--text-light);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.08);
+            background: rgba(43, 122, 75, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        body.dark .action-btn:hover {
+            background: rgba(76, 159, 112, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .dropdown-menu-custom {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.4rem;
+            min-width: 160px;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(43, 122, 75, 0.1);
+            color: var(--accent-green);
+        }
+
+        body.dark .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        /* ========== FORMULÁRIO ========== */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .input-group-custom {
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: var(--input-radius);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(43, 122, 75, 0.12);
+        }
+
+        body.dark .input-group-custom:focus-within {
+            box-shadow: 0 0 0 4px rgba(76, 159, 112, 0.15);
+        }
+
+        .form-control {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            border-radius: var(--input-radius);
+            flex: 1;
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #a0b8b0;
+        }
+
+        body.dark .form-control::placeholder {
+            color: #6a8a7e;
+        }
+
+        .form-control:focus {
+            background: transparent;
+            box-shadow: none;
+            border-color: transparent;
+            color: var(--text-primary);
+        }
+
+        .form-control[readonly] {
+            opacity: 0.85;
+            cursor: default;
+        }
+
+        .password-toggle-icon {
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0 1rem;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .password-toggle-icon:hover {
+            color: var(--accent-green);
+        }
+
+        /* ========== BARRA DE FORÇA ========== */
+        .strength-wrapper {
+            margin-top: 0.5rem;
+        }
+
+        .progress {
+            height: 4px;
+            border-radius: 8px;
+            background-color: var(--input-border);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* ========== BOTÃO REGISTO ========== */
+        .btn-register {
+            background: var(--accent-gradient);
+            border: none;
+            padding: 0.85rem;
+            font-weight: 700;
+            border-radius: var(--input-radius);
+            font-size: 1rem;
+            transition: 0.3s ease;
+            color: #ffffff;
+            box-shadow: 0 6px 24px rgba(43, 122, 75, 0.25);
+            letter-spacing: 0.3px;
+            width: 100%;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px rgba(43, 122, 75, 0.35);
+        }
+
+        .btn-register:active {
+            transform: translateY(0px);
+        }
+
+        body.dark .btn-register {
+            box-shadow: 0 6px 24px rgba(76, 159, 112, 0.2);
+        }
+
+        body.dark .btn-register:hover {
+            box-shadow: 0 10px 32px rgba(76, 159, 112, 0.3);
+        }
+
+        /* ========== BOTÃO VOLTAR ========== */
+        .btn-outline-back {
+            border-radius: var(--input-radius);
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid var(--input-border);
+            background: transparent;
+            color: var(--text-secondary);
+            transition: 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        .btn-outline-back:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(43, 122, 75, 0.05);
+            transform: translateY(-1px);
+        }
+
+        body.dark .btn-outline-back:hover {
+            background: rgba(76, 159, 112, 0.08);
+        }
+
+        /* ========== VALIDAÇÕES E ERROS ========== */
+        .invalid-feedback-custom {
+            font-size: 0.7rem;
+            color: var(--error-text);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ========== TOAST ========== */
+        .toast-custom {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1090;
+            min-width: 280px;
+            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-left: 5px solid var(--accent-green);
+            box-shadow: var(--glass-shadow);
+            padding: 1rem 1.25rem;
+        }
+
+        .toast-custom .toast-body {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .toast-custom .btn-close {
+            filter: var(--text-primary) === '#ffffff' ? 'invert(1)' : 'invert(0.4)';
+        }
+
+        body.dark .toast-custom .btn-close {
+            filter: invert(1);
+        }
+
+        .text-muted-custom {
+            font-size: 0.7rem;
+            color: var(--text-secondary) !important;
+            opacity: 0.8;
+        }
+
+        /* ========== AUTOCOMPLETE ========== */
+        .email-auto-fill {
+            color: var(--accent-green);
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.3rem 0.75rem;
+            background: rgba(43, 122, 75, 0.08);
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.25rem;
+            opacity: 0.9;
+        }
+
+        body.dark .email-auto-fill {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        /* ========== RESPONSIVIDADE ========== */
+        @media (max-width: 576px) {
+            .register-wrapper {
+                padding: 1rem;
+                background-position: center 50%;
+            }
+
+            .register-card {
+                padding: 1.75rem 1.25rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .card-header-custom h2 {
+                font-size: 1.35rem;
+            }
+
+            .card-header-custom .brand-icon {
+                font-size: 2.2rem;
+                padding: 0.5rem;
+            }
+
+            .top-actions {
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+            }
+
+            .slogan-overlay {
+                bottom: 20px;
+                padding: 0 1rem;
+                max-width: 90%;
+            }
+
+            .slogan-overlay h2 {
+                font-size: 1.2rem;
+            }
+
+            .slogan-overlay p {
+                font-size: 0.75rem;
+            }
+
+            .slogan-overlay .logo-slogan {
+                max-height: 40px;
+            }
+
+            .form-control {
+                font-size: 0.9rem;
+                padding: 0.65rem 0.85rem;
+            }
+
+            .toast-custom {
+                left: 15px;
+                right: 15px;
+                min-width: auto;
+                bottom: 15px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .register-card {
+                padding: 1.25rem 1rem;
+            }
+        }
+
+        /* ========== ANIMAÇÃO ========== */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-card {
+            animation: fadeSlideUp 0.6s ease forwards;
+        }
+
+        .slogan-overlay {
+            animation: fadeSlideUp 0.8s ease 0.2s both;
+        }
+        
+        .logo-slogan1{
+            width:  50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-wrapper">
+    
+
+    <!-- PAINEL PRINCIPAL -->
+    <div class="form-panel">
+        <div class="register-card">
+            <!-- AÇÕES SUPERIORES -->
+            <div class="top-actions">
+                <button id="themeToggleBtn" class="action-btn" aria-label="Alternar tema">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="action-btn dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-globe2"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="langDropdown">
+                        <li><a class="dropdown-item lang-option" data-lang="pt" href="#">🇵🇹 Português</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="en" href="#">🇬🇧 English</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="es" href="#">🇪🇸 Español</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <div class="card-header-custom">
+                <div class="brand-icon">
+                    <a href="index.html">
+                        <img class="logo-slogan" src="images/lugac-logo.png" alt="LUGAC">
+                    </a>
+                </div>
+                <h2 id="registerTitle">Criar nova conta</h2>
+                <p id="registerSubtitle">Preencha os dados para começar</p>
+            </div>
+
+            <!-- FORMULÁRIO -->
+            <form id="registerForm" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" id="nameLabel">Nome completo</label>
+                    <div class="input-group-custom">
+                        <input type="text" class="form-control" id="fullNameInput" 
+                               placeholder="Ex: Luisa Catendo" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="nameError"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" id="emailLabel">E-mail institucional</label>
+                    <div class="input-group-custom">
+                        <input type="email" class="form-control" id="emailInput" 
+                               placeholder="username.lugac.ao" required readonly>
+                    </div>
+                    <div id="emailAutoFill" class="email-auto-fill">
+                        <i class="bi bi-arrow-right-circle me-1"></i> 
+                        <span id="emailStatus">Aguardando nome...</span>
+                    </div>
+                    <div class="invalid-feedback-custom" id="emailError"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" id="passwordLabel">Senha</label>
+                    <div class="input-group-custom">
+                        <input type="password" class="form-control" id="passwordInput" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle-icon" id="togglePasswordBtn" tabindex="-1">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
+                    <div class="strength-wrapper">
+                        <div class="progress">
+                            <div id="strengthBar" class="progress-bar" style="width: 0%; background-color: var(--progress-weak);"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">Força: —</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" id="confirmLabel">Confirmar senha</label>
+                    <div class="input-group-custom">
+                        <input type="password" class="form-control" id="confirmPasswordInput" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle-icon" id="toggleConfirmBtn" tabindex="-1">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
+                    <div class="invalid-feedback-custom" id="confirmError"></div>
+                </div>
+
+                <button type="submit" class="btn-register mb-3" id="registerBtn">
+                    <span id="btnText">Criar conta</span>
+                    <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+
+                <a href="login.html" class="btn-outline-back">
+                    <i class="bi bi-arrow-left"></i> Voltar para o login
+                </a>
+            </form>
+
+            <div class="text-center mt-3">
+                <small class="text-muted-custom" id="demoNote">🔐 O email é gerado automaticamente no formato: usuario.vitalinka.ao</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-custom d-none" id="notificationToast" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-check-circle-fill me-2" style="color: var(--accent-green); font-size: 1.4rem;"></i>
+        <div class="toast-body p-0" id="toastMessage"></div>
+        <button type="button" class="btn-close ms-auto" id="closeToast" aria-label="Close"></button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============================================================
+    //  TRADUÇÕES
+    // ============================================================
+    const translations = {
+        pt: {
+            registerTitle: "Criar nova conta",
+            registerSubtitle: "Preencha os dados para começar",
+            nameLabel: "Nome completo",
+            emailLabel: "E-mail institucional",
+            passwordLabel: "Senha",
+            confirmLabel: "Confirmar senha",
+            btnText: "Criar conta",
+            demoNote: "🔐 O email é gerado automaticamente no formato: usuario.lugac.ao",
+            strengthPlaceholder: "Força: —",
+            weak: "Fraca",
+            medium: "Média",
+            strong: "Forte",
+            nameRequired: "Nome é obrigatório",
+            emailRequired: "E-mail é obrigatório",
+            emailInvalid: "Formato de e-mail inválido",
+            passwordRequired: "Senha é obrigatória",
+            passwordWeak: "A senha deve ter força Mínima: Média (use letras maiúsculas, números ou símbolos)",
+            confirmMismatch: "As senhas não coincidem",
+            successMsg: "✅ Conta criada com sucesso! Redirecionando para o login...",
+            errorMsg: "❌ Erro no registo. Verifique os campos e tente novamente.",
+            waitingName: "Aguardando nome...",
+            generatingEmail: "Gerando email...",
+            emailGenerated: "Email gerado automaticamente"
+        },
+        en: {
+            registerTitle: "Create new account",
+            registerSubtitle: "Fill in the details to get started",
+            nameLabel: "Full name",
+            emailLabel: "Institutional Email",
+            passwordLabel: "Password",
+            confirmLabel: "Confirm password",
+            btnText: "Sign up",
+            demoNote: "🔐 Email is automatically generated in the format: username.lugac.ao",
+            strengthPlaceholder: "Strength: —",
+            weak: "Weak",
+            medium: "Medium",
+            strong: "Strong",
+            nameRequired: "Name is required",
+            emailRequired: "Email is required",
+            emailInvalid: "Invalid email format",
+            passwordRequired: "Password is required",
+            passwordWeak: "Password strength must be at least Medium (use uppercase, numbers or symbols)",
+            confirmMismatch: "Passwords do not match",
+            successMsg: "✅ Account created successfully! Redirecting to login...",
+            errorMsg: "❌ Registration failed. Check the fields and try again.",
+            waitingName: "Waiting for name...",
+            generatingEmail: "Generating email...",
+            emailGenerated: "Email automatically generated"
+        },
+        es: {
+            registerTitle: "Crear nueva cuenta",
+            registerSubtitle: "Complete los datos para empezar",
+            nameLabel: "Nombre completo",
+            emailLabel: "Correo institucional",
+            passwordLabel: "Contraseña",
+            confirmLabel: "Confirmar contraseña",
+            btnText: "Registrarse",
+            demoNote: "🔐 El correo se genera automáticamente en el formato: usuario.lugac.ao",
+            strengthPlaceholder: "Fortaleza: —",
+            weak: "Débil",
+            medium: "Media",
+            strong: "Fuerte",
+            nameRequired: "El nombre es obligatorio",
+            emailRequired: "El correo es obligatorio",
+            emailInvalid: "Formato de correo inválido",
+            passwordRequired: "La contraseña es obligatoria",
+            passwordWeak: "La contraseña debe tener fuerza mínima: Media (use mayúsculas, números o símbolos)",
+            confirmMismatch: "Las contraseñas no coinciden",
+            successMsg: "✅ ¡Cuenta creada con éxito! Redirigiendo al login...",
+            errorMsg: "❌ Error en el registro. Verifique los campos e intente de nuevo.",
+            waitingName: "Esperando nombre...",
+            generatingEmail: "Generando correo...",
+            emailGenerated: "Correo generado automáticamente"
+        }
+    };
+
+    // ============================================================
+    //  ESTADO GLOBAL
+    // ============================================================
+    let currentLang = localStorage.getItem('vitalinkaLang') || 'pt';
+    let isDark = localStorage.getItem('vitalinkaTheme') === 'dark';
+
+    // ============================================================
+    //  DOM REFS
+    // ============================================================
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const fullNameInput = document.getElementById('fullNameInput');
+    const emailInput = document.getElementById('emailInput');
+    const emailStatus = document.getElementById('emailStatus');
+    const emailAutoFill = document.getElementById('emailAutoFill');
+    const passwordInput = document.getElementById('passwordInput');
+    const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const btnTextSpan = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const toastEl = document.getElementById('notificationToast');
+    const toastMessageSpan = document.getElementById('toastMessage');
+    const closeToastBtn = document.getElementById('closeToast');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const confirmError = document.getElementById('confirmError');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const toggleConfirmBtn = document.getElementById('toggleConfirmBtn');
+
+    const i18nEls = {
+        registerTitle: document.getElementById('registerTitle'),
+        registerSubtitle: document.getElementById('registerSubtitle'),
+        nameLabel: document.getElementById('nameLabel'),
+        emailLabel: document.getElementById('emailLabel'),
+        passwordLabel: document.getElementById('passwordLabel'),
+        confirmLabel: document.getElementById('confirmLabel'),
+        demoNote: document.getElementById('demoNote')
+    };
+
+    // ============================================================
+    //  FUNÇÃO GERAR EMAIL INSTITUCIONAL
+    // ============================================================
+    function generateInstitutionalEmail(name) {
+        if (!name || name.trim().length < 3) {
+            return null;
+        }
+
+        // Limpar e normalizar o nome
+        let cleanName = name.trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .replace(/[^a-z0-9\s.-]/g, '')   // Remove caracteres especiais
+            .replace(/\s+/g, '.');           // Substitui espaços por .
+        
+        // Remove pontos duplicados
+        cleanName = cleanName.replace(/\.+/g, '.');
+        
+        // Remove pontos no início e fim
+        cleanName = cleanName.replace(/^\.|\.$/g, '');
+        
+        // Se ficou vazio ou muito curto, retorna null
+        if (!cleanName || cleanName.length < 3) {
+            return null;
+        }
+
+        // Gera o email no formato: username.vitalinka.ao
+        return `${cleanName}@lugac.ao`;
+    }
+
+    function updateEmailField(name) {
+        const t = translations[currentLang];
+        
+        if (!name || name.trim().length < 3) {
+            emailInput.value = '';
+            emailInput.placeholder = 'username.lugac.ao';
+            emailStatus.textContent = t.waitingName || 'Aguardando nome...';
+            emailAutoFill.style.opacity = '0.7';
+            return;
+        }
+
+        const email = generateInstitutionalEmail(name);
+        if (email) {
+            emailInput.value = email;
+            emailInput.placeholder = email;
+            emailStatus.textContent = t.emailGenerated || 'Email gerado automaticamente';
+            emailAutoFill.style.opacity = '1';
+            // Valida o email automaticamente
+            validateEmail();
+        } else {
+            emailInput.value = '';
+            emailInput.placeholder = 'username.lugac.ao';
+            emailStatus.textContent = t.generatingEmail || 'Gerando email...';
+            emailAutoFill.style.opacity = '0.7';
+        }
+    }
+
+    // ============================================================
+    //  FUNÇÕES DE IDIOMA
+    // ============================================================
+    function applyLanguage() {
+        const t = translations[currentLang];
+        if (i18nEls.registerTitle) i18nEls.registerTitle.innerText = t.registerTitle;
+        if (i18nEls.registerSubtitle) i18nEls.registerSubtitle.innerText = t.registerSubtitle;
+        if (i18nEls.nameLabel) i18nEls.nameLabel.innerText = t.nameLabel;
+        if (i18nEls.emailLabel) i18nEls.emailLabel.innerText = t.emailLabel;
+        if (i18nEls.passwordLabel) i18nEls.passwordLabel.innerText = t.passwordLabel;
+        if (i18nEls.confirmLabel) i18nEls.confirmLabel.innerText = t.confirmLabel;
+        if (i18nEls.demoNote) i18nEls.demoNote.innerText = t.demoNote;
+        if (btnTextSpan) btnTextSpan.innerText = t.btnText;
+        updateStrengthTextAndBar();
+        validateAllFields();
+        // Atualiza o status do email com o novo idioma
+        updateEmailField(fullNameInput.value.trim());
+    }
+
+    // ============================================================
+    //  FUNÇÕES DE FORÇA DE SENHA
+    // ============================================================
+    function checkPasswordStrength(password) {
+        let score = 0;
+        if (!password) return { score: 0, level: 'weak' };
+        if (password.length >= 6) score++;
+        if (password.length >= 10) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        let level = 'weak';
+        if (score >= 4) level = 'strong';
+        else if (score >= 2) level = 'medium';
+        return { score: Math.min(100, score * 20), level };
+    }
+
+    function updateStrengthTextAndBar() {
+        const pwd = passwordInput.value;
+        const { score, level } = checkPasswordStrength(pwd);
+        strengthBar.style.width = `${score}%`;
+        const t = translations[currentLang];
+        let levelText = '', color = '';
+        if (level === 'weak') { levelText = t.weak; color = 'var(--progress-weak)'; }
+        else if (level === 'medium') { levelText = t.medium; color = 'var(--progress-medium)'; }
+        else { levelText = t.strong; color = 'var(--progress-strong)'; }
+        strengthText.innerText = pwd ? `Força: ${levelText}` : t.strengthPlaceholder;
+        strengthBar.style.backgroundColor = color;
+        return level;
+    }
+
+    // ============================================================
+    //  VALIDAÇÕES
+    // ============================================================
+    function validateName() {
+        const name = fullNameInput.value.trim();
+        if (!name) {
+            nameError.innerText = translations[currentLang].nameRequired;
+            return false;
+        }
+        nameError.innerText = '';
+        return true;
+    }
+
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        if (!email) {
+            emailError.innerText = translations[currentLang].emailRequired;
+            return false;
+        }
+        // Verifica se o email está no formato correto com domínio vitalinka.ao
+        const emailRegex = /^[^\s@]+@lugac\.ao$/;
+        if (!emailRegex.test(email)) {
+            emailError.innerText = translations[currentLang].emailInvalid + ' (deve terminar com @lugac.ao)';
+            return false;
+        }
+        emailError.innerText = '';
+        return true;
+    }
+
+    function validatePasswordStrength() {
+        const pwd = passwordInput.value;
+        if (!pwd) return false;
+        const level = checkPasswordStrength(pwd).level;
+        return level === 'medium' || level === 'strong';
+    }
+
+    function validateConfirmPassword() {
+        const pwd = passwordInput.value;
+        const confirm = confirmPasswordInput.value;
+        if (!confirm) {
+            confirmError.innerText = "";
+            return false;
+        }
+        if (pwd !== confirm) {
+            confirmError.innerText = translations[currentLang].confirmMismatch;
+            return false;
+        }
+        confirmError.innerText = '';
+        return true;
+    }
+
+    function validateAllFields() {
+        const isNameOk = validateName();
+        const isEmailOk = validateEmail();
+        const isPasswordStrong = validatePasswordStrength();
+        const isConfirmOk = validateConfirmPassword();
+        return isNameOk && isEmailOk && isPasswordStrong && isConfirmOk;
+    }
+
+    // ============================================================
+    //  TOAST
+    // ============================================================
+    function showToast(message, isError = false) {
+        toastMessageSpan.innerText = message;
+        toastEl.classList.remove('d-none');
+        toastEl.style.borderLeftColor = isError ? '#e53e3e' : 'var(--accent-green)';
+        setTimeout(() => toastEl.classList.add('d-none'), 4000);
+    }
+
+    // ============================================================
+    //  SIMULAÇÃO DE REGISTO
+    // ============================================================
+    async function simulateRegistration(email, name) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({ success: true, message: translations[currentLang].successMsg });
+            }, 1200);
+        });
+    }
+
+    // ============================================================
+    //  EVENTOS DO FORMULÁRIO
+    // ============================================================
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const isNameOk = validateName();
+        const isEmailOk = validateEmail();
+        const isPasswordStrong = validatePasswordStrength();
+        const isConfirmOk = validateConfirmPassword();
+
+        if (!isNameOk || !isEmailOk || !isPasswordStrong || !isConfirmOk) {
+            let errorMsg = translations[currentLang].errorMsg;
+            if (!isPasswordStrong) errorMsg = translations[currentLang].passwordWeak;
+            showToast(errorMsg, true);
+            return;
+        }
+
+        btnTextSpan.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        registerBtn.disabled = true;
+
+        const email = emailInput.value.trim();
+        const name = fullNameInput.value.trim();
+        const result = await simulateRegistration(email, name);
+
+        btnTextSpan.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        registerBtn.disabled = false;
+
+        showToast(result.message, !result.success);
+        if (result.success) {
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 2000);
+        }
+    });
+
+    // ============================================================
+    //  EVENTOS DE INPUT
+    // ============================================================
+    fullNameInput.addEventListener('input', function() {
+        validateName();
+        // Gera o email automaticamente baseado no nome
+        const name = this.value.trim();
+        updateEmailField(name);
+        validateEmail();
+        // Atualiza o status visual
+        if (name.length >= 3) {
+            emailAutoFill.style.borderColor = 'var(--accent-green)';
+        } else {
+            emailAutoFill.style.borderColor = 'transparent';
+        }
+    });
+
+    passwordInput.addEventListener('input', () => {
+        updateStrengthTextAndBar();
+        validateConfirmPassword();
+    });
+    confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+
+    // ============================================================
+    //  TEMA
+    // ============================================================
+    function setTheme(enableDark) {
+        if (enableDark) {
+            document.body.classList.add('dark');
+            localStorage.setItem('vitalinkaTheme', 'dark');
+            themeBtn.querySelector('i').className = 'bi bi-sun-fill';
+        } else {
+            document.body.classList.remove('dark');
+            localStorage.setItem('vitalinkaTheme', 'light');
+            themeBtn.querySelector('i').className = 'bi bi-moon-stars';
+        }
+    }
+
+    themeBtn.addEventListener('click', () => {
+        isDark = !isDark;
+        setTheme(isDark);
+    });
+
+    // ============================================================
+    //  IDIOMA
+    // ============================================================
+    document.querySelectorAll('.lang-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentLang = option.getAttribute('data-lang');
+            localStorage.setItem('vitalinkaLang', currentLang);
+            applyLanguage();
+            validateAllFields();
+        });
+    });
+
+    // ============================================================
+    //  MOSTRAR/OCULTAR SENHA
+    // ============================================================
+    togglePasswordBtn.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        const icon = togglePasswordBtn.querySelector('i');
+        icon.className = type === 'text' ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    toggleConfirmBtn.addEventListener('click', () => {
+        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordInput.setAttribute('type', type);
+        const icon = toggleConfirmBtn.querySelector('i');
+        icon.className = type === 'text' ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    // ============================================================
+    //  FECHAR TOAST
+    // ============================================================
+    if (closeToastBtn) {
+        closeToastBtn.addEventListener('click', () => toastEl.classList.add('d-none'));
+    }
+
+    // ============================================================
+    //  INICIALIZAÇÃO
+    // ============================================================
+    setTheme(isDark);
+    applyLanguage();
+    validateAllFields();
+    
+    // Gera email inicial se o campo de nome já tiver valor
+    if (fullNameInput.value.trim().length >= 3) {
+        updateEmailField(fullNameInput.value.trim());
+    }
+</script>
+</body>
+</html>

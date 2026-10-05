@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUGAC–COZINHA | Módulo Gestor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; transition: background-color .2s, border-color .2s; }
+    body { font-family:'Times New Roman', Times, serif; background:var(--bg-body); color:var(--text-primary); overflow-x:hidden; }
+    :root{
+      --bg-body:#f4f7fc; --bg-sidebar:#fff; --bg-card:#fff; --bg-topbar:#fff;
+      --text-primary:#1a2639; --text-secondary:#5e6f8d; --border-light:#e9edf4;
+      --shadow-sm:0 8px 20px rgba(0,0,0,.02),0 4px 8px rgba(0,0,0,.02);
+      --shadow-md:0 12px 30px rgba(0,0,0,.04);
+      --primary:#e65c1e; --primary-soft:#ffefe8; --success:#2b8f5e; --warning:#e6a017;
+      --danger:#d64545; --info:#2c7da0; --gray:#9aa9b9; --purple:#7c3aed;
+      --sidebar-width:280px; --sidebar-collapsed:82px; --radius:20px; --radius-sm:14px;
+    }
+    body.dark{
+      --bg-body:#0e1217; --bg-sidebar:#161c24; --bg-card:#1e2630; --bg-topbar:#161c24;
+      --text-primary:#eef2f8; --text-secondary:#a3b3c9; --border-light:#2a3440;
+      --shadow-sm:0 8px 20px rgba(0,0,0,.4); --shadow-md:0 12px 30px rgba(0,0,0,.5);
+      --primary-soft:#2f221c; --gray:#6b7b8f;
+    }
+    body::before{
+      content:''; position:fixed; inset:0;
+      background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-size:cover; background-position:center; background-attachment:fixed;
+      opacity:.08; z-index:-1; pointer-events:none;
+    }
+    body.dark::before{ opacity:.04; }
+    .app-wrapper{ display:flex; min-height:100vh; }
+    .sidebar{
+      width:var(--sidebar-width); background:var(--bg-sidebar); border-right:1px solid var(--border-light);
+      display:flex; flex-direction:column; transition:width .3s cubic-bezier(.2,.9,.3,1);
+      box-shadow:var(--shadow-sm); z-index:1050; position:relative;
+    }
+    .sidebar.collapsed{ width:var(--sidebar-collapsed); }
+    .sidebar-header{ padding:1.5rem 1rem .8rem; display:flex; flex-direction:column; gap:1.2rem; }
+    .logo-area{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.3rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; }
+    .logo-icon{ width:200px; height:200px; border-radius:90px; 
+      display:flex; align-items:center; justify-content:center; font-size:1.6rem; 
+      flex-shrink:0; 
+      
+    }
+    .logo-text span{ font-weight:400; font-size:.7rem; color:var(--text-secondary); display:block; line-height:1.2; }
+    .user-profile{ display:flex; align-items:center; gap:10px; padding:8px 6px; background:var(--bg-body); border-radius:40px; cursor:pointer; }
+    .user-profile:hover{ background:var(--primary-soft); }
+    .user-avatar{ width:40px; height:40px; border-radius:40px; overflow:hidden; flex-shrink:0; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; }
+    .user-avatar img{ width:100%; height:100%; object-fit:cover; }
+    .user-info{ white-space:nowrap; overflow:hidden; }
+    .user-info h6{ margin:0; font-weight:600; font-size:.9rem; }
+    .user-info small{ font-size:.7rem; color:var(--success); display:flex; align-items:center; gap:4px; }
+    .sidebar.collapsed .user-info, .sidebar.collapsed .logo-text, .sidebar.collapsed .user-profile .user-info{ display:none; }
+    .sidebar.collapsed .user-profile{ justify-content:center; padding:6px; }
+    .sidebar.collapsed .logo-area{ justify-content:center; }
+    .sidebar-nav{ flex:1; overflow-y:auto; padding:1rem .5rem; display:flex; flex-direction:column; gap:4px; }
+    .nav-item{
+      display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px;
+      color:var(--text-secondary); font-weight:500; cursor:pointer; white-space:nowrap;
+      position:relative; border:none; background:transparent; width:100%; text-align:left;
+      font-family:'Times New Roman', Times, serif; font-size:1rem;
+    }
+    .nav-item i{ font-size:1.2rem; width:24px; text-align:center; flex-shrink:0; }
+    .nav-item span{ font-size:.95rem; }
+    .nav-item:hover{ background:var(--primary-soft); color:var(--primary); }
+    .nav-item.active{ background:var(--primary); color:#fff; box-shadow:0 8px 16px rgba(230,92,30,.25); }
+    .nav-item.active i{ color:#fff; }
+    .nav-item .nav-badge{ margin-left:auto; background:var(--danger); color:#fff; font-size:.6rem; padding:2px 7px; border-radius:20px; font-weight:700; }
+    .sidebar.collapsed .nav-item span, .sidebar.collapsed .nav-item .nav-badge{ display:none; }
+    .sidebar.collapsed .nav-item{ justify-content:center; padding:12px 8px; }
+    .sidebar.collapsed .nav-item::after{
+      content:attr(data-title); position:absolute; left:70px; background:var(--bg-card); color:var(--text-primary);
+      padding:6px 14px; border-radius:30px; font-size:.8rem; font-weight:500; white-space:nowrap;
+      box-shadow:var(--shadow-md); border:1px solid var(--border-light); opacity:0; pointer-events:none; z-index:1200;
+    }
+    .sidebar.collapsed .nav-item:hover::after{ opacity:1; }
+    .expand-btn{
+      margin:.5rem 1rem 1rem; padding:8px 12px; border-radius:30px; border:1px solid var(--border-light);
+      background:transparent; color:var(--text-secondary); display:flex; align-items:center; justify-content:center;
+      gap:8px; cursor:pointer; font-family:'Times New Roman', Times, serif; font-size:.9rem;
+    }
+    .expand-btn:hover{ background:var(--primary-soft); color:var(--primary); border-color:var(--primary); }
+    .main-content{ flex:1; display:flex; flex-direction:column; overflow:hidden; background:transparent; }
+    .topbar{
+      background:var(--bg-topbar); border-bottom:1px solid var(--border-light);
+      padding:.8rem 1.5rem; display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; z-index:1040;
+    }
+    .topbar-left{ display:flex; align-items:center; gap:16px; }
+    .topbar-left h5{ margin:0; font-weight:600; font-size:1.1rem; }
+    .breadcrumb{ font-size:.75rem; color:var(--text-secondary); display:flex; gap:6px; }
+    .topbar-right{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .connection-badge{ display:flex; align-items:center; gap:6px; font-size:.8rem; font-weight:500; padding:6px 14px; border-radius:40px; background:var(--bg-body); border:1px solid var(--border-light); }
+    .connection-badge.online i{ color:var(--success); }
+    .connection-badge.offline i{ color:var(--danger); }
+    .session-timer{ display:flex; align-items:center; gap:8px; font-weight:600; background:var(--bg-body); padding:6px 16px; border-radius:40px; border:1px solid var(--border-light); font-size:.9rem; }
+    .session-timer i{ color:var(--primary); }
+    .theme-toggle, .notif-btn, .profile-btn, .command-btn{
+      width:42px; height:42px; border-radius:40px; background:var(--bg-body); border:1px solid var(--border-light);
+      display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-primary); position:relative;
+    }
+    .theme-toggle:hover, .notif-btn:hover, .profile-btn:hover, .command-btn:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    .notif-badge{ position:absolute; top:-2px; right:-2px; background:var(--danger); color:#fff; font-size:.6rem; border-radius:40px; padding:2px 6px; font-weight:700; }
+    .tabs-container{
+      padding:.8rem 1.5rem 0; display:flex; gap:6px; overflow-x:auto;
+      background:var(--bg-topbar); border-bottom:1px solid var(--border-light); scrollbar-width:none;
+    }
+    .tabs-container::-webkit-scrollbar{ display:none; }
+    .tab-item{
+      padding:8px 20px; border-radius:40px 40px 0 0; background:transparent; border:none;
+      color:var(--text-secondary); font-weight:500; font-size:.85rem; display:flex; align-items:center;
+      gap:10px; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+      font-family:'Times New Roman', Times, serif;
+    }
+    .tab-item.active{ background:var(--bg-body); color:var(--primary); border-bottom:2px solid var(--primary); font-weight:600; }
+    .tab-item i{ font-size:.8rem; opacity:.7; }
+    .tab-close{ font-size:.7rem; opacity:.5; margin-left:6px; }
+    .tab-close:hover{ opacity:1; color:var(--danger); }
+    .content-area{ flex:1; padding:1.5rem; overflow-y:auto; background:transparent; }
+    .card{
+      background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius);
+      box-shadow:var(--shadow-sm); padding:1.2rem; height:100%;
+    }
+    .card:hover{ box-shadow:var(--shadow-md); }
+    .stat-value{ font-size:2rem; font-weight:700; line-height:1.2; color:var(--text-primary); }
+    .stat-label{ font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text-secondary); font-weight:600; }
+    .badge-status{ padding:4px 10px; border-radius:40px; font-size:.7rem; font-weight:600; }
+    .badge-green{ background:rgba(43,143,94,.15); color:var(--success); }
+    .badge-yellow{ background:rgba(230,160,23,.15); color:var(--warning); }
+    .badge-red{ background:rgba(214,69,69,.15); color:var(--danger); }
+    .badge-blue{ background:rgba(44,125,160,.15); color:var(--info); }
+    .badge-gray{ background:rgba(154,169,185,.15); color:var(--gray); }
+    .badge-purple{ background:rgba(124,58,237,.15); color:var(--purple); }
+    .order-card{ border-left:6px solid var(--gray); cursor:pointer; margin-bottom:12px; }
+    .order-card.status-new{ border-left-color:var(--info); }
+    .order-card.status-preparing{ border-left-color:var(--warning); }
+    .order-card.status-ready{ border-left-color:var(--success); }
+    .order-card.status-late{ border-left-color:var(--danger); }
+    .timer-badge{ font-family:monospace; background:var(--bg-body); padding:4px 8px; border-radius:20px; font-size:.8rem; font-weight:600; }
+    .ingredient-img{ width:48px; height:48px; border-radius:12px; object-fit:cover; margin-right:12px; border:2px solid var(--border-light); }
+    .text-secondary{ color:var(--text-secondary) !important; }
+    .bg-primary-soft{ background:var(--primary-soft); }
+    .btn-primary{ background:var(--primary); border:none; border-radius:40px; padding:8px 20px; font-weight:500; font-family:'Times New Roman', Times, serif; }
+    .btn-primary:hover{ background:#c94d14; }
+    .btn-outline-secondary{ border-radius:40px; border:1px solid var(--border-light); color:var(--text-primary); font-family:'Times New Roman', Times, serif; }
+    .btn-outline-secondary:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    ::-webkit-scrollbar{ width:5px; height:5px; }
+    ::-webkit-scrollbar-thumb{ background:var(--gray); border-radius:10px; }
+    .hidden{ display:none !important; }
+    .profile-menu-item{
+      display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:14px; cursor:pointer;
+      color:var(--text-primary); border:none; background:transparent; width:100%; text-align:left;
+      font-family:'Times New Roman', Times, serif; font-size:1rem;
+    }
+    .profile-menu-item:hover{ background:var(--primary-soft); color:var(--primary); }
+    .profile-menu-item i{ width:24px; text-align:center; font-size:1.1rem; color:var(--text-secondary); }
+    .profile-menu-item:hover i{ color:var(--primary); }
+    .profile-menu-item.danger:hover{ background:rgba(214,69,69,.1); color:var(--danger); }
+    .profile-menu-item.danger:hover i{ color:var(--danger); }
+    .profile-header{ display:flex; align-items:center; gap:16px; padding:1.5rem; background:var(--primary-soft); border-radius:20px; margin-bottom:1rem; }
+    .profile-header .avatar-lg{ width:64px; height:64px; border-radius:60px; overflow:hidden; border:3px solid var(--primary); flex-shrink:0; }
+    .profile-header .avatar-lg img{ width:100%; height:100%; object-fit:cover; }
+    .empty-state{ text-align:center; padding:3rem 1rem; color:var(--text-secondary); }
+    .empty-state i{ font-size:3rem; margin-bottom:1rem; opacity:.4; }
+    .attention-card{ cursor:pointer; border-left:5px solid; }
+    .attention-card.critical{ border-left-color:var(--danger); }
+    .attention-card.validity{ border-left-color:var(--warning); }
+    .attention-card.replenish{ border-left-color:var(--info); }
+    .attention-card.inventory{ border-left-color:var(--primary); }
+    .quick-action{
+      display:flex; flex-direction:column; align-items:center; gap:8px; padding:16px 8px;
+      border-radius:14px; background:var(--bg-card); border:1px solid var(--border-light);
+      cursor:pointer; text-align:center; font-size:.8rem; font-weight:600; color:var(--text-primary);
+    }
+    .quick-action:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); transform:translateY(-2px); }
+    .quick-action i{ font-size:1.5rem; color:var(--primary); }
+    .timeline-item{ display:flex; gap:14px; padding:12px 0; border-bottom:1px solid var(--border-light); }
+    .timeline-icon{ width:36px; height:36px; border-radius:40px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .modal-inner-tab{ padding:6px 14px; border-radius:20px; background:var(--bg-body); border:1px solid var(--border-light); cursor:pointer; font-size:.8rem; font-weight:500; }
+    .modal-inner-tab.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    .health-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-radius:12px; background:var(--bg-body); margin-bottom:8px; }
+    .health-dot{ width:14px; height:14px; border-radius:50%; }
+    .health-green{ background:var(--success); }
+    .health-yellow{ background:var(--warning); }
+    .health-red{ background:var(--danger); }
+    /* Cockpit */
+    .cockpit-card{
+      background:linear-gradient(135deg, var(--primary) 0%, #c94d14 100%);
+      color:#fff; border-radius:var(--radius); padding:1.5rem; border:none;
+    }
+    .cockpit-card h5{ color:#fff; }
+    .cockpit-card .btn{ background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:30px; }
+    .cockpit-card .btn:hover{ background:rgba(255,255,255,.35); }
+    /* AI Chat */
+    .ai-chat{ display:flex; flex-direction:column; height:500px; }
+    .ai-messages{ flex:1; overflow-y:auto; padding:1rem; background:var(--bg-body); border-radius:var(--radius-sm); margin-bottom:12px; }
+    .ai-msg{ margin-bottom:12px; display:flex; gap:10px; }
+    .ai-msg.user{ flex-direction:row-reverse; }
+    .ai-avatar{ width:36px; height:36px; border-radius:40px; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ai-avatar.user{ background:var(--primary); }
+    .ai-bubble{ background:var(--bg-card); padding:10px 14px; border-radius:14px; max-width:75%; border:1px solid var(--border-light); }
+    .ai-msg.user .ai-bubble{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    .ai-suggestions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .ai-suggest{ padding:5px 12px; border-radius:20px; background:var(--bg-body); border:1px solid var(--border-light); font-size:.8rem; cursor:pointer; }
+    .ai-suggest:hover{ background:var(--primary-soft); border-color:var(--primary); color:var(--primary); }
+    /* Decision center */
+    .decision-item{ display:flex; gap:14px; padding:14px; border-radius:14px; background:var(--bg-card); border:1px solid var(--border-light); margin-bottom:10px; align-items:center; }
+    .decision-num{ width:32px; height:32px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+    /* Bar chart */
+    .bar-row{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+    .bar-label{ width:120px; font-weight:600; font-size:.9rem; }
+    .bar-track{ flex:1; height:26px; background:var(--bg-body); border-radius:8px; overflow:hidden; }
+    .bar-fill{ height:100%; background:linear-gradient(90deg, var(--primary), #f59e0b); display:flex; align-items:center; padding-left:8px; color:#fff; font-weight:600; font-size:.8rem; }
+    @media (max-width:992px){
+      .sidebar{ width:var(--sidebar-collapsed); }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span{ display:none; }
+      .sidebar .nav-item{ justify-content:center; }
+      .sidebar .nav-item::after{ display:none; }
+      .sidebar .user-profile{ justify-content:center; }
+      .sidebar .logo-area{ justify-content:center; }
+    }
+    @media (max-width:768px){
+      .sidebar{ position:fixed; left:-100%; width:280px; height:100vh; transition:left .3s ease; }
+      .sidebar.mobile-open{ left:0; }
+      .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span{ display:block; }
+      .sidebar .nav-item{ justify-content:flex-start; }
+      .sidebar .user-profile{ justify-content:flex-start; }
+      .sidebar .logo-area{ justify-content:flex-start; }
+      .sidebar .nav-item::after{ display:none; }
+      .content-area{ padding:1rem; }
+      .topbar{ padding:.6rem 1rem; }
+    }
+    .toast-container{ position:fixed; top:80px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+    .toast-custom{
+      background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+      padding:12px 18px; box-shadow:var(--shadow-md); display:flex; align-items:center; gap:12px;
+      min-width:280px; animation:slideIn .3s ease;
+    }
+    @keyframes slideIn{ from{ transform:translateX(100%); opacity:0; } to{ transform:translateX(0); opacity:1; } }
+    .toast-custom.success{ border-left:4px solid var(--success); }
+    .toast-custom.error{ border-left:4px solid var(--danger); }
+    .toast-custom.warning{ border-left:4px solid var(--warning); }
+    .toast-custom.info{ border-left:4px solid var(--info); }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <a href="login.html">
+          <img src="images/lugac-logo.png" class="logo-icon" />
+        </a>
+      </div>
+      <div class="user-profile" id="userProfileSidebar">
+        <div class="user-avatar">
+          <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Gestor">
+        </div>
+        <div class="user-info">
+          <h6>António Diogo</h6>
+          <small><i class="fas fa-circle" style="font-size:.5rem;color:var(--success);"></i> Gestor Online</small>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <button class="expand-btn" id="toggleSidebar"><i class="fas fa-chevron-left"></i> <span>Expandir</span></button>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn btn-outline-secondary d-md-none" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+        <h5 id="pageTitle">Cockpit do Gestor</h5>
+        <div class="breadcrumb" id="breadcrumb">Início / Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="connection-badge online" id="connectionBadge"><i class="fas fa-circle"></i> <span>Online</span></div>
+        <div class="session-timer"><i class="fas fa-hourglass-half"></i> <span id="timerText">15:00</span></div>
+        <button class="command-btn" id="commandBtn" title="Command Center"><i class="fas fa-bolt"></i></button>
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema"><i class="fas fa-moon"></i></button>
+        <button class="notif-btn" id="notifBtn"><i class="fas fa-bell"></i><span class="notif-badge" id="notifCount">5</span></button>
+        <button class="profile-btn" id="profileBtn"><i class="fas fa-user"></i></button>
+      </div>
+    </header>
+
+    <div class="tabs-container" id="tabsContainer"></div>
+    <div class="content-area" id="contentArea"></div>
+  </div>
+</div>
+
+<!-- MODAL SESSÃO -->
+<div class="modal fade" id="sessionModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3" style="border-radius:30px;border:none;background:var(--bg-card);">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-hourglass-end me-2 text-warning"></i>Sessão prestes a terminar</h5></div>
+      <div class="modal-body">A sua sessão irá terminar em breve. Deseja continuar a trabalhar?</div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" id="endSessionBtn">Encerrar Sessão</button>
+        <button class="btn btn-primary" id="continueSessionBtn">Continuar Sessão</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DINÂMICO -->
+<div class="modal fade" id="dynamicModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="dynamicModalTitle">Modal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="dynamicModalBody"></div>
+      <div class="modal-footer border-0" id="dynamicModalFooter">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="dynamicModalConfirm">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="modal fade" id="profileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-circle me-2" style="color:var(--primary);"></i>Perfil do Gestor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-0">
+        <div class="profile-header">
+          <div class="avatar-lg"><img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Gestor"></div>
+          <div>
+            <h5 class="fw-bold mb-0">António Diogo</h5>
+            <p class="text-secondary mb-1">Gestor Geral</p>
+            <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i> Online</span>
+          </div>
+        </div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Meu Perfil...','info')"><i class="fas fa-id-card"></i><div><div class="fw-bold">Meu Perfil</div><small class="text-secondary">Ver e editar informações</small></div></div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Estado da Sessão...','info')"><i class="fas fa-signal"></i><div><div class="fw-bold">Estado da Sessão</div><small class="text-secondary">Tempo restante e atividade</small></div></div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Atividade...','info')"><i class="fas fa-history"></i><div><div class="fw-bold">Atividade</div><small class="text-secondary">Últimas ações realizadas</small></div></div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Permissões...','info')"><i class="fas fa-shield-halved"></i><div><div class="fw-bold">Permissões (RBAC)</div><small class="text-secondary">Consultar acessos e autorizações</small></div></div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Definições...','info')"><i class="fas fa-cog"></i><div><div class="fw-bold">Definições</div><small class="text-secondary">Preferências do sistema</small></div></div>
+        <div class="profile-menu-item" onclick="Toast.show('A abrir Ajuda...','info')"><i class="fas fa-question-circle"></i><div><div class="fw-bold">Ajuda & Suporte</div><small class="text-secondary">FAQ e contacto</small></div></div>
+        <hr class="my-2" style="border-color:var(--border-light);">
+        <div class="profile-menu-item danger" 
+             onclick="Toast.show('Sessão terminada. A redirecionar...','warning')">
+          <i class="fas fa-sign-out-alt"></i><div>
+          <div class="fw-bold">
+             <a href="logout.html" >
+               Terminar Sessão
+            </a>
+          </div><small class="text-secondary">Sair da conta atual</small></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTIFICAÇÕES -->
+<div class="modal fade" id="notifModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-bell me-2" style="color:var(--primary);"></i>Alertas do Gestor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="notifModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMMAND CENTER -->
+<div class="modal fade" id="commandModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:30px;background:var(--bg-card);border:none;">
+      <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fas fa-bolt me-2" style="color:var(--primary);"></i>O que pretende fazer?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body" id="commandModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ---------- STORAGE ---------- */
+const StorageService = {
+  get(k,f){ try{ return JSON.parse(localStorage.getItem(k)) ?? f; }catch(e){ return f; } },
+  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+};
+
+/* ---------- TOAST ---------- */
+const Toast = {
+  show(msg, type='success'){
+    const c = document.getElementById('toastContainer');
+    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+    const el = document.createElement('div');
+    el.className = `toast-custom ${type}`;
+    el.innerHTML = `<i class="fas ${icons[type]||icons.info}" style="color:var(--${type==='success'?'success':type==='error'?'danger':type==='warning'?'warning':'info'})"></i><div>${msg}</div>`;
+    c.appendChild(el);
+    setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(100%)'; setTimeout(()=>el.remove(),300); }, 3500);
+  }
+};
+window.Toast = Toast;
+
+/* ---------- DADOS SIMULADOS ---------- */
+const DB = {
+  orders: [
+    { id:'#PED-00251', hora:'10:42', itens:4, estado:'preparacao', tempo:13, limite:20, prioridade:'Normal', mesa:5, cozinha:'Operacional' },
+    { id:'#PED-00252', hora:'10:45', itens:3, estado:'novo', tempo:2, limite:25, prioridade:'Normal', mesa:8, cozinha:'Operacional' },
+    { id:'#PED-00253', hora:'10:30', itens:2, estado:'atrasado', tempo:28, limite:18, prioridade:'Alta', mesa:12, cozinha:'Sobrecarga' },
+    { id:'#PED-00254', hora:'10:48', itens:5, estado:'preparacao', tempo:8, limite:30, prioridade:'Normal', mesa:3, cozinha:'Operacional' },
+    { id:'#PED-00255', hora:'10:20', itens:3, estado:'pronto', tempo:22, limite:20, prioridade:'Normal', mesa:7, cozinha:'Operacional' },
+    { id:'#PED-00256', hora:'10:50', itens:2, estado:'novo', tempo:1, limite:15, prioridade:'Alta', mesa:2, cozinha:'Operacional' }
+  ],
+  stock: [
+    { id:'ING-0001', nome:'Frango', stock:6, min:5, max:20, ponto:7, unidade:'kg', consumoMedio:7.2, previsao:8.5, categoria:'Carnes', img:'https://images.unsplash.com/photo-1604503468506-a8da13d82791?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0002', nome:'Bife de vaca', stock:8, min:4, max:15, ponto:6, unidade:'kg', consumoMedio:3.5, previsao:4.2, categoria:'Carnes', img:'https://images.unsplash.com/photo-1588168333986-5078d3ae3976?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0003', nome:'Peixe fresco', stock:3, min:5, max:12, ponto:6, unidade:'kg', consumoMedio:4.1, previsao:5.0, categoria:'Peixes', img:'https://images.unsplash.com/photo-1534948216015-6c23b1e3b9b1?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0004', nome:'Arroz', stock:18, min:10, max:50, ponto:15, unidade:'kg', consumoMedio:5.2, previsao:5.8, categoria:'Cereais', img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0005', nome:'Batata', stock:12, min:8, max:30, ponto:12, unidade:'kg', consumoMedio:6.0, previsao:6.5, categoria:'Legumes', img:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0006', nome:'Tomate', stock:2, min:4, max:15, ponto:6, unidade:'kg', consumoMedio:3.2, previsao:3.8, categoria:'Legumes', img:'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0007', nome:'Óleo', stock:2, min:3, max:10, ponto:4, unidade:'L', consumoMedio:1.8, previsao:2.2, categoria:'Outros', img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=200&auto=format&fit=crop' },
+    { id:'ING-0008', nome:'Queijo', stock:2, min:3, max:10, ponto:4, unidade:'kg', consumoMedio:1.5, previsao:1.9, categoria:'Lacticínios', img:'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?q=80&w=200&auto=format&fit=crop' }
+  ],
+  lotes: [
+    { id:'LOT-001', ing:'Frango', lote:'FR-2026-0920', qtd:6, un:'kg', validade:'2026-09-25', fornecedor:'Fornecedor X' },
+    { id:'LOT-002', ing:'Tomate', lote:'TO-2026-0921', qtd:2, un:'kg', validade:'2026-09-24', fornecedor:'Fornecedor Z' },
+    { id:'LOT-003', ing:'Queijo', lote:'QU-2026-0918', qtd:2, un:'kg', validade:'2026-09-28', fornecedor:'Fornecedor W' },
+    { id:'LOT-004', ing:'Peixe', lote:'PE-2026-0922', qtd:3, un:'kg', validade:'2026-09-23', fornecedor:'Fornecedor Y' }
+  ],
+  dishes: [
+    { nome:'Frango Grelhado', vendas:184, custo:1850, preco:4500 },
+    { nome:'Hambúrguer', vendas:156, custo:2200, preco:5000 },
+    { nome:'Peixe Grelhado', vendas:121, custo:2800, preco:6000 },
+    { nome:'Massa Bolonhesa', vendas:97, custo:1600, preco:4000 },
+    { nome:'Arroz com Frango', vendas:83, custo:1400, preco:3500 }
+  ],
+  waste: [
+    { id:'DES-001', ing:'Tomate', qtd:0.5, un:'kg', motivo:'Validade', data:'2026-09-22', valor:750 },
+    { id:'DES-002', ing:'Frango', qtd:0.3, un:'kg', motivo:'Sobras', data:'2026-09-22', valor:1350 },
+    { id:'DES-003', ing:'Arroz', qtd:0.5, un:'kg', motivo:'Queimado', data:'2026-09-21', valor:600 },
+    { id:'DES-004', ing:'Tomate', qtd:0.4, un:'kg', motivo:'Validade', data:'2026-09-20', valor:600 },
+    { id:'DES-005', ing:'Tomate', qtd:0.3, un:'kg', motivo:'Má conservação', data:'2026-09-19', valor:450 },
+    { id:'DES-006', ing:'Tomate', qtd:0.6, un:'kg', motivo:'Validade', data:'2026-09-18', valor:900 },
+    { id:'DES-007', ing:'Tomate', qtd:0.2, un:'kg', motivo:'Sobras', data:'2026-09-17', valor:300 }
+  ],
+  replenishments: [
+    { id:'REP-00025', ing:'Frango', atual:6, necessario:8.5, sugestao:2.5, estado:'Sugerida', prioridade:'Normal' },
+    { id:'REP-00026', ing:'Tomate', atual:2, necessario:6, sugestao:4, estado:'Em Análise', prioridade:'Urgente' },
+    { id:'REP-00027', ing:'Óleo', atual:2, necessario:5, sugestao:3, estado:'Sugerida', prioridade:'Normal' }
+  ],
+  alerts: [
+    { tipo:'critico', titulo:'Ingrediente esgotado', msg:'Tomate com stock abaixo do mínimo', detalhe:'Stock: 2 kg • Mínimo: 4 kg' },
+    { tipo:'atencao', titulo:'Stock abaixo do mínimo', msg:'Óleo próximo do nível crítico', detalhe:'Stock: 2 L • Mínimo: 3 L' },
+    { tipo:'aviso', titulo:'Validades próximas', msg:'4 lotes próximos do vencimento', detalhe:'Frango, Tomate, Peixe, Queijo' },
+    { tipo:'info', titulo:'Nova reposição registada', msg:'REP-00025 criada para Frango', detalhe:'Aguarda aprovação do gestor' },
+    { tipo:'critico', titulo:'Pedido atrasado', msg:'#PED-00253 ultrapassou o tempo previsto', detalhe:'28 min de 18 min estimados' }
+  ],
+  decisions: [
+    { num:1, tipo:'Reposição', desc:'Frango abaixo do nível necessário para amanhã.', detalhe:'Stock: 6 kg • Previsão: 8.5 kg' },
+    { num:2, tipo:'Stock', desc:'Óleo próximo do mínimo configurado.', detalhe:'Stock: 2 L • Mínimo: 3 L' },
+    { num:3, tipo:'Desperdício', desc:'Aumento de desperdício de tomate na última semana.', detalhe:'6 registos em 7 dias' },
+    { num:4, tipo:'Pedido', desc:'#PED-00253 atrasado há 10 minutos.', detalhe:'Mesa 12 • 28 min' },
+    { num:5, tipo:'Validade', desc:'3 lotes próximos do vencimento.', detalhe:'Frango, Tomate, Peixe' }
+  ],
+  history: [
+    { hora:'10:42', tipo:'pedido', desc:'Pedido #PED-00251 recebido', user:'Sistema' },
+    { hora:'10:43', tipo:'aprovacao', desc:'Reposição REP-00025 aprovada (10 kg frango)', user:'António Diogo' },
+    { hora:'10:35', tipo:'saida', desc:'Arroz -2 kg • Pedido #PED-00248', user:'Maria Santos' },
+    { hora:'10:20', tipo:'ajuste', desc:'Batata -0,5 kg • Inventário', user:'António Diogo' },
+    { hora:'09:55', tipo:'desperdicio', desc:'Tomate 0,3 kg • Validade', user:'Maria Santos' }
+  ]
+};
+
+/* ---------- MENU GESTOR ---------- */
+const MENU = [
+  { id:'dashboard',    label:'Cockpit',        icon:'fa-gauge-high', fixed:true },
+  { id:'pedidos',      label:'Pedidos',        icon:'fa-receipt', badge:5 },
+  { id:'stock',        label:'Stock',          icon:'fa-boxes-stacked', badge:2 },
+  { id:'custos',       label:'Custos',         icon:'fa-coins' },
+  { id:'vendas',       label:'Vendas',         icon:'fa-chart-line' },
+  { id:'desperdicios', label:'Desperdícios',   icon:'fa-recycle' },
+  { id:'compras',      label:'Compras',        icon:'fa-cart-shopping' },
+  { id:'relatorios',   label:'Relatórios',     icon:'fa-file-lines' },
+  { id:'previsoes',    label:'Previsões',      icon:'fa-crystal-ball' },
+  { id:'ai',           label:'KITCHSYNC AI',   icon:'fa-robot' },
+  { id:'desempenho',   label:'Desempenho',     icon:'fa-chart-column' },
+  { id:'alertas',      label:'Alertas',        icon:'fa-bell', badge:5 },
+  { id:'historico',    label:'Histórico',      icon:'fa-clock-rotate-left' }
+];
+
+let openTabs = [{ id:'dashboard', label:'Cockpit', icon:'fa-gauge-high', fixed:true }];
+let activeTab = 'dashboard';
+
+/* ---------- SIDEBAR ---------- */
+function renderSidebar(){
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = MENU.map(m => `
+    <button class="nav-item ${m.id===activeTab?'active':''}" data-page="${m.id}" data-title="${m.label}">
+      <i class="fas ${m.icon}"></i><span>${m.label}</span>
+      ${m.badge ? `<span class="nav-badge">${m.badge}</span>` : ''}
+    </button>
+  `).join('');
+  nav.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => openTab(btn.dataset.page)));
+}
+
+/* ---------- TABS ---------- */
+function renderTabs(){
+  const c = document.getElementById('tabsContainer');
+  c.innerHTML = openTabs.map(t => `
+    <div class="tab-item ${t.id===activeTab?'active':''}" data-tab="${t.id}">
+      <i class="fas ${t.icon}"></i>${t.label}
+      ${t.fixed ? '' : `<i class="fas fa-times tab-close" data-close="${t.id}"></i>`}
+    </div>
+  `).join('');
+  c.querySelectorAll('.tab-item').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.classList.contains('tab-close')) return closeTab(e.target.dataset.close);
+      activateTab(el.dataset.tab);
+    });
+  });
+}
+function openTab(id){
+  const m = MENU.find(x => x.id === id);
+  if (!m) return;
+  if (!openTabs.some(t => t.id === id)) openTabs.push({ id, label:m.label, icon:m.icon, fixed:!!m.fixed });
+  activateTab(id);
+}
+function activateTab(id){
+  activeTab = id;
+  renderTabs(); renderSidebar();
+  const m = MENU.find(x => x.id === id);
+  document.getElementById('pageTitle').textContent = m ? m.label : id;
+  document.getElementById('breadcrumb').textContent = `Início / ${m ? m.label : id}`;
+  renderContent(id);
+  resetSessionTimer();
+}
+function closeTab(id){
+  const idx = openTabs.findIndex(t => t.id === id);
+  if (idx < 0) return;
+  openTabs.splice(idx,1);
+  if (activeTab === id){ const nx = openTabs[idx-1] || openTabs[0]; activeTab = nx ? nx.id : 'dashboard'; }
+  renderTabs(); renderSidebar(); renderContent(activeTab);
+}
+
+/* ---------- HELPERS ---------- */
+function daysUntil(d){ return Math.ceil((new Date(d)-new Date())/86400000); }
+function formatDate(d){ return d ? new Date(d).toLocaleDateString('pt-PT') : '—'; }
+function stockStatus(i){
+  if (i.stock <= 0) return 'esgotado';
+  if (i.stock < i.min) return 'critico';
+  if (i.stock <= i.ponto) return 'atencao';
+  return 'disponivel';
+}
+function statusBadge(s){
+  return { disponivel:['badge-green','Disponível'], atencao:['badge-yellow','Atenção'], critico:['badge-red','Crítico'], esgotado:['badge-gray','Esgotado'] }[s];
+}
+
+/* ---------- RENDER CONTEÚDO ---------- */
+function renderContent(id){
+  const area = document.getElementById('contentArea');
+  const r = {
+    dashboard: renderDashboard, pedidos: renderPedidos, stock: renderStock,
+    custos: renderCustos, vendas: renderVendas, desperdicios: renderDesperdicios,
+    compras: renderCompras, relatorios: renderRelatorios, previsoes: renderPrevisoes,
+    ai: renderAI, desempenho: renderDesempenho, alertas: renderAlertas, historico: renderHistorico
+  }[id] || (()=>'<div class="empty-state"><i class="fas fa-cube"></i><p>Em construção</p></div>');
+  area.innerHTML = r();
+  if (binders[id]) binders[id]();
+}
+
+/* ============================================================
+   DASHBOARD / COCKPIT
+   ============================================================ */
+function renderDashboard(){
+  const criticos = DB.stock.filter(i => stockStatus(i)==='critico'||stockStatus(i)==='esgotado').length;
+  const validades = DB.lotes.filter(l => daysUntil(l.validade) <= 7).length;
+  const reposicoes = DB.replenishments.filter(r => r.estado==='Sugerida'||r.estado==='Em Análise').length;
+  const pedidosAtrasados = DB.orders.filter(o => o.estado==='atrasado').length;
+  const totalVendas = DB.dishes.reduce((s,d)=>s+d.vendas*d.preco,0);
+  const totalCusto = DB.dishes.reduce((s,d)=>s+d.vendas*d.custo,0);
+  const margem = totalVendas - totalCusto;
+  const ticket = Math.round(totalVendas/DB.dishes.reduce((s,d)=>s+d.vendas,0));
+  const totalWaste = DB.waste.reduce((s,w)=>s+w.valor,0);
+
+  return `
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div><h4 class="fw-bold mb-1">Cockpit Inteligente do Gestor</h4><p class="text-secondary">Visão estratégica da operação em tempo real</p></div>
+      <div class="text-end"><div class="fw-bold" id="currentDate"></div><div class="fs-4 fw-bold" id="currentTime"></div></div>
+    </div>
+
+    <!-- Cockpit alerta principal -->
+    <div class="cockpit-card mb-4">
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        <div>
+          <h5 class="fw-bold mb-2"><i class="fas fa-triangle-exclamation me-2"></i>⚠️ ATENÇÃO NECESSÁRIA</h5>
+          <p class="mb-3">Stock de <strong>frango</strong> poderá ser insuficiente para a previsão de amanhã.</p>
+          <div class="row g-3 small">
+            <div class="col-md-3"><strong>Stock atual:</strong><br>6 kg</div>
+            <div class="col-md-3"><strong>Consumo médio:</strong><br>7,2 kg/dia</div>
+            <div class="col-md-3"><strong>Previsão amanhã:</strong><br>8,5 kg</div>
+            <div class="col-md-3"><strong>Stock segurança:</strong><br>2 kg</div>
+          </div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <button class="btn" data-action="analisar"><i class="fas fa-chart-line me-1"></i>Analisar</button>
+          <button class="btn" data-action="ignorar"><i class="fas fa-eye-slash me-1"></i>Ignorar</button>
+          <button class="btn" data-action="repor"><i class="fas fa-cart-plus me-1"></i>Abrir reposição</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Central de atenção -->
+    <div class="mb-4">
+      <h6 class="fw-bold mb-2"><i class="fas fa-circle-exclamation me-2" style="color:var(--danger);"></i>Central de Atenção</h6>
+      <div class="row g-3">
+        <div class="col-md-3 col-6"><div class="card attention-card critical" data-attention="stock"><div class="d-flex justify-content-between align-items-center"><div><div class="stat-value text-danger">${criticos}</div><div class="stat-label">Stock Crítico</div></div><i class="fas fa-circle-exclamation" style="font-size:1.8rem;color:var(--danger);opacity:.3;"></i></div></div></div>
+        <div class="col-md-3 col-6"><div class="card attention-card validity" data-attention="validades"><div class="d-flex justify-content-between align-items-center"><div><div class="stat-value text-warning">${validades}</div><div class="stat-label">Validades</div></div><i class="fas fa-calendar-day" style="font-size:1.8rem;color:var(--warning);opacity:.3;"></i></div></div></div>
+        <div class="col-md-3 col-6"><div class="card attention-card replenish" data-attention="compras"><div class="d-flex justify-content-between align-items-center"><div><div class="stat-value text-info">${reposicoes}</div><div class="stat-label">Reposições</div></div><i class="fas fa-cart-plus" style="font-size:1.8rem;color:var(--info);opacity:.3;"></i></div></div></div>
+        <div class="col-md-3 col-6"><div class="card attention-card critical" data-attention="pedidos"><div class="d-flex justify-content-between align-items-center"><div><div class="stat-value text-danger">${pedidosAtrasados}</div><div class="stat-label">Atrasados</div></div><i class="fas fa-clock" style="font-size:1.8rem;color:var(--danger);opacity:.3;"></i></div></div></div>
+      </div>
+    </div>
+
+    <!-- Indicadores principais -->
+    <h6 class="fw-bold mb-2"><i class="fas fa-chart-pie me-2" style="color:var(--primary);"></i>Indicadores Principais</h6>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">${DB.orders.length}</div><div class="stat-label">Pedidos Hoje</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-warning">${DB.orders.filter(o=>o.estado==='preparacao').length}</div><div class="stat-label">Em Preparação</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">${DB.orders.filter(o=>o.estado==='pronto').length}</div><div class="stat-label">Prontos</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">${pedidosAtrasados}</div><div class="stat-label">Atrasados</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">18 min</div><div class="stat-label">Tempo Médio</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">${(totalVendas/1000).toFixed(0)}K Kz</div><div class="stat-label">Vendas Dia</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">${(margem/1000).toFixed(0)}K Kz</div><div class="stat-label">Margem Est.</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">${ticket} Kz</div><div class="stat-label">Ticket Médio</div></div></div>
+    </div>
+
+    <!-- Saúde operacional -->
+    <h6 class="fw-bold mb-2"><i class="fas fa-heart-pulse me-2" style="color:var(--success);"></i>Saúde Operacional</h6>
+    <div class="row g-3 mb-4">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="health-item"><span><i class="fas fa-receipt me-2"></i>Pedidos</span><span class="d-flex align-items-center gap-2"><span class="health-dot health-green"></span>Bom</span></div>
+          <div class="health-item"><span><i class="fas fa-boxes-stacked me-2"></i>Stock</span><span class="d-flex align-items-center gap-2"><span class="health-dot health-yellow"></span>Atenção</span></div>
+          <div class="health-item"><span><i class="fas fa-fire me-2"></i>Produção</span><span class="d-flex align-items-center gap-2"><span class="health-dot health-green"></span>Bom</span></div>
+          <div class="health-item"><span><i class="fas fa-recycle me-2"></i>Desperdício</span><span class="d-flex align-items-center gap-2"><span class="health-dot health-yellow"></span>Atenção</span></div>
+          <div class="health-item"><span><i class="fas fa-coins me-2"></i>Custos</span><span class="d-flex align-items-center gap-2"><span class="health-dot health-green"></span>Bom</span></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center d-flex flex-column justify-content-center">
+          <div style="font-size:3.5rem;">🟢</div>
+          <h5 class="fw-bold mb-1">Operação Saudável</h5>
+          <p class="text-secondary small mb-3">Indicador global calculado a partir dos dados internos</p>
+          <button class="btn btn-outline-secondary btn-sm" data-action="ver-saude">Ver análise completa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Centro de Decisões -->
+    <h6 class="fw-bold mb-2"><i class="fas fa-bullseye me-2" style="color:var(--purple);"></i>Decisões Pendentes <span class="badge-status badge-purple ms-2">${DB.decisions.length} situações</span></h6>
+    <div class="row g-3 mb-4">
+      <div class="col-12">
+        ${DB.decisions.map(d => `
+          <div class="decision-item">
+            <div class="decision-num">${String(d.num).padStart(2,'0')}</div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${d.tipo}</div>
+              <div>${d.desc}</div>
+              <small class="text-secondary">${d.detalhe}</small>
+            </div>
+            <button class="btn btn-primary btn-sm" data-decision="${d.num}">Analisar</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Timeline Operacional -->
+    <h6 class="fw-bold mb-2"><i class="fas fa-clock me-2" style="color:var(--info);"></i>Timeline Operacional</h6>
+    <div class="card">
+      ${DB.history.slice(0,5).map(h => `
+        <div class="timeline-item">
+          <div class="timeline-icon"><i class="fas ${h.tipo==='pedido'?'fa-receipt':h.tipo==='aprovacao'?'fa-check':h.tipo==='saida'?'fa-arrow-up-from-bracket':h.tipo==='ajuste'?'fa-sliders':'fa-trash-alt'}"></i></div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between"><strong>${h.desc}</strong><small class="text-secondary">${h.hora}</small></div>
+            <small class="text-secondary">${h.user}</small>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   PEDIDOS
+   ============================================================ */
+function renderPedidos(){
+  return `
+    <h4 class="mb-3">Central de Pedidos do Gestor</h4>
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      <span class="badge-status badge-blue">Todos (${DB.orders.length})</span>
+      <span class="badge-status badge-gray">Em preparação (${DB.orders.filter(o=>o.estado==='preparacao').length})</span>
+      <span class="badge-status badge-gray">Prontos (${DB.orders.filter(o=>o.estado==='pronto').length})</span>
+      <span class="badge-status badge-gray">Atrasados (${DB.orders.filter(o=>o.estado==='atrasado').length})</span>
+    </div>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Nº</th><th>Hora</th><th>Itens</th><th>Estado</th><th>Tempo</th><th>Prioridade</th><th>Alerta</th><th></th></tr></thead>
+          <tbody>
+            ${DB.orders.map(o => {
+              const alerta = o.estado==='atrasado'?'🔴 Atrasado':o.tempo >= o.limite*0.75?'🟡 Próximo do limite':'🟢 Dentro do prazo';
+              const cls = o.estado==='atrasado'?'badge-red':o.estado==='preparacao'?'badge-yellow':o.estado==='pronto'?'badge-green':'badge-blue';
+              return `<tr>
+                <td><strong>${o.id}</strong></td><td>${o.hora}</td><td>${o.itens}</td>
+                <td><span class="badge-status ${cls}">${o.estado.toUpperCase()}</span></td>
+                <td>${o.tempo}/${o.limite} min</td><td>${o.prioridade}</td>
+                <td>${alerta}</td>
+                <td><button class="btn btn-sm btn-outline-secondary" data-order="${o.id}">Ver</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   STOCK
+   ============================================================ */
+function renderStock(){
+  const criticos = DB.stock.filter(i => stockStatus(i)==='critico'||stockStatus(i)==='esgotado');
+  return `
+    <h4 class="mb-3">Monitorização de Stock</h4>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">${DB.stock.filter(i=>stockStatus(i)==='disponivel').length}</div><div class="stat-label">Stock Normal</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-warning">${DB.stock.filter(i=>stockStatus(i)==='atencao').length}</div><div class="stat-label">Atenção</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">${criticos.length}</div><div class="stat-label">Crítico</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-info">${DB.lotes.filter(l=>daysUntil(l.validade)<=7).length}</div><div class="stat-label">Validade Próxima</div></div></div>
+    </div>
+
+    <h6 class="fw-bold mb-2"><i class="fas fa-triangle-exclamation me-2" style="color:var(--danger);"></i>Problemas de Stock</h6>
+    ${criticos.map(i => {
+      const deficit = Math.max(0, i.previsao - i.stock).toFixed(1);
+      return `
+        <div class="card mb-3" style="border-left:4px solid var(--danger);">
+          <div class="row align-items-center g-3">
+            <div class="col-md-2 d-flex align-items-center">
+              <img src="${i.img}" class="ingredient-img" style="width:52px;height:52px;">
+              <strong>${i.nome}</strong>
+            </div>
+            <div class="col-md-2"><small class="text-secondary">Stock atual</small><div class="fw-bold">${i.stock} ${i.unidade}</div></div>
+            <div class="col-md-2"><small class="text-secondary">Mínimo</small><div class="fw-bold">${i.min} ${i.unidade}</div></div>
+            <div class="col-md-2"><small class="text-secondary">Previsão</small><div class="fw-bold">${i.previsao} ${i.unidade}</div></div>
+            <div class="col-md-2"><small class="text-secondary">Défice</small><div class="fw-bold text-danger">${deficit} ${i.unidade}</div></div>
+            <div class="col-md-2 d-flex flex-column gap-1">
+              <button class="btn btn-sm btn-primary" data-ing="${i.id}">Ver ingrediente</button>
+              <button class="btn btn-sm btn-outline-secondary" data-action="consumo">Ver consumo</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+/* ============================================================
+   CUSTOS
+   ============================================================ */
+function renderCustos(){
+  return `
+    <h4 class="mb-3">Análise de Custos</h4>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">1.850</div><div class="stat-label">Custo Médio/Prato</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-warning">+5%</div><div class="stat-label">Variação</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">42%</div><div class="stat-label">Custo Produção</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">4.950 Kz</div><div class="stat-label">Desperdício</div></div></div>
+    </div>
+
+    <h6 class="fw-bold mb-2">Fichas de Custo Automáticas</h6>
+    <div class="row g-3">
+      ${DB.dishes.map(d => `
+        <div class="col-md-6">
+          <div class="card">
+            <h6 class="fw-bold mb-2">${d.nome}</h6>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead><tr><th>Ingrediente</th><th>Qtd</th><th>Custo</th></tr></thead>
+                <tbody>
+                  <tr><td>Frango</td><td>250 g</td><td>1.250 Kz</td></tr>
+                  <tr><td>Arroz</td><td>150 g</td><td>350 Kz</td></tr>
+                  <tr><td>Óleo</td><td>20 ml</td><td>100 Kz</td></tr>
+                  <tr><td>Temperos</td><td>—</td><td>150 Kz</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="fw-bold">Custo estimado: ${d.custo} Kz</span>
+              <span class="badge-status badge-green">Margem ${Math.round((1-d.custo/d.preco)*100)}%</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   VENDAS
+   ============================================================ */
+function renderVendas(){
+  const maxV = Math.max(...DB.dishes.map(d=>d.vendas));
+  return `
+    <h4 class="mb-3">Análise de Vendas</h4>
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      <span class="badge-status badge-blue">Hoje</span>
+      <span class="badge-status badge-gray">Ontem</span>
+      <span class="badge-status badge-gray">7 dias</span>
+      <span class="badge-status badge-gray">30 dias</span>
+      <span class="badge-status badge-gray">Este mês</span>
+      <span class="badge-status badge-gray">Personalizado</span>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">641</div><div class="stat-label">Total Pedidos</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">1.284</div><div class="stat-label">Itens Vendidos</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">2.9M Kz</div><div class="stat-label">Receita</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">4.500 Kz</div><div class="stat-label">Ticket Médio</div></div></div>
+    </div>
+
+    <h6 class="fw-bold mb-2">Ranking de Pratos</h6>
+    <div class="card mb-3">
+      ${DB.dishes.map((d,i) => `
+        <div class="bar-row">
+          <div class="bar-label">${i+1}. ${d.nome}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(d.vendas/maxV)*100}%">${d.vendas}</div></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <h6 class="fw-bold mb-2">Horários de Maior Movimento</h6>
+    <div class="card">
+      ${[['08h',10],['09h',25],['10h',40],['11h',70],['12h',95],['13h',80],['14h',45]].map(([h,v]) => `
+        <div class="bar-row">
+          <div class="bar-label">${h}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${v}%">${v}%</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   DESPERDÍCIOS
+   ============================================================ */
+function renderDesperdicios(){
+  const total = DB.waste.reduce((s,w)=>s+w.valor,0);
+  const tomateCount = DB.waste.filter(w=>w.ing==='Tomate').length;
+  return `
+    <h4 class="mb-3">Centro de Desperdícios</h4>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">${DB.waste.reduce((s,w)=>s+w.qtd,0).toFixed(1)} kg</div><div class="stat-label">Hoje</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">${(total/1000).toFixed(1)}K Kz</div><div class="stat-label">Valor Perdido</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">Tomate</div><div class="stat-label">Mais Desperdiçado</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">Validade</div><div class="stat-label">Motivo Frequente</div></div></div>
+    </div>
+
+    <div class="card mb-4" style="border-left:4px solid var(--warning);">
+      <h6 class="fw-bold mb-2"><i class="fas fa-magnifying-glass-chart me-2" style="color:var(--warning);"></i>🔎 Detector de Padrões</h6>
+      <p class="mb-2">⚠️ <strong>Padrão identificado</strong></p>
+      <p class="mb-3">O ingrediente <strong>tomate</strong> apresentou registos de desperdício em <strong>${tomateCount} dos últimos 7 dias</strong>.</p>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-secondary btn-sm" data-action="ver-historico">Analisar histórico</button>
+        <button class="btn btn-outline-secondary btn-sm" data-action="ver-mov">Ver movimentos</button>
+        <button class="btn btn-outline-secondary btn-sm" data-action="ver-detalhes">Ver detalhes</button>
+      </div>
+    </div>
+
+    <h6 class="fw-bold mb-2">Registos Recentes</h6>
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>ID</th><th>Ingrediente</th><th>Qtd</th><th>Motivo</th><th>Valor</th><th>Data</th></tr></thead>
+          <tbody>
+            ${DB.waste.map(w => `<tr>
+              <td>${w.id}</td><td>${w.ing}</td><td>${w.qtd} ${w.un}</td>
+              <td><span class="badge-status badge-yellow">${w.motivo}</span></td>
+              <td>${w.valor} Kz</td><td>${formatDate(w.data)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   COMPRAS
+   ============================================================ */
+function renderCompras(){
+  return `
+    <h4 class="mb-3">Controlo de Compras</h4>
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      <span class="badge-status badge-gray">Sugerida</span>
+      <span class="badge-status badge-blue">Em Análise</span>
+      <span class="badge-status badge-yellow">Aprovada</span>
+      <span class="badge-status badge-purple">Solicitada</span>
+      <span class="badge-status badge-green">Recebida</span>
+    </div>
+    <div class="card mb-3">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>ID</th><th>Ingrediente</th><th>Atual</th><th>Necessário</th><th>Sugestão</th><th>Estado</th><th>Ações</th></tr></thead>
+          <tbody>
+            ${DB.replenishments.map(r => `<tr>
+              <td>${r.id}</td>
+              <td><strong>${r.ing}</strong></td>
+              <td>${r.atual} kg</td>
+              <td>${r.necessario} kg</td>
+              <td><strong>${r.sugestao} kg</strong></td>
+              <td><span class="badge-status ${r.estado==='Em Análise'?'badge-blue':r.estado==='Sugerida'?'badge-gray':'badge-green'}">${r.estado}</span></td>
+              <td>
+                <button class="btn btn-sm btn-primary" data-approve="${r.id}">Aprovar</button>
+                <button class="btn btn-sm btn-outline-secondary" data-edit-rep="${r.id}">Editar</button>
+                <button class="btn btn-sm btn-outline-secondary" data-reject="${r.id}">Rejeitar</button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="alert alert-info mt-2 mb-0" style="border-radius:14px;"><i class="fas fa-info-circle me-2"></i>O sistema <strong>não compra automaticamente</strong>. Apenas apresenta sugestões — a decisão final é sempre do gestor.</div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   RELATÓRIOS
+   ============================================================ */
+function renderRelatorios(){
+  const relatorios = [
+    { cat:'Operacionais', icon:'fa-fire', items:['Pedidos','Tempo de preparação','Produção','Pedidos atrasados'] },
+    { cat:'Stock', icon:'fa-boxes-stacked', items:['Movimentações','Consumo','Inventário','Validades','Lotes'] },
+    { cat:'Custos', icon:'fa-coins', items:['Custo dos pratos','Custo dos ingredientes','Variação de preços'] },
+    { cat:'Desperdícios', icon:'fa-recycle', items:['Desperdício por ingrediente','Desperdício por período','Desperdício por motivo'] },
+    { cat:'Vendas', icon:'fa-chart-line', items:['Vendas por período','Produtos vendidos','Produtos mais solicitados'] }
+  ];
+  return `
+    <h4 class="mb-3">Centro de Relatórios</h4>
+    <div class="card mb-3">
+      <div class="row g-2">
+        <div class="col-md-3"><label class="form-label">Data inicial</label><input type="date" class="form-control"></div>
+        <div class="col-md-3"><label class="form-label">Data final</label><input type="date" class="form-control"></div>
+        <div class="col-md-2"><label class="form-label">Categoria</label><select class="form-select"><option>Todas</option>${relatorios.map(r=>`<option>${r.cat}</option>`).join('')}</select></div>
+        <div class="col-md-2"><label class="form-label">Estado</label><select class="form-select"><option>Todos</option><option>Concluído</option><option>Pendente</option></select></div>
+        <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100">Filtrar</button></div>
+      </div>
+    </div>
+    <div class="row g-3">
+      ${relatorios.map(r => `
+        <div class="col-md-4">
+          <div class="card">
+            <h6 class="fw-bold mb-2"><i class="fas ${r.icon} me-2" style="color:var(--primary);"></i>${r.cat}</h6>
+            ${r.items.map(it => `
+              <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border-light);">
+                <span class="small">${it}</span>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-outline-secondary" title="PDF" data-export="pdf"><i class="fas fa-file-pdf"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary" title="Excel" data-export="excel"><i class="fas fa-file-excel"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary" title="CSV" data-export="csv"><i class="fas fa-file-csv"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary" title="Imprimir" data-export="print"><i class="fas fa-print"></i></button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   PREVISÕES
+   ============================================================ */
+function renderPrevisoes(){
+  return `
+    <h4 class="mb-3">🔮 Central de Previsões</h4>
+    <div class="alert alert-warning mb-4" style="border-radius:14px;">
+      <i class="fas fa-info-circle me-2"></i>Estas são <strong>estimativas</strong> baseadas no histórico disponível. Não são certezas — servem apenas para apoio à decisão.
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card" style="border-left:4px solid var(--primary);">
+          <h6 class="fw-bold mb-2">🔮 Previsão de Consumo</h6>
+          <p class="mb-2">Para <strong>amanhã</strong>, o sistema estima necessidade de aproximadamente <strong>8,5 kg de frango</strong>.</p>
+          <small class="text-secondary">Base: histórico + pedidos já registados</small>
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm" data-action="ver-calculo">Ver cálculo</button>
+            <button class="btn btn-outline-secondary btn-sm" data-action="ver-hist">Ver histórico</button>
+            <button class="btn btn-outline-secondary btn-sm" data-action="ver-stock">Ver stock</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card" style="border-left:4px solid var(--info);">
+          <h6 class="fw-bold mb-2">📊 Procura por Pratos</h6>
+          <p class="mb-2">Estima-se que <strong>Frango Grelhado</strong> continue a ser o prato mais procurado.</p>
+          <small class="text-secondary">Tendência: +8% vs semana anterior</small>
+          <div class="d-flex gap-2 mt-3"><button class="btn btn-outline-secondary btn-sm">Ver detalhes</button></div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card" style="border-left:4px solid var(--warning);">
+          <h6 class="fw-bold mb-2">⚠️ Possível Stock Crítico</h6>
+          <p class="mb-2">Sem reposição, <strong>Tomate</strong> poderá esgotar em <strong>1 dia</strong>.</p>
+          <small class="text-secondary">Stock: 2 kg • Consumo médio: 3,2 kg/dia</small>
+          <div class="d-flex gap-2 mt-3"><button class="btn btn-primary btn-sm" data-action="repor">Abrir reposição</button></div>
+        </div>
+      </div>
+    </div>
+
+    <h6 class="fw-bold mb-2">Previsão de Necessidade (próximos 7 dias)</h6>
+    <div class="card">
+      ${DB.stock.slice(0,6).map(i => {
+        const total = (i.previsao*7).toFixed(1);
+        const diasRestantes = (i.stock / i.consumoMedio).toFixed(1);
+        return `<div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--border-light);">
+          <div><strong>${i.nome}</strong><br><small class="text-secondary">Previsão: ${total} ${i.unidade}</small></div>
+          <div class="text-end"><span class="badge-status ${diasRestantes < 2 ? 'badge-red' : diasRestantes < 5 ? 'badge-yellow' : 'badge-green'}">${diasRestantes} dias de stock</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   KITCHSYNC AI
+   ============================================================ */
+function renderAI(){
+  return `
+    <h4 class="mb-3"><i class="fas fa-robot me-2" style="color:var(--purple);"></i>KITCHSYNC AI</h4>
+    <p class="text-secondary mb-3">Assistente analítico do gestor. Pergunte sobre pedidos, stock, custos, vendas ou desperdícios.</p>
+    <div class="card">
+      <div class="ai-chat">
+        <div class="ai-messages" id="aiMessages">
+          <div class="ai-msg">
+            <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+            <div class="ai-bubble">
+              Olá, António! Sou a <strong>KITCHSYNC AI</strong>. Posso analisar dados de pedidos, stock, vendas, custos e desperdícios. O que deseja saber?
+              <div class="ai-suggestions">
+                <div class="ai-suggest" data-q="Qual é a situação actual da cozinha?">Situação da cozinha</div>
+                <div class="ai-suggest" data-q="Quais ingredientes estão em situação crítica?">Ingredientes críticos</div>
+                <div class="ai-suggest" data-q="Qual prato teve maior procura esta semana?">Prato mais procurado</div>
+                <div class="ai-suggest" data-q="Quanto desperdiçámos este mês?">Desperdício mensal</div>
+                <div class="ai-suggest" data-q="Quais pedidos estão atrasados agora?">Pedidos atrasados</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="input-group">
+          <input type="text" class="form-control" id="aiInput" placeholder="Pergunte à KITCHSYNC AI...">
+          <button class="btn btn-primary" id="aiSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   DESEMPENHO
+   ============================================================ */
+function renderDesempenho(){
+  return `
+    <h4 class="mb-3">📈 Performance Operacional</h4>
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-success">231</div><div class="stat-label">Pedidos Concluídos</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value text-danger">6</div><div class="stat-label">Atrasados</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">18 min</div><div class="stat-label">Tempo Médio</div></div></div>
+      <div class="col-md-3 col-6"><div class="card"><div class="stat-value">92%</div><div class="stat-label">Produtividade</div></div></div>
+    </div>
+
+    <div class="card mb-3">
+      <h6 class="fw-bold mb-3">Resumo de Pedidos</h6>
+      ${[['Pedidos recebidos',250,'var(--info)'],['Pedidos concluídos',231,'var(--success)'],['Em preparação',13,'var(--warning)'],['Atrasados',6,'var(--danger)']].map(([label,val,color]) => `
+        <div class="bar-row">
+          <div class="bar-label">${label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(val/250)*100}%;background:${color}">${val}</div></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-4"><div class="card"><h6 class="fw-bold mb-2">Produção</h6><div class="small text-secondary mb-2">Pedidos concluídos vs. atrasados</div><div class="stat-value text-success">92%</div></div></div>
+      <div class="col-md-4"><div class="card"><h6 class="fw-bold mb-2">Stock</h6><div class="small text-secondary mb-2">Rupturas e desperdício</div><div class="stat-value text-warning">3 rupturas</div></div></div>
+      <div class="col-md-4"><div class="card"><h6 class="fw-bold mb-2">Custos</h6><div class="small text-secondary mb-2">Variação vs. período anterior</div><div class="stat-value text-warning">+5%</div></div></div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   ALERTAS
+   ============================================================ */
+function renderAlertas(){
+  const categorias = ['Todos','Críticos','Validade','Reposição','Inventário'];
+  return `
+    <h4 class="mb-3">Central de Alertas do Gestor</h4>
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+      ${categorias.map((c,i) => `<span class="badge-status ${i===0?'badge-blue':'badge-gray'}">${c}</span>`).join('')}
+    </div>
+    ${DB.alerts.map(a => {
+      const cls = a.tipo==='critico'?'danger':a.tipo==='atencao'?'warning':a.tipo==='aviso'?'info':'primary';
+      const icon = a.tipo==='critico'?'fa-circle-exclamation':a.tipo==='atencao'?'fa-triangle-exclamation':a.tipo==='aviso'?'fa-calendar-day':'fa-info-circle';
+      const tab = a.tipo==='critico'?'stock':a.tipo==='atencao'?'stock':a.tipo==='aviso'?'stock':'compras';
+      return `
+        <div class="card mb-2" style="border-left:4px solid var(--${cls});cursor:pointer;" data-alert-tab="${tab}">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas ${icon}" style="font-size:1.5rem;color:var(--${cls});"></i>
+              <div>
+                <div class="fw-bold">${a.titulo}</div>
+                <div>${a.msg}</div>
+                <small class="text-secondary">${a.detalhe}</small>
+              </div>
+            </div>
+            <i class="fas fa-chevron-right text-secondary"></i>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+/* ============================================================
+   HISTÓRICO
+   ============================================================ */
+function renderHistorico(){
+  const icons = { pedido:'fa-receipt', aprovacao:'fa-check', saida:'fa-arrow-up-from-bracket', ajuste:'fa-sliders', desperdicio:'fa-trash-alt' };
+  return `
+    <h4 class="mb-3">Histórico de Auditoria</h4>
+    <div class="card">
+      ${DB.history.map(h => `
+        <div class="timeline-item">
+          <div class="timeline-icon"><i class="fas ${icons[h.tipo]||'fa-circle'}"></i></div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between"><strong>${h.desc}</strong><small class="text-secondary">${h.hora}</small></div>
+            <small class="text-secondary">${h.user}</small>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="mt-3 d-flex gap-2 flex-wrap">
+      <input type="text" class="form-control" style="max-width:200px;" placeholder="Filtrar utilizador...">
+      <select class="form-select" style="max-width:200px;"><option>Todas operações</option><option>Pedido</option><option>Aprovação</option><option>Saída</option><option>Ajuste</option><option>Desperdício</option></select>
+      <input type="date" class="form-control" style="max-width:180px;">
+    </div>
+  `;
+}
+
+/* ============================================================
+   BINDERS
+   ============================================================ */
+const binders = {
+  dashboard(){
+    document.querySelectorAll('[data-attention]').forEach(el => el.addEventListener('click', () => {
+      const t = el.dataset.attention;
+      if (t==='stock') openTab('stock');
+      else if (t==='validades') { openTab('stock'); Toast.show('Filtro: Validades próximas','info'); }
+      else if (t==='compras') openTab('compras');
+      else if (t==='pedidos') openTab('pedidos');
+    }));
+    document.querySelectorAll('[data-action="analisar"]').forEach(b => b.addEventListener('click', () => openTab('previsoes')));
+    document.querySelectorAll('[data-action="ignorar"]').forEach(b => b.addEventListener('click', () => Toast.show('Alerta ignorado','info')));
+    document.querySelectorAll('[data-action="repor"]').forEach(b => b.addEventListener('click', () => openTab('compras')));
+    document.querySelectorAll('[data-action="ver-saude"]').forEach(b => b.addEventListener('click', () => openTab('desempenho')));
+    document.querySelectorAll('[data-decision]').forEach(b => b.addEventListener('click', () => openDecision(b.dataset.decision)));
+  },
+  pedidos(){ document.querySelectorAll('[data-order]').forEach(b => b.addEventListener('click', () => openOrder(b.dataset.order))); },
+  stock(){ document.querySelectorAll('[data-ing]').forEach(b => b.addEventListener('click', () => openIngredient(b.dataset.ing))); },
+  custos(){ document.querySelectorAll('[data-action="ver-detalhes"]').forEach(b => b.addEventListener('click', () => Toast.show('Detalhes de custo abertos','info'))); },
+  desperdicios(){
+    document.querySelectorAll('[data-action="ver-historico"]').forEach(b => b.addEventListener('click', () => Toast.show('Histórico de tomate aberto','info')));
+    document.querySelectorAll('[data-action="ver-mov"]').forEach(b => b.addEventListener('click', () => Toast.show('Movimentos de tomate','info')));
+    document.querySelectorAll('[data-action="ver-detalhes"]').forEach(b => b.addEventListener('click', () => Toast.show('Detalhes do padrão','info')));
+  },
+  compras(){
+    document.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => {
+      Toast.show(`✓ Reposição ${b.dataset.approve} aprovada. Registo criado no histórico.`,'success');
+    }));
+    document.querySelectorAll('[data-edit-rep]').forEach(b => b.addEventListener('click', () => Toast.show('Editar reposição','info')));
+    document.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', () => Toast.show('Reposição rejeitada','warning')));
+  },
+  relatorios(){ document.querySelectorAll('[data-export]').forEach(b => b.addEventListener('click', () => Toast.show(`A exportar relatório em ${b.dataset.export.toUpperCase()}...`,'info'))); },
+  previsoes(){
+    document.querySelectorAll('[data-action="ver-calculo"]').forEach(b => b.addEventListener('click', () => Toast.show('Cálculo baseado em histórico de 30 dias','info')));
+    document.querySelectorAll('[data-action="ver-hist"]').forEach(b => b.addEventListener('click', () => Toast.show('Histórico de consumo','info')));
+    document.querySelectorAll('[data-action="ver-stock"]').forEach(b => b.addEventListener('click', () => openTab('stock')));
+    document.querySelectorAll('[data-action="repor"]').forEach(b => b.addEventListener('click', () => openTab('compras')));
+  },
+  ai(){ bindAI(); },
+  alertas(){ document.querySelectorAll('[data-alert-tab]').forEach(el => el.addEventListener('click', () => openTab(el.dataset.alertTab))); }
+};
+
+/* ============================================================
+   MODAIS / AÇÕES
+   ============================================================ */
+let dynamicModalInstance = null;
+function openModal(title, body, onConfirm, confirmLabel='Fechar', size='lg'){
+  document.getElementById('dynamicModalTitle').textContent = title;
+  document.getElementById('dynamicModalBody').innerHTML = body;
+  document.getElementById('dynamicModalConfirm').textContent = confirmLabel;
+  document.querySelector('#dynamicModal .modal-dialog').className = `modal-dialog modal-dialog-centered modal-${size}`;
+  const btn = document.getElementById('dynamicModalConfirm');
+  const nb = btn.cloneNode(true);
+  btn.parentNode.replaceChild(nb, btn);
+  nb.addEventListener('click', () => { if (onConfirm && onConfirm()===false) return; dynamicModalInstance.hide(); });
+  dynamicModalInstance = new bootstrap.Modal(document.getElementById('dynamicModal'));
+  dynamicModalInstance.show();
+}
+
+function openOrder(id){
+  const o = DB.orders.find(x => x.id === id);
+  if (!o) return;
+  openModal(`Pedido ${o.id}`, `
+    <ul class="nav nav-pills gap-1 mb-3" id="innerTabs">
+      <li class="modal-inner-tab active" data-inner="resumo">Resumo</li>
+      <li class="modal-inner-tab" data-inner="itens">Itens</li>
+      <li class="modal-inner-tab" data-inner="cozinha">Cozinha</li>
+      <li class="modal-inner-tab" data-inner="historico">Histórico</li>
+    </ul>
+    <div id="innerContent">
+      <p><strong>Estado:</strong> ${o.estado.toUpperCase()}</p>
+      <p><strong>Tempo:</strong> ${o.tempo} min (limite: ${o.limite} min)</p>
+      <p><strong>Mesa:</strong> ${o.mesa} • <strong>Prioridade:</strong> ${o.prioridade}</p>
+      <p><strong>Cozinha:</strong> ${o.cozinha}</p>
+    </div>
+  `, null, 'Fechar');
+  setTimeout(() => {
+    document.querySelectorAll('.modal-inner-tab').forEach(t => t.addEventListener('click', () => {
+      document.querySelectorAll('.modal-inner-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const c = document.getElementById('innerContent');
+      const k = t.dataset.inner;
+      if (k==='resumo') c.innerHTML = `<p><strong>Estado:</strong> ${o.estado.toUpperCase()}</p><p><strong>Tempo:</strong> ${o.tempo} min</p><p><strong>Mesa:</strong> ${o.mesa}</p>`;
+      else if (k==='itens') c.innerHTML = '<p>Frango Grelhado ×1</p><p>Arroz ×1</p><p>Salada ×1</p><p>Água ×1</p>';
+      else if (k==='cozinha') c.innerHTML = `<p>Operador: António Diogo</p><p>Tempo médio de preparação: 18 min</p><p>Produtividade: 92%</p>`;
+      else if (k==='historico') c.innerHTML = `<div class="timeline-item"><div class="timeline-icon"><i class="fas fa-receipt"></i></div><div><strong>Pedido recebido</strong><br><small>${o.hora}</small></div></div><div class="timeline-item"><div class="timeline-icon"><i class="fas fa-check"></i></div><div><strong>Aceite pela cozinha</strong><br><small>${o.hora}</small></div></div><div class="timeline-item"><div class="timeline-icon"><i class="fas fa-fire"></i></div><div><strong>Produção iniciada</strong><br><small>há ${o.tempo-2} min</small></div></div>`;
+    }));
+  }, 100);
+}
+
+function openIngredient(id){
+  const i = DB.stock.find(x => x.id === id);
+  if (!i) return;
+  const deficit = Math.max(0, i.previsao - i.stock).toFixed(1);
+  openModal('Detalhes do Ingrediente', `
+    <div class="d-flex gap-3 align-items-center mb-3">
+      <img src="${i.img}" style="width:80px;height:80px;border-radius:20px;object-fit:cover;">
+      <div>
+        <h4 class="fw-bold mb-0">${i.nome.toUpperCase()}</h4>
+        <small class="text-secondary">${i.id} • ${i.categoria}</small>
+      </div>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col-4"><div class="card text-center"><div class="stat-value" style="font-size:1.4rem;">${i.stock} ${i.unidade}</div><div class="stat-label">Stock atual</div></div></div>
+      <div class="col-4"><div class="card text-center"><div class="stat-value" style="font-size:1.4rem;">${i.min} ${i.unidade}</div><div class="stat-label">Mínimo</div></div></div>
+      <div class="col-4"><div class="card text-center"><div class="stat-value" style="font-size:1.4rem;">${i.previsao} ${i.unidade}</div><div class="stat-label">Previsão</div></div></div>
+    </div>
+    <p><strong>Consumo médio:</strong> ${i.consumoMedio} ${i.unidade}/dia</p>
+    <p><strong>Défice previsto:</strong> <span class="text-danger">${deficit} ${i.unidade}</span></p>
+    <p><strong>Fornecedor sugerido:</strong> Fornecedor X</p>
+  `, null, 'Fechar');
+}
+
+function openDecision(num){
+  const d = DB.decisions.find(x => x.num == num);
+  if (!d) return;
+  openModal(`Decisão #${d.num}`, `
+    <h5 class="fw-bold">${d.tipo}</h5>
+    <p>${d.desc}</p>
+    <p class="text-secondary">${d.detalhe}</p>
+    <hr>
+    <p class="small text-secondary">Ao clicar em "Analisar", o sistema abrirá a tab correspondente com filtros aplicados.</p>
+  `, () => {
+    if (d.tipo==='Reposição' || d.tipo==='Stock') openTab('compras');
+    else if (d.tipo==='Desperdício') openTab('desperdicios');
+    else if (d.tipo==='Pedido') openTab('pedidos');
+    else if (d.tipo==='Validade') openTab('stock');
+    Toast.show('A abrir análise...','info');
+    return true;
+  }, 'Analisar');
+}
+
+/* ---------- KITCHSYNC AI ---------- */
+function bindAI(){
+  const send = () => {
+    const inp = document.getElementById('aiInput');
+    const q = inp.value.trim();
+    if (!q) return;
+    addMsg(q,'user');
+    inp.value = '';
+    setTimeout(() => addMsg(aiAnswer(q),'ai'), 500);
+  };
+  document.getElementById('aiSend').addEventListener('click', send);
+  document.getElementById('aiInput').addEventListener('keydown', e => { if (e.key==='Enter') send(); });
+  document.querySelectorAll('.ai-suggest').forEach(s => s.addEventListener('click', () => {
+    const q = s.dataset.q;
+    addMsg(q,'user');
+    setTimeout(() => addMsg(aiAnswer(q),'ai'), 500);
+  }));
+}
+function addMsg(text, who){
+  const c = document.getElementById('aiMessages');
+  const el = document.createElement('div');
+  el.className = `ai-msg ${who==='user'?'user':''}`;
+  el.innerHTML = `<div class="ai-avatar ${who==='user'?'user':''}"><i class="fas ${who==='user'?'fa-user':'fa-robot'}"></i></div><div class="ai-bubble">${text}</div>`;
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+}
+function aiAnswer(q){
+  const l = q.toLowerCase();
+  if (l.includes('situação') || l.includes('cozinha')) {
+    return `Existem <strong>${DB.orders.length}</strong> pedidos registados.<br>
+      <strong>${DB.orders.filter(o=>o.estado==='preparacao').length}</strong> encontram-se em preparação.<br>
+      <strong>${DB.orders.filter(o=>o.estado==='pronto').length}</strong> estão prontos.<br>
+      <strong>${DB.orders.filter(o=>o.estado==='atrasado').length}</strong> ultrapassaram o tempo previsto.<br>
+      O stock de <strong>frango</strong> encontra-se abaixo do nível mínimo.`;
+  }
+  if (l.includes('crítico') || l.includes('crítica') || l.includes('critico')) {
+    const cr = DB.stock.filter(i => stockStatus(i)==='critico'||stockStatus(i)==='esgotado');
+    return `Ingredientes em situação crítica:<br>${cr.map(i=>`• <strong>${i.nome}</strong> (${i.stock} ${i.unidade})`).join('<br>')}`;
+  }
+  if (l.includes('prato') || l.includes('procura')) {
+    const top = [...DB.dishes].sort((a,b)=>b.vendas-a.vendas)[0];
+    return `O prato com maior procura esta semana foi <strong>${top.nome}</strong> com <strong>${top.vendas}</strong> vendas.`;
+  }
+  if (l.includes('desperdício') || l.includes('desperdicio')) {
+    const total = DB.waste.reduce((s,w)=>s+w.valor,0);
+    return `Este mês registámos <strong>${DB.waste.length}</strong> ocorrências de desperdício, com valor estimado de <strong>${total} Kz</strong>.<br>O ingrediente mais desperdiçado é o <strong>tomate</strong>.`;
+  }
+  if (l.includes('atrasad')) {
+    const at = DB.orders.filter(o=>o.estado==='atrasado');
+    return at.length ? `Pedidos atrasados agora:<br>${at.map(o=>`• <strong>${o.id}</strong> — ${o.tempo} min (limite ${o.limite} min)`).join('<br>')}` : 'Não existem pedidos atrasados neste momento.';
+  }
+  if (l.includes('validade')) {
+    const va = DB.lotes.filter(l=>daysUntil(l.validade)<=7);
+    return `Ingredientes próximos da validade:<br>${va.map(l=>`• <strong>${l.ing}</strong> — lote ${l.lote} (${daysUntil(l.validade)} dias)`).join('<br>')}`;
+  }
+  if (l.includes('custo')) {
+    return `Custo estimado do <strong>Frango Grelhado</strong>: <strong>1.850 Kz</strong>.<br>Margem estimada: <strong>59%</strong> (preço: 4.500 Kz).`;
+  }
+  if (l.includes('reposi')) {
+    return `Existem <strong>${DB.replenishments.length}</strong> sugestões de reposição.<br>${DB.replenishments.map(r=>`• <strong>${r.ing}</strong> — ${r.sugestao} kg (${r.estado})`).join('<br>')}`;
+  }
+  return `Posso ajudar com informações sobre: <strong>pedidos, stock, custos, vendas, desperdícios, validades e reposições</strong>. Experimente perguntar "Qual é a situação actual da cozinha?".`;
+}
+
+/* ============================================================
+   SESSÃO / TEMA / ONLINE / NOTIF / PROFILE / COMMAND
+   ============================================================ */
+let sessionSeconds = 15*60, sessionInterval, sessionModalShown = false;
+const timerText = document.getElementById('timerText');
+const sessionModal = new bootstrap.Modal(document.getElementById('sessionModal'));
+function formatTime(s){ return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+function startSessionTimer(){
+  clearInterval(sessionInterval);
+  sessionInterval = setInterval(() => {
+    if (sessionSeconds <= 0){ clearInterval(sessionInterval); window.location.href='408.html'; return; }
+    sessionSeconds--; timerText.textContent = formatTime(sessionSeconds);
+    if (sessionSeconds === 120 && !sessionModalShown){ sessionModalShown=true; sessionModal.show(); }
+  },1000);
+}
+function resetSessionTimer(){
+  sessionSeconds = 15*60; timerText.textContent = formatTime(sessionSeconds);
+  sessionModalShown = false; if (sessionModal) sessionModal.hide();
+  startSessionTimer();
+}
+document.getElementById('continueSessionBtn').addEventListener('click', () => { sessionModal.hide(); resetSessionTimer(); });
+document.getElementById('endSessionBtn').addEventListener('click', () => { sessionModal.hide(); clearInterval(sessionInterval); Toast.show('Sessão encerrada','warning'); });
+document.addEventListener('click', () => resetSessionTimer());
+
+const themeToggle = document.getElementById('themeToggle');
+if ((localStorage.getItem('lugac_theme')||'light') === 'dark') document.body.classList.add('dark');
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  const d = document.body.classList.contains('dark');
+  localStorage.setItem('lugac_theme', d?'dark':'light');
+  themeToggle.innerHTML = d ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+});
+
+const sidebar = document.getElementById('sidebar');
+document.getElementById('toggleSidebar').addEventListener('click', function(){
+  sidebar.classList.toggle('collapsed');
+  this.innerHTML = sidebar.classList.contains('collapsed') ? '<i class="fas fa-chevron-right"></i> <span>Expandir</span>' : '<i class="fas fa-chevron-left"></i> <span>Compactar</span>';
+});
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => sidebar.classList.toggle('mobile-open'));
+
+function updateConn(){
+  const b = document.getElementById('connectionBadge');
+  if (navigator.onLine){ b.className='connection-badge online'; b.innerHTML='<i class="fas fa-circle"></i> <span>Online</span>'; }
+  else { b.className='connection-badge offline'; b.innerHTML='<i class="fas fa-circle"></i> <span>Offline — Dados locais</span>'; }
+}
+window.addEventListener('online', updateConn); window.addEventListener('offline', updateConn); updateConn();
+
+const notifModal = new bootstrap.Modal(document.getElementById('notifModal'));
+document.getElementById('notifBtn').addEventListener('click', () => {
+  document.getElementById('notifModalBody').innerHTML = DB.alerts.map(a => {
+    const cls = a.tipo==='critico'?'danger':a.tipo==='atencao'?'warning':a.tipo==='aviso'?'info':'primary';
+    const icon = a.tipo==='critico'?'fa-circle-exclamation':a.tipo==='atencao'?'fa-triangle-exclamation':a.tipo==='aviso'?'fa-calendar-day':'fa-info-circle';
+    return `<div class="d-flex align-items-start gap-3 py-2" style="border-bottom:1px solid var(--border-light);">
+      <i class="fas ${icon} mt-1" style="color:var(--${cls});"></i>
+      <div><div class="fw-bold">${a.titulo}</div><div>${a.msg}</div><small class="text-secondary">${a.detalhe}</small></div>
+    </div>`;
+  }).join('');
+  notifModal.show();
+});
+
+const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+document.getElementById('profileBtn').addEventListener('click', () => profileModal.show());
+document.getElementById('userProfileSidebar').addEventListener('click', () => profileModal.show());
+
+const commandModal = new bootstrap.Modal(document.getElementById('commandModal'));
+document.getElementById('commandBtn').addEventListener('click', () => {
+  document.getElementById('commandModalBody').innerHTML = `
+    <div class="profile-menu-item" onclick="Command.go('pedidos')"><i class="fas fa-receipt"></i><div><div class="fw-bold">📋 Ver Pedidos</div><small class="text-secondary">Central de pedidos</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('stock')"><i class="fas fa-boxes-stacked"></i><div><div class="fw-bold">📦 Monitorizar Stock</div><small class="text-secondary">Estado atual</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('compras')"><i class="fas fa-cart-shopping"></i><div><div class="fw-bold">🛒 Analisar Compras</div><small class="text-secondary">Sugestões de reposição</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('ai')"><i class="fas fa-robot"></i><div><div class="fw-bold">🤖 Perguntar à IA</div><small class="text-secondary">KITCHSYNC AI</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('relatorios')"><i class="fas fa-file-lines"></i><div><div class="fw-bold">📊 Ver Relatórios</div><small class="text-secondary">Análises e exportações</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('previsoes')"><i class="fas fa-crystal-ball"></i><div><div class="fw-bold">🔮 Ver Previsões</div><small class="text-secondary">Estimativas futuras</small></div></div>
+    <div class="profile-menu-item" onclick="Command.go('desperdicios')"><i class="fas fa-recycle"></i><div><div class="fw-bold">♻️ Centro de Desperdícios</div><small class="text-secondary">Análise de perdas</small></div></div>
+  `;
+  commandModal.show();
+});
+window.Command = { go: (id) => { commandModal.hide(); setTimeout(()=>openTab(id),200); } };
+
+function tickClock(){
+  const n = new Date();
+  const d = document.getElementById('currentDate');
+  const t = document.getElementById('currentTime');
+  if (d) d.textContent = n.toLocaleDateString('pt-PT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  if (t) t.textContent = n.toLocaleTimeString('pt-PT');
+}
+setInterval(tickClock,1000);
+
+/* ---------- INICIALIZAÇÃO ---------- */
+renderSidebar(); renderTabs(); activateTab('dashboard'); tickClock(); startSessionTimer();
+
+})();
+</script>
+</body>
+</html>

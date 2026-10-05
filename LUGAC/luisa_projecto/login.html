@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>LUGAC - Login</title>
+    <!-- Bootstrap 5 + Icons + Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ========== TEMA CLARO ========== */
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0.50);
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+            --text-primary: #1a2e2a;
+            --text-secondary: #4a6a5e;
+            --text-light: #ffffff;
+            --input-bg: #f7faf9;
+            --input-border: #dce5e2;
+            --input-focus: #2b7a4b;
+            --accent-green: #2b7a4b;
+            --accent-hover: #1e5a3a;
+            --accent-gradient: linear-gradient(135deg, #2b7a4b 0%, #1e5a3a 100%);
+            --progress-weak: #e53e3e;
+            --progress-medium: #ed8936;
+            --progress-strong: #2b7a4b;
+            --error-bg: #fee2e2;
+            --error-text: #b91c1c;
+            --card-radius: 24px;
+            --input-radius: 12px;
+        }
+
+        /* ========== TEMA ESCURO ========== */
+        body.dark {
+            --bg-overlay: rgba(0, 0, 0, 0.70);
+            --glass-bg: rgba(20, 30, 28, 0.88);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            --text-primary: #eef4f0;
+            --text-secondary: #b8d0c2;
+            --input-bg: #2a3c36;
+            --input-border: #3a4f48;
+            --input-focus: #4c9f70;
+            --accent-green: #4c9f70;
+            --accent-hover: #6bb886;
+            --accent-gradient: linear-gradient(135deg, #4c9f70 0%, #2b7a4b 100%);
+            --error-bg: #3b1e1e;
+            --error-text: #fca5a5;
+        }
+
+        /* ========== WRAPPER ========== */
+        .login-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            background-image: url('images/login.jpg');
+            background-position: center 30%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-overlay);
+            z-index: 0;
+        }
+
+        /* ========== SLOGAN (canto inferior) ========== */
+        .slogan-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+            padding: 0 2rem;
+            max-width: 650px;
+            pointer-events: none;
+        }
+
+        .slogan-overlay {
+            max-height: 60px;
+            width: auto;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4));
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-slogan{
+            width: 200px;
+            height: 200px;
+        }
+        .slogan-overlay h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .slogan-overlay p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+            margin-bottom: 0;
+        }
+
+        /* ========== PAINEL PRINCIPAL (vidro) ========== */
+        .form-panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            color: transparent;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: var(--card-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            padding: 2.5rem 2.5rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        /* ========== HEADER DO CARD ========== */
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-header-custom .brand-icon {
+            font-size: 2.6rem;
+            color: var(--accent-green);
+            display: inline-block;
+            
+            padding: 0.6rem;
+            border-radius: 90px;
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .card-header-custom .brand-icon {
+            
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .card-header-custom p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* ========== BOTÕES DE TEMA E IDIOMA ========== */
+        .top-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-btn {
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: 0.2s;
+            padding: 0.35rem 0.5rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+        }
+
+        body.dark .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+            color: var(--text-light);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.08);
+            background: rgba(43, 122, 75, 0.15);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        body.dark .action-btn:hover {
+            background: rgba(76, 159, 112, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .dropdown-menu-custom {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.4rem;
+            min-width: 160px;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(43, 122, 75, 0.1);
+            color: var(--accent-green);
+        }
+
+        body.dark .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        /* ========== FORMULÁRIO ========== */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .input-group-custom {
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: var(--input-radius);
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(43, 122, 75, 0.12);
+        }
+
+        body.dark .input-group-custom:focus-within {
+            box-shadow: 0 0 0 4px rgba(76, 159, 112, 0.15);
+        }
+
+        .form-control, .form-select {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            border-radius: var(--input-radius);
+            flex: 1;
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #a0b8b0;
+        }
+
+        body.dark .form-control::placeholder {
+            color: #6a8a7e;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: transparent;
+            box-shadow: none;
+            border-color: transparent;
+            color: var(--text-primary);
+        }
+
+        .form-select option {
+            background: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .input-group-text {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0 0 0 1rem;
+            font-size: 1rem;
+        }
+
+        .password-toggle-icon {
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0 1rem;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .password-toggle-icon:hover {
+            color: var(--accent-green);
+        }
+
+        /* ========== BARRA DE FORÇA ========== */
+        .strength-wrapper {
+            margin-top: 0.5rem;
+        }
+
+        .progress {
+            height: 4px;
+            border-radius: 8px;
+            background-color: var(--input-border);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        .strength-text {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* ========== BOTÃO ENVIAR CÓDIGO ========== */
+        .btn-outline-send {
+            border-radius: var(--input-radius);
+            padding: 0.4rem 1.2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 2px solid var(--accent-green);
+            background: transparent;
+            color: var(--accent-green);
+            transition: 0.25s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-outline-send:hover {
+            background: var(--accent-green);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(43, 122, 75, 0.25);
+        }
+
+        body.dark .btn-outline-send:hover {
+            box-shadow: 0 4px 16px rgba(76, 159, 112, 0.3);
+        }
+
+        /* ========== BOTÃO LOGIN ========== */
+        .btn-login {
+            background: var(--accent-gradient);
+            border: none;
+            padding: 0.85rem;
+            font-weight: 700;
+            border-radius: var(--input-radius);
+            font-size: 1rem;
+            transition: 0.3s ease;
+            color: #ffffff;
+            box-shadow: 0 6px 24px rgba(43, 122, 75, 0.25);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px rgba(43, 122, 75, 0.35);
+        }
+
+        .btn-login:active {
+            transform: translateY(0px);
+        }
+
+        body.dark .btn-login {
+            box-shadow: 0 6px 24px rgba(76, 159, 112, 0.2);
+        }
+
+        body.dark .btn-login:hover {
+            box-shadow: 0 10px 32px rgba(76, 159, 112, 0.3);
+        }
+
+        /* ========== LINKS ========== */
+        .link-underline {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .link-underline:hover {
+            text-decoration: underline;
+            color: var(--accent-hover);
+        }
+
+        /* ========== VALIDAÇÕES E ERROS ========== */
+        .invalid-feedback-custom {
+            font-size: 0.7rem;
+            color: var(--error-text);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .global-error {
+            background: var(--error-bg);
+            color: var(--error-text);
+            border-radius: var(--input-radius);
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            text-align: center;
+            border-left: 4px solid var(--error-text);
+            display: none;
+        }
+
+        .text-muted-custom {
+            font-size: 0.7rem;
+            color: var(--text-secondary) !important;
+            opacity: 0.8;
+        }
+
+        /* ========== RESPONSIVIDADE ========== */
+        @media (max-width: 576px) {
+            .login-wrapper {
+                padding: 1rem;
+                background-position: center 50%;
+            }
+
+            .login-card {
+                padding: 1.75rem 1.25rem 1.5rem;
+                border-radius: 20px;
+            }
+
+            .card-header-custom h2 {
+                font-size: 1.35rem;
+            }
+
+            .card-header-custom .brand-icon {
+                font-size: 2.2rem;
+                padding: 0.5rem;
+            }
+
+            .top-actions {
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+            }
+
+            .slogan-overlay {
+                bottom: 20px;
+                padding: 0 1rem;
+                max-width: 90%;
+            }
+
+            .slogan-overlay h2 {
+                font-size: 1.2rem;
+            }
+
+            .slogan-overlay p {
+                font-size: 0.75rem;
+            }
+
+            .slogan-overlay .logo-slogan {
+                max-height: 40px;
+            }
+
+            .btn-outline-send {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            .form-control, .form-select {
+                font-size: 0.9rem;
+                padding: 0.65rem 0.85rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .login-card {
+                padding: 1.25rem 1rem;
+            }
+
+            .d-flex.gap-2 {
+                flex-wrap: wrap;
+            }
+
+            .btn-outline-send {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* ========== ANIMAÇÃO DE ENTRADA ========== */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: fadeSlideUp 0.6s ease forwards;
+        }
+
+        .slogan-overlay {
+            animation: fadeSlideUp 0.8s ease 0.2s both;
+        }
+        
+        .logo-slogan1{
+            width:  50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <!-- PAINEL PRINCIPAL -->
+    <div class="form-panel">
+        <div class="login-card">
+            <!-- AÇÕES SUPERIORES -->
+            <div class="top-actions">
+                
+                
+                <button id="themeToggleBtn" class="action-btn" aria-label="Alternar tema">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="action-btn dropdown-toggle" type="button" id="langDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-globe2"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="langDropdown">
+                        <li><a class="dropdown-item lang-option" data-lang="pt" href="#">🇵🇹 Português</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="en" href="#">🇬🇧 English</a></li>
+                        <li><a class="dropdown-item lang-option" data-lang="es" href="#">🇪🇸 Español</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <div class="card-header-custom">
+                <div class="brand-icon">
+                    <a href="index.html">
+                        <img class="logo-slogan" src="images/lugac-logo.png" 
+                             alt="LUGAC">
+                    </a>
+                </div>
+                <h2 id="loginTitle">Acesso seguro</h2>
+                <p id="loginSubtitle">Entre no sistema LUGAC</p>
+            </div>
+
+            <!-- FORMULÁRIO -->
+            <form id="loginForm" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" id="emailLabel">E-mail</label>
+                    <div class="input-group-custom">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="emailInput" placeholder="exemplo@dominio.com" required>
+                    </div>
+                    <div class="invalid-feedback-custom" id="emailError"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" id="passwordLabel">Senha</label>
+                    <div class="input-group-custom">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="passwordInput" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle-icon" id="togglePasswordBtn" tabindex="-1">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
+                    <div class="strength-wrapper">
+                        <div class="progress">
+                            <div id="strengthBar" class="progress-bar" style="width: 0%; background-color: var(--progress-weak);"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText">Força: —</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" id="profileLabel">Perfil de acesso</label>
+                    <div class="input-group-custom">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <select id="profileSelect" class="form-select" required>
+                            <option value="" disabled selected>Selecione o seu perfil</option>
+                            <option value="admin">Administrador</option>
+                            <option value="gerente">Gerente</option>
+                            <option value="gestor">Gestor de Stock</option>
+                            <option value="cozinheiro">Cozinheiro</option>
+                            <option value="atendente">Atendente</option>
+                            <option value="cliente">Cliente</option>
+                        </select>
+                    </div>
+                    <div class="invalid-feedback-custom" id="profileError"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" id="tokenLabel">Código de verificação (2FA)</label>
+                    <div class="d-flex gap-2">
+                        <div class="input-group-custom flex-grow-1">
+                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                            <input type="text" class="form-control" id="tokenInput" placeholder="000000" maxlength="6" inputmode="numeric">
+                        </div>
+                        <button type="button" id="sendCodeBtn" class="btn-outline-send">
+                            <i class="fas fa-paper-plane"></i> Enviar
+                        </button>
+                    </div>
+                    <div class="invalid-feedback-custom" id="tokenError"></div>
+                    <small class="text-muted-custom" id="tokenHint">Clique em "Enviar" para receber (simulação) um token de 6 dígitos.</small>
+                </div>
+
+                <button type="submit" class="btn btn-login w-100 mt-2" id="loginBtn">
+                    <span id="btnText">Entrar na plataforma</span>
+                    <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+
+                <div id="globalErrorMessage" class="global-error"></div>
+
+                <div class="d-flex justify-content-between mt-3 flex-wrap gap-2">
+                    <a href="esqueci-me%20-senha.html" id="forgotLink" class="link-underline">🔐 Esqueci-me da senha</a>
+                    <a href="cadastro.html" id="signupLink" class="link-underline">📝 Criar conta</a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted-custom" id="demoNote">🔐 Credencial: demo@lugac.com | Senha: Demo@123</small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============================================================
+    //  TRADUÇÕES
+    // ============================================================
+    const translations = {
+        pt: {
+            loginTitle: "Acesso seguro",
+            loginSubtitle: "Entre no sistema LUGAC",
+            emailLabel: "E-mail",
+            passwordLabel: "Senha",
+            tokenLabel: "Código de verificação (2FA)",
+            tokenHint: "Clique em \"Enviar\" para receber (simulação) um token de 6 dígitos.",
+            btnText: "Entrar na plataforma",
+            demoNote: "🔐 Credencial: demo@lugac.com | Senha: Demo@123",
+            strengthPlaceholder: "Força: —",
+            weak: "Fraca",
+            medium: "Média",
+            strong: "Forte",
+            emailRequired: "E-mail é obrigatório",
+            emailInvalid: "Formato de e-mail inválido",
+            tokenInvalid: "Token deve conter 6 dígitos numéricos",
+            loginError: "❌ Falha: verifique e-mail, força da senha (mín. Média), token e perfil.",
+            codeSent: "📧 Código enviado para {email} (simulação): {code}",
+            profileLabel: "Perfil de acesso"
+        },
+        en: {
+            loginTitle: "Secure Access",
+            loginSubtitle: "Login to LUGAC system",
+            emailLabel: "Email",
+            passwordLabel: "Password",
+            tokenLabel: "Verification code (2FA)",
+            tokenHint: "Click \"Send\" to receive (simulation) a 6-digit token.",
+            btnText: "Sign in",
+            demoNote: "🔐 Credential: demo@vitalinka.com | Password: Demo@123",
+            strengthPlaceholder: "Strength: —",
+            weak: "Weak",
+            medium: "Medium",
+            strong: "Strong",
+            emailRequired: "Email is required",
+            emailInvalid: "Invalid email format",
+            tokenInvalid: "Token must be 6 numeric digits",
+            loginError: "❌ Authentication failed: check email, password strength (min. Medium), token and profile.",
+            codeSent: "📧 Code sent to {email} (simulation): {code}",
+            profileLabel: "Access profile"
+        },
+        es: {
+            loginTitle: "Acceso Seguro",
+            loginSubtitle: "Ingrese al sistema LUGAC",
+            emailLabel: "Correo",
+            passwordLabel: "Contraseña",
+            tokenLabel: "Código de verificación (2FA)",
+            tokenHint: "Haga clic en \"Enviar\" para recibir (simulación) un token de 6 dígitos.",
+            btnText: "Iniciar sesión",
+            demoNote: "🔐 Credencial: demo@lugac.com | Contraseña: Demo@123",
+            strengthPlaceholder: "Fortaleza: —",
+            weak: "Débil",
+            medium: "Media",
+            strong: "Fuerte",
+            emailRequired: "El correo es obligatorio",
+            emailInvalid: "Formato de correo inválido",
+            tokenInvalid: "El token debe tener 6 dígitos numéricos",
+            loginError: "❌ Fallo: verifique correo, fortaleza de contraseña (min. Media), token y perfil.",
+            codeSent: "📧 Código enviado a {email} (simulación): {code}",
+            profileLabel: "Perfil de acceso"
+        }
+    };
+
+    // ============================================================
+    //  ESTADO GLOBAL
+    // ============================================================
+    let currentLang = localStorage.getItem('kwendaLang') || 'pt';
+    let isDark = localStorage.getItem('kwendaTheme') === 'dark';
+    let currentVerificationCode = null;
+
+    // ============================================================
+    //  DOM REFS
+    // ============================================================
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const tokenInput = document.getElementById('tokenInput');
+    const profileSelect = document.getElementById('profileSelect');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const btnTextSpan = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const emailError = document.getElementById('emailError');
+    const tokenError = document.getElementById('tokenError');
+    const profileError = document.getElementById('profileError');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+    const globalErrorDiv = document.getElementById('globalErrorMessage');
+
+    const i18nEls = {
+        loginTitle: document.getElementById('loginTitle'),
+        loginSubtitle: document.getElementById('loginSubtitle'),
+        emailLabel: document.getElementById('emailLabel'),
+        passwordLabel: document.getElementById('passwordLabel'),
+        tokenLabel: document.getElementById('tokenLabel'),
+        tokenHint: document.getElementById('tokenHint'),
+        demoNote: document.getElementById('demoNote'),
+        profileLabel: document.getElementById('profileLabel')
+    };
+
+    // ============================================================
+    //  MAPEAMENTO DE PERFIS PARA REDIRECIONAMENTO
+    // ============================================================
+    const profileRedirects = {
+        'admin': 'perfil.html',
+        'gestor': 'perfil.html',
+        'cozinheiro': 'perfil.html',
+        'atendente': 'perfil.html',
+        'gerente': 'perfil.html',
+        'cliente': 'client.html'
+    };
+
+    // ============================================================
+    //  FUNÇÕES DE IDIOMA
+    // ============================================================
+    function applyLanguage() {
+        const t = translations[currentLang];
+        if (i18nEls.loginTitle) i18nEls.loginTitle.innerText = t.loginTitle;
+        if (i18nEls.loginSubtitle) i18nEls.loginSubtitle.innerText = t.loginSubtitle;
+        if (i18nEls.emailLabel) i18nEls.emailLabel.innerText = t.emailLabel;
+        if (i18nEls.passwordLabel) i18nEls.passwordLabel.innerText = t.passwordLabel;
+        if (i18nEls.tokenLabel) i18nEls.tokenLabel.innerText = t.tokenLabel;
+        if (i18nEls.tokenHint) i18nEls.tokenHint.innerText = t.tokenHint;
+        if (i18nEls.demoNote) i18nEls.demoNote.innerText = t.demoNote;
+        if (i18nEls.profileLabel) i18nEls.profileLabel.innerText = t.profileLabel;
+        if (btnTextSpan) btnTextSpan.innerText = t.btnText;
+        updateStrengthTextAndBar();
+    }
+
+    // ============================================================
+    //  FUNÇÕES DE FORÇA DE SENHA
+    // ============================================================
+    function checkPasswordStrength(password) {
+        let score = 0;
+        if (!password) return { score: 0, level: 'weak' };
+        if (password.length >= 6) score++;
+        if (password.length >= 10) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        let level = 'weak';
+        if (score >= 4) level = 'strong';
+        else if (score >= 2) level = 'medium';
+        return { score: Math.min(100, score * 20), level };
+    }
+
+    function updateStrengthTextAndBar() {
+        const pwd = passwordInput.value;
+        const { score, level } = checkPasswordStrength(pwd);
+        strengthBar.style.width = `${score}%`;
+        const t = translations[currentLang];
+        let levelText = '', color = '';
+        if (level === 'weak') { levelText = t.weak; color = 'var(--progress-weak)'; }
+        else if (level === 'medium') { levelText = t.medium; color = 'var(--progress-medium)'; }
+        else { levelText = t.strong; color = 'var(--progress-strong)'; }
+        strengthText.innerText = pwd ? `Força: ${levelText}` : t.strengthPlaceholder;
+        strengthBar.style.backgroundColor = color;
+        return level;
+    }
+
+    // ============================================================
+    //  VALIDAÇÕES
+    // ============================================================
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        if (!email) {
+            emailError.innerText = translations[currentLang].emailRequired;
+            return false;
+        }
+        const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailError.innerText = translations[currentLang].emailInvalid;
+            return false;
+        }
+        emailError.innerText = '';
+        return true;
+    }
+
+    function validateToken() {
+        const token = tokenInput.value.trim();
+        if (token.length === 0) {
+            tokenError.innerText = '';
+            return false;
+        }
+        const isValid = /^\d{6}$/.test(token);
+        if (!isValid) {
+            tokenError.innerText = translations[currentLang].tokenInvalid;
+            return false;
+        }
+        if (currentVerificationCode && token !== currentVerificationCode) {
+            tokenError.innerText = "Código inválido. Peça um novo.";
+            return false;
+        }
+        tokenError.innerText = '';
+        return true;
+    }
+
+    function validateProfile() {
+        const profile = profileSelect.value;
+        if (!profile) {
+            profileError.innerText = "Selecione um perfil de acesso";
+            return false;
+        }
+        profileError.innerText = '';
+        return true;
+    }
+
+    function showGlobalError(message) {
+        globalErrorDiv.innerText = message;
+        globalErrorDiv.style.display = 'block';
+        setTimeout(() => {
+            globalErrorDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // ============================================================
+    //  ENVIAR CÓDIGO
+    // ============================================================
+    function sendVerificationCode() {
+        if (!validateEmail()) {
+            showGlobalError(translations[currentLang].emailInvalid);
+            return;
+        }
+        const email = emailInput.value.trim();
+        const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+        currentVerificationCode = randomCode;
+        const t = translations[currentLang];
+        const msg = t.codeSent.replace('{email}', email).replace('{code}', randomCode);
+        alert(msg);
+        tokenError.innerText = '';
+        tokenInput.value = '';
+    }
+
+    // ============================================================
+    //  AUTENTICAÇÃO
+    // ============================================================
+    async function authenticate(email, password, token) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const emailValid = email && /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(email);
+                const pwdStrength = checkPasswordStrength(password).level;
+                const tokenValid = token && currentVerificationCode && token === currentVerificationCode;
+                const isTestAccount = (email === 'demo@lugac.com' && password === 'Demo@123');
+                if (emailValid && (pwdStrength === 'medium' || pwdStrength === 'strong' || isTestAccount) && tokenValid) {
+                    resolve({ success: true });
+                } else {
+                    resolve({ success: false, error: translations[currentLang].loginError });
+                }
+            }, 500);
+        });
+    }
+
+    // ============================================================
+    //  EVENTOS DO FORMULÁRIO
+    // ============================================================
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        globalErrorDiv.style.display = 'none';
+
+        const isEmailOk = validateEmail();
+        const isTokenOk = validateToken();
+        const isProfileOk = validateProfile();
+        const password = passwordInput.value;
+        const strengthLevel = checkPasswordStrength(password).level;
+        let pwdOk = (strengthLevel === 'medium' || strengthLevel === 'strong');
+        if (emailInput.value.trim() === 'demo@lugac.com' && password === 'Demo@123') pwdOk = true;
+
+        if (!isEmailOk || !isTokenOk || !pwdOk || !isProfileOk) {
+            showGlobalError(translations[currentLang].loginError);
+            return;
+        }
+
+        btnTextSpan.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        loginBtn.disabled = true;
+
+        const emailVal = emailInput.value.trim();
+        const tokenVal = tokenInput.value.trim();
+        const result = await authenticate(emailVal, password, tokenVal);
+
+        btnTextSpan.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        loginBtn.disabled = false;
+
+        if (result.success) {
+            const chosenProfile = profileSelect.value;
+            const redirectUrl = profileRedirects[chosenProfile] || 'client.html';
+            window.location.href = redirectUrl;
+        } else {
+            showGlobalError(result.error);
+        }
+    });
+
+    // ============================================================
+    //  EVENTOS DE INPUT
+    // ============================================================
+    sendCodeBtn.addEventListener('click', sendVerificationCode);
+    emailInput.addEventListener('input', validateEmail);
+    tokenInput.addEventListener('input', validateToken);
+    profileSelect.addEventListener('change', validateProfile);
+    passwordInput.addEventListener('input', updateStrengthTextAndBar);
+
+    // ============================================================
+    //  TEMA
+    // ============================================================
+    function setTheme(enableDark) {
+        if (enableDark) {
+            document.body.classList.add('dark');
+            localStorage.setItem('kwendaTheme', 'dark');
+            themeBtn.querySelector('i').className = 'bi bi-sun-fill';
+        } else {
+            document.body.classList.remove('dark');
+            localStorage.setItem('kwendaTheme', 'light');
+            themeBtn.querySelector('i').className = 'bi bi-moon-stars';
+        }
+    }
+
+    themeBtn.addEventListener('click', () => {
+        isDark = !isDark;
+        setTheme(isDark);
+    });
+
+    // ============================================================
+    //  IDIOMA
+    // ============================================================
+    document.querySelectorAll('.lang-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentLang = option.getAttribute('data-lang');
+            localStorage.setItem('kwendaLang', currentLang);
+            applyLanguage();
+            validateEmail();
+            validateToken();
+            updateStrengthTextAndBar();
+        });
+    });
+
+    // ============================================================
+    //  MOSTRAR/OCULTAR SENHA
+    // ============================================================
+    togglePasswordBtn.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        const icon = togglePasswordBtn.querySelector('i');
+        icon.className = type === 'text' ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    // ============================================================
+    //  MÁSCARA DO TOKEN
+    // ============================================================
+    tokenInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        validateToken();
+    });
+
+    // ============================================================
+    //  INICIALIZAÇÃO
+    // ============================================================
+    setTheme(isDark);
+    applyLanguage();
+    updateStrengthTextAndBar();
+</script>
+</body>
+</html>

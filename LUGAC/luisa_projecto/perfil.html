@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#2b7a4b">
+
+    <title>LUGAC | Verificação de Segurança</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+             font-family: 'Times New Roman', Times, serif;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================================
+           VARIÁVEIS - TEMA CLARO
+        ============================================================ */
+
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0.50);
+
+            --glass-bg: rgba(255, 255, 255, 0.92);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
+
+            --text-primary: #1a2e2a;
+            --text-secondary: #4a6a5e;
+            --text-light: #ffffff;
+
+            --input-bg: #f7faf9;
+            --input-border: #dce5e2;
+            --input-focus: #2b7a4b;
+
+            --accent-green: #2b7a4b;
+            --accent-hover: #1e5a3a;
+
+            --accent-gradient:
+                linear-gradient(
+                    135deg,
+                    #2b7a4b 0%,
+                    #1e5a3a 100%
+                );
+
+            --error-bg: #fee2e2;
+            --error-text: #b91c1c;
+
+            --success-bg: #d1fae5;
+            --success-text: #065f46;
+
+            --info-bg: #d1ecf1;
+            --info-text: #0c5460;
+
+            --card-radius: 24px;
+            --input-radius: 12px;
+        }
+
+        /* ============================================================
+           TEMA ESCURO
+        ============================================================ */
+
+        body.dark {
+            --bg-overlay: rgba(0, 0, 0, 0.70);
+
+            --glass-bg: rgba(20, 30, 28, 0.90);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+
+            --text-primary: #eef4f0;
+            --text-secondary: #b8d0c2;
+            --text-light: #ffffff;
+
+            --input-bg: #2a3c36;
+            --input-border: #3a4f48;
+            --input-focus: #4c9f70;
+
+            --accent-green: #4c9f70;
+            --accent-hover: #6bb886;
+
+            --accent-gradient:
+                linear-gradient(
+                    135deg,
+                    #4c9f70 0%,
+                    #2b7a4b 100%
+                );
+
+            --error-bg: #3b1e1e;
+            --error-text: #fca5a5;
+
+            --success-bg: #14352a;
+            --success-text: #86efac;
+
+            --info-bg: #1a3a3f;
+            --info-text: #8dd4e0;
+        }
+
+        /* ============================================================
+           WRAPPER
+        ============================================================ */
+
+        .verify-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 100vh;
+            width: 100%;
+
+            background-image: url('images/perfil.jpg');
+            background-position: center 30%;
+            background-size: cover;
+            background-repeat: no-repeat;
+
+            position: relative;
+
+            padding: 2rem;
+        }
+
+        .verify-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+
+            background: var(--bg-overlay);
+
+            z-index: 0;
+        }
+
+        /* ============================================================
+           PAINEL
+        ============================================================ */
+
+        .form-panel {
+            position: relative;
+            z-index: 1;
+
+            width: 100%;
+            max-width: 500px;
+
+            margin: 0 auto;
+        }
+
+        .verify-card {
+            background: var(--glass-bg);
+
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+            border-radius: var(--card-radius);
+            border: 1px solid var(--glass-border);
+
+            box-shadow: var(--glass-shadow);
+
+            padding: 2.5rem 2.5rem 2rem;
+
+            transition:
+                background 0.3s ease,
+                box-shadow 0.3s ease;
+
+            animation: fadeSlideUp 0.6s ease forwards;
+        }
+
+        /* ============================================================
+           HEADER
+        ============================================================ */
+
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-header-custom .brand-icon {
+            font-size: 2.6rem;
+            color: var(--accent-green);
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(43, 122, 75, 0.12);
+
+            padding: 0.6rem;
+            width: 70px;
+            height: 70px;
+
+            border-radius: 16px;
+
+            margin-bottom: 0.75rem;
+        }
+
+        body.dark .card-header-custom .brand-icon {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+
+            color: var(--text-primary);
+
+            margin-bottom: 0.2rem;
+        }
+
+        .card-header-custom p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* ============================================================
+           AÇÕES
+        ============================================================ */
+
+        .top-actions {
+            display: flex;
+            justify-content: flex-end;
+
+            gap: 0.75rem;
+
+            margin-bottom: 0.5rem;
+        }
+
+        .action-btn {
+            cursor: pointer;
+
+            background: rgba(255, 255, 255, 0.15);
+
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+
+            font-size: 1.2rem;
+
+            color: var(--text-primary);
+
+            transition: all 0.2s ease;
+
+            padding: 0.35rem 0.5rem;
+
+            border-radius: 50%;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 38px;
+            height: 38px;
+        }
+
+        body.dark .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.06);
+            color: var(--text-light);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.08);
+
+            background: rgba(43, 122, 75, 0.15);
+
+            border-color: var(--accent-green);
+
+            color: var(--accent-green);
+        }
+
+        body.dark .action-btn:hover {
+            background: rgba(76, 159, 112, 0.2);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .dropdown-menu-custom {
+            background: var(--glass-bg);
+
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+
+            border: 1px solid var(--glass-border);
+
+            border-radius: 12px;
+
+            padding: 0.4rem;
+
+            min-width: 160px;
+        }
+
+        .dropdown-menu-custom .dropdown-item {
+            color: var(--text-primary);
+
+            border-radius: 8px;
+
+            padding: 0.5rem 1rem;
+
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(43, 122, 75, 0.1);
+            color: var(--accent-green);
+        }
+
+        body.dark .dropdown-menu-custom .dropdown-item:hover {
+            background: rgba(76, 159, 112, 0.15);
+        }
+
+        /* ============================================================
+           FORMULÁRIO
+        ============================================================ */
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+
+            font-size: 0.85rem;
+
+            margin-bottom: 0.4rem;
+        }
+
+        .input-group-custom {
+            background: var(--input-bg);
+
+            border: 2px solid var(--input-border);
+
+            border-radius: var(--input-radius);
+
+            transition: all 0.25s ease;
+
+            display: flex;
+            align-items: center;
+
+            overflow: hidden;
+        }
+
+        .input-group-custom:focus-within {
+            border-color: var(--input-focus);
+
+            box-shadow:
+                0 0 0 4px rgba(43, 122, 75, 0.12);
+        }
+
+        body.dark .input-group-custom:focus-within {
+            box-shadow:
+                0 0 0 4px rgba(76, 159, 112, 0.15);
+        }
+
+        .form-control {
+            background: transparent;
+
+            border: none;
+
+            padding: 0.75rem 1rem;
+
+            color: var(--text-primary);
+
+            font-size: 0.95rem;
+
+            border-radius: var(--input-radius);
+
+            flex: 1;
+
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #a0b8b0;
+        }
+
+        body.dark .form-control::placeholder {
+            color: #6a8a7e;
+        }
+
+        .form-control:focus {
+            background: transparent;
+
+            box-shadow: none;
+
+            border-color: transparent;
+
+            color: var(--text-primary);
+        }
+
+        .input-group-text {
+            background: transparent;
+
+            border: none;
+
+            color: var(--text-secondary);
+
+            padding: 0 0 0 1rem;
+
+            font-size: 1rem;
+        }
+
+        /* ============================================================
+           PIN
+        ============================================================ */
+
+        .pin-toggle-icon {
+            cursor: pointer;
+
+            background: transparent;
+
+            border: none;
+
+            padding: 0 1rem;
+
+            font-size: 1.1rem;
+
+            color: var(--text-secondary);
+
+            transition: color 0.2s ease;
+        }
+
+        .pin-toggle-icon:hover,
+        .pin-toggle-icon:focus {
+            color: var(--accent-green);
+        }
+
+        /* ============================================================
+           BOTÃO VALIDAR
+        ============================================================ */
+
+        .btn-validate {
+            background: var(--accent-gradient);
+
+            border: none;
+
+            padding: 0.85rem;
+
+            font-weight: 700;
+
+            border-radius: var(--input-radius);
+
+            font-size: 1rem;
+
+            transition: 0.3s ease;
+
+            color: #ffffff;
+
+            box-shadow:
+                0 6px 24px rgba(43, 122, 75, 0.25);
+
+            letter-spacing: 0.3px;
+
+            width: 100%;
+        }
+
+        .btn-validate:hover:not(:disabled) {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 10px 32px rgba(43, 122, 75, 0.35);
+        }
+
+        .btn-validate:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-validate:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+
+        /* ============================================================
+           CANCELAR
+        ============================================================ */
+
+        .btn-cancel {
+            border-radius: var(--input-radius);
+
+            padding: 0.85rem;
+
+            font-size: 1rem;
+
+            font-weight: 600;
+
+            border: 2px solid var(--input-border);
+
+            background: transparent;
+
+            color: var(--text-secondary);
+
+            transition: 0.25s ease;
+
+            width: 100%;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            border-color: #e53e3e;
+
+            color: #e53e3e;
+
+            background: rgba(229, 62, 62, 0.05);
+
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* ============================================================
+           ERROS
+        ============================================================ */
+
+        .invalid-feedback-custom {
+            font-size: 0.72rem;
+
+            color: var(--error-text);
+
+            margin-top: 4px;
+
+            font-weight: 500;
+
+            min-height: 16px;
+        }
+
+        .global-error,
+        .global-success {
+            border-radius: var(--input-radius);
+
+            padding: 0.65rem 1rem;
+
+            font-size: 0.85rem;
+
+            margin-top: 1rem;
+
+            text-align: center;
+
+            display: none;
+        }
+
+        .global-error {
+            background: var(--error-bg);
+
+            color: var(--error-text);
+
+            border-left: 4px solid var(--error-text);
+        }
+
+        .global-success {
+            background: var(--success-bg);
+
+            color: var(--success-text);
+
+            border-left: 4px solid var(--accent-green);
+        }
+
+        /* ============================================================
+           PERFIL
+        ============================================================ */
+
+        .profile-badge {
+            background: rgba(43, 122, 75, 0.12);
+
+            border-radius: var(--input-radius);
+
+            padding: 0.8rem 1rem;
+
+            margin: 0.5rem 0 1.5rem;
+
+            text-align: center;
+
+            border: 1px solid var(--accent-green);
+
+            display: none;
+
+            animation: fadeSlideUp 0.4s ease forwards;
+        }
+
+        .profile-badge .profile-icon {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+
+        .profile-badge .profile-name {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .profile-badge .profile-role {
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        /* ============================================================
+           HINTS
+        ============================================================ */
+
+        .key-hint {
+            font-size: 0.75rem;
+
+            color: var(--text-secondary);
+
+            margin-top: 0.25rem;
+        }
+
+        .key-hint code {
+            background: var(--input-bg);
+
+            padding: 0.15rem 0.5rem;
+
+            border-radius: 4px;
+
+            font-size: 0.75rem;
+        }
+
+        .text-muted-custom {
+            font-size: 0.7rem;
+
+            color: var(--text-secondary) !important;
+
+            opacity: 0.8;
+        }
+
+        /* ============================================================
+           WELCOME
+        ============================================================ */
+
+        .welcome-message {
+            font-size: 0.95rem;
+
+            color: var(--text-primary);
+
+            margin-bottom: 1.5rem;
+
+            padding: 0.8rem 1rem;
+
+            background: rgba(43, 122, 75, 0.08);
+
+            border-radius: var(--input-radius);
+
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .welcome-message strong {
+            color: var(--accent-green);
+        }
+
+        /* ============================================================
+           SLOGAN
+        ============================================================ */
+
+        .slogan-overlay {
+            position: absolute;
+
+            bottom: 40px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            z-index: 2;
+
+            text-align: center;
+
+            color: #ffffff;
+
+            text-shadow:
+                0 4px 30px rgba(0, 0, 0, 0.6);
+
+            padding: 0 2rem;
+
+            max-width: 650px;
+
+            pointer-events: none;
+
+            animation:
+                fadeSlideUp 0.8s ease 0.2s both;
+        }
+
+        .slogan-overlay h2 {
+            font-size: 1.6rem;
+
+            font-weight: 700;
+
+            letter-spacing: 0.5px;
+
+            margin-bottom: 0.25rem;
+        }
+
+        .slogan-overlay p {
+            font-size: 0.9rem;
+
+            opacity: 0.9;
+
+            font-weight: 300;
+
+            letter-spacing: 0.3px;
+
+            margin-bottom: 0;
+        }
+
+        /* ============================================================
+           RESPONSIVIDADE
+        ============================================================ */
+
+        @media (max-width: 576px) {
+
+            .verify-wrapper {
+                padding: 1rem;
+
+                background-position: center 50%;
+            }
+
+            .verify-card {
+                padding: 1.75rem 1.25rem 1.5rem;
+
+                border-radius: 20px;
+            }
+
+            .card-header-custom h2 {
+                font-size: 1.35rem;
+            }
+
+            .card-header-custom .brand-icon {
+                font-size: 2.2rem;
+
+                width: 60px;
+                height: 60px;
+
+                padding: 0.5rem;
+            }
+
+            .top-actions {
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 34px;
+                height: 34px;
+
+                font-size: 1rem;
+            }
+
+            .slogan-overlay {
+                bottom: 20px;
+
+                padding: 0 1rem;
+
+                max-width: 90%;
+            }
+
+            .slogan-overlay h2 {
+                font-size: 1.2rem;
+            }
+
+            .slogan-overlay p {
+                font-size: 0.75rem;
+            }
+
+            .form-control {
+                font-size: 0.9rem;
+
+                padding: 0.65rem 0.85rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+
+            .verify-card {
+                padding: 1.25rem 1rem;
+            }
+
+            .welcome-message {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ============================================================
+           ANIMAÇÃO
+        ============================================================ */
+
+        @keyframes fadeSlideUp {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+        /* ============================================================
+           REDUÇÃO DE MOVIMENTO
+        ============================================================ */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="verify-wrapper">
+
+    <!-- ============================================================
+         PAINEL PRINCIPAL
+    ============================================================ -->
+
+    <div class="form-panel">
+
+        <div class="verify-card">
+
+            <!-- AÇÕES SUPERIORES -->
+            <div class="top-actions">
+
+                <button
+                    type="button"
+                    id="themeToggleBtn"
+                    class="action-btn"
+                    aria-label="Alternar tema"
+                    title="Alternar tema"
+                >
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+
+                <div class="dropdown">
+
+                    <button
+                        class="action-btn dropdown-toggle"
+                        type="button"
+                        id="langDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Selecionar idioma"
+                        title="Selecionar idioma"
+                    >
+                        <i class="bi bi-globe2"></i>
+                    </button>
+
+                    <ul
+                        class="dropdown-menu dropdown-menu-end dropdown-menu-custom"
+                        aria-labelledby="langDropdown"
+                    >
+                        <li>
+                            <a
+                                class="dropdown-item lang-option"
+                                data-lang="pt"
+                                href="#"
+                            >
+                                🇵🇹 Português
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item lang-option"
+                                data-lang="en"
+                                href="#"
+                            >
+                                🇬🇧 English
+                            </a>
+                        </li>
+
+                        <li>
+                            <a
+                                class="dropdown-item lang-option"
+                                data-lang="es"
+                                href="#"
+                            >
+                                🇪🇸 Español
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <!-- HEADER -->
+            <div class="card-header-custom">
+
+                <div class="brand-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+
+                <h2 id="verifyTitle">
+                    Verificação de Segurança
+                </h2>
+
+                <p id="verifySubtitle">
+                    Confirme a sua identidade para aceder ao sistema
+                </p>
+
+            </div>
+
+            <!-- MENSAGEM DE BOAS-VINDAS -->
+            <div
+                class="welcome-message"
+                id="welcomeMessage"
+                role="note"
+            >
+                <i class="bi bi-person-check me-2"></i>
+
+                <span id="welcomeText">
+                    Bem-vindo(a). Para concluir o acesso ao sistema,
+                    introduza a sua Chave Institucional e PIN de Segurança.
+                </span>
+            </div>
+
+            <!-- ========================================================
+                 FORMULÁRIO
+            ========================================================= -->
+
+            <form id="verifyForm" novalidate>
+
+                <!-- CHAVE INSTITUCIONAL -->
+                <div class="mb-3">
+
+                    <label
+                        class="form-label"
+                        id="keyLabel"
+                        for="institutionalKeyInput"
+                    >
+                        Chave Institucional
+                    </label>
+
+                    <div class="input-group-custom">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-key-fill"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="institutionalKeyInput"
+                            placeholder="LUGAC-ADM-000001"
+                            autocomplete="username"
+                            autocapitalize="characters"
+                            spellcheck="false"
+                            maxlength="16"
+                            required
+                        >
+
+                    </div>
+
+                    <div
+                        class="key-hint"
+                        id="keyHint"
+                    >
+                        Formato:
+                        <code>LUGAC-PERFIL-NÚMERO</code>
+                        (ex: LUGAC-ADM-000001)
+                    </div>
+
+                    <div
+                        class="invalid-feedback-custom"
+                        id="keyError"
+                        aria-live="polite"
+                    ></div>
+
+                </div>
+
+                <!-- PIN -->
+                <div class="mb-4">
+
+                    <label
+                        class="form-label"
+                        id="pinLabel"
+                        for="pinInput"
+                    >
+                        PIN de Segurança
+                    </label>
+
+                    <div class="input-group-custom">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-shield-shaded"></i>
+                        </span>
+
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="pinInput"
+                            placeholder="••••••"
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="pin-toggle-icon"
+                            id="togglePinBtn"
+                            aria-label="Mostrar PIN"
+                            title="Mostrar PIN"
+                        >
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="key-hint"
+                        id="pinHint"
+                    >
+                        PIN de 4 a 6 dígitos
+                        (atribuído pela administração)
+                    </div>
+
+                    <div
+                        class="invalid-feedback-custom"
+                        id="pinError"
+                        aria-live="polite"
+                    ></div>
+
+                </div>
+
+                <!-- PERFIL DETECTADO -->
+                <div
+                    id="profileBadge"
+                    class="profile-badge"
+                    aria-live="polite"
+                >
+
+                    <div class="profile-icon">
+                        <i
+                            id="detectedProfileIcon"
+                            class="bi bi-person-badge"
+                        ></i>
+                    </div>
+
+                    <div>
+
+                        <span
+                            class="profile-name"
+                            id="detectedProfileName"
+                        >
+                            Utilizador
+                        </span>
+
+                        <br>
+
+                        <span
+                            class="profile-role"
+                            id="detectedProfileRole"
+                        >
+                            Perfil
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- VALIDAR -->
+                <button
+                    type="submit"
+                    class="btn-validate mb-3"
+                    id="validateBtn"
+                >
+
+                    <span id="validateBtnText">
+                        Validar Acesso
+                    </span>
+
+                    <span
+                        id="validateSpinner"
+                        class="spinner-border spinner-border-sm ms-2 d-none"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+
+                </button>
+
+                <!-- CANCELAR -->
+                <button
+                    type="button"
+                    class="btn-cancel"
+                    id="cancelBtn"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    <span id="cancelBtnText">
+                        Cancelar Sessão
+                    </span>
+                </button>
+
+                <!-- MENSAGEM GLOBAL DE ERRO -->
+                <div
+                    id="globalErrorMessage"
+                    class="global-error"
+                    role="alert"
+                    aria-live="assertive"
+                ></div>
+
+                <!-- MENSAGEM GLOBAL DE SUCESSO -->
+                <div
+                    id="globalSuccessMessage"
+                    class="global-success"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+                <!-- NOTA -->
+                <div class="text-center mt-3">
+
+                    <small
+                        class="text-muted-custom"
+                        id="demoNote"
+                    >
+                        🔐 A Chave Institucional e PIN são atribuídos
+                        exclusivamente ao funcionário.
+                    </small>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js">
+</script>
+
+<script>
+
+    'use strict';
+
+    /* ================================================================
+       BASE DE DADOS DE CHAVES INSTITUCIONAIS + PIN
+       ================================================================
+
+       ATENÇÃO:
+       Estas credenciais ficam visíveis no navegador.
+       Para produção, mover esta validação para o servidor.
+    ================================================================= */
+
+    const institutionalKeys = {
+
+        'LUGAC-ADM-000001': {
+            name: 'Administrador',
+            profile: 'Administrador',
+            profileIcon: 'bi bi-shield-fill-check',
+            pin: '1234',
+            redirect: 'admin-dash.html'
+        },
+
+        'LUGAC-GER-000001': {
+            name: 'Gerente',
+            profile: 'Gerente',
+            profileIcon: 'bi bi-briefcase-fill',
+            pin: '2345',
+            redirect: 'gestor-dash.html'
+        },
+
+        'LUGAC-STO-000001': {
+            name: 'Stock',
+            profile: 'Stock',
+            profileIcon: 'bi bi-box-seam-fill',
+            pin: '3456',
+            redirect: 'stock_dash.html'
+        },
+
+        'LUGAC-COK-000001': {
+            name: 'Cozinheiro',
+            profile: 'Cozinheiro',
+            profileIcon: 'bi bi-egg-fried',
+            pin: '4567',
+            redirect: 'cook-dash.html'
+        },
+
+        'LUGAC-ATD-000001': {
+            name: 'Atendente',
+            profile: 'Atendente',
+            profileIcon: 'bi bi-person-heart',
+            pin: '0123',
+            redirect: 'garcon_dash.html'
+        }
+
+    };
+
+
+    /* ================================================================
+       TRADUÇÕES
+    ================================================================= */
+
+    const translations = {
+
+        pt: {
+
+            verifyTitle:
+                'Verificação de Segurança',
+
+            verifySubtitle:
+                'Confirme a sua identidade para aceder ao sistema',
+
+            keyLabel:
+                'Chave Institucional',
+
+            pinLabel:
+                'PIN de Segurança',
+
+            validateBtnText:
+                'Validar Acesso',
+
+            cancelBtnText:
+                'Cancelar Sessão',
+
+            demoNote:
+                '🔐 A Chave Institucional e PIN são atribuídos exclusivamente ao funcionário.',
+
+            keyHint:
+                'Formato: <code>LUGAC-PERFIL-NÚMERO</code> (ex: LUGAC-ADM-000001)',
+
+            pinHint:
+                'PIN de 4 a 6 dígitos (atribuído pela administração)',
+
+            welcomeText:
+                'Bem-vindo(a). Para concluir o acesso ao sistema, introduza a sua Chave Institucional e PIN de Segurança.',
+
+            keyRequired:
+                'A Chave Institucional é obrigatória.',
+
+            keyInvalid:
+                'Chave Institucional inválida. Use o formato LUGAC-ADM-000001.',
+
+            keyNotFound:
+                'Chave Institucional não encontrada.',
+
+            pinRequired:
+                'O PIN de Segurança é obrigatório.',
+
+            pinInvalid:
+                'PIN inválido. Deve ter 4 a 6 dígitos.',
+
+            pinNotFound:
+                'PIN incorreto. Verifique e tente novamente.',
+
+            accessGranted:
+                '✅ Acesso concedido. Redirecionando para o dashboard...',
+
+            accessDenied:
+                '❌ Acesso negado. Redirecionando para a página de erro...',
+
+            sessionCancelled:
+                'Sessão cancelada. A ser redirecionado para o login...'
+        },
+
+        en: {
+
+            verifyTitle:
+                'Security Verification',
+
+            verifySubtitle:
+                'Confirm your identity to access the system',
+
+            keyLabel:
+                'Institutional Key',
+
+            pinLabel:
+                'Security PIN',
+
+            validateBtnText:
+                'Validate Access',
+
+            cancelBtnText:
+                'Cancel Session',
+
+            demoNote:
+                '🔐 The Institutional Key and PIN are assigned exclusively to the employee.',
+
+            keyHint:
+                'Format: <code>LUGAC-PROFILE-NUMBER</code> (e.g.: LUGAC-ADM-000001)',
+
+            pinHint:
+                '4 to 6 digit PIN (assigned by administration)',
+
+            welcomeText:
+                'Welcome. To complete system access, enter your Institutional Key and Security PIN.',
+
+            keyRequired:
+                'Institutional Key is required.',
+
+            keyInvalid:
+                'Invalid Institutional Key. Use the format LUGAC-ADM-000001.',
+
+            keyNotFound:
+                'Institutional Key not found.',
+
+            pinRequired:
+                'Security PIN is required.',
+
+            pinInvalid:
+                'Invalid PIN. It must contain 4 to 6 digits.',
+
+            pinNotFound:
+                'Incorrect PIN. Check and try again.',
+
+            accessGranted:
+                '✅ Access granted. Redirecting to dashboard...',
+
+            accessDenied:
+                '❌ Access denied. Redirecting to error page...',
+
+            sessionCancelled:
+                'Session cancelled. Redirecting to login...'
+        },
+
+        es: {
+
+            verifyTitle:
+                'Verificación de Seguridad',
+
+            verifySubtitle:
+                'Confirme su identidad para acceder al sistema',
+
+            keyLabel:
+                'Clave Institucional',
+
+            pinLabel:
+                'PIN de Seguridad',
+
+            validateBtnText:
+                'Validar Acceso',
+
+            cancelBtnText:
+                'Cancelar Sesión',
+
+            demoNote:
+                '🔐 La Clave Institucional y PIN se asignan exclusivamente al empleado.',
+
+            keyHint:
+                'Formato: <code>LUGAC-PERFIL-NÚMERO</code> (ej.: LUGAC-ADM-000001)',
+
+            pinHint:
+                'PIN de 4 a 6 dígitos (asignado por la administración)',
+
+            welcomeText:
+                'Bienvenido(a). Para completar el acceso al sistema, introduzca su Clave Institucional y PIN de Seguridad.',
+
+            keyRequired:
+                'La Clave Institucional es obligatoria.',
+
+            keyInvalid:
+                'Clave Institucional inválida. Use el formato LUGAC-ADM-000001.',
+
+            keyNotFound:
+                'Clave Institucional no encontrada.',
+
+            pinRequired:
+                'El PIN de Seguridad es obligatorio.',
+
+            pinInvalid:
+                'PIN inválido. Debe tener de 4 a 6 dígitos.',
+
+            pinNotFound:
+                'PIN incorrecto. Verifique e intente de nuevo.',
+
+            accessGranted:
+                '✅ Acceso concedido. Redirigiendo al dashboard...',
+
+            accessDenied:
+                '❌ Acceso denegado. Redirigiendo a la página de error...',
+
+            sessionCancelled:
+                'Sesión cancelada. Redirigiendo al login...'
+        }
+
+    };
+
+
+    /* ================================================================
+       ESTADO GLOBAL
+    ================================================================= */
+
+    const savedLang =
+        localStorage.getItem('vitalinkaLang');
+
+    const savedTheme =
+        localStorage.getItem('vitalinkaTheme');
+
+    let currentLang =
+        translations[savedLang]
+            ? savedLang
+            : 'pt';
+
+    let isDark =
+        savedTheme === 'dark';
+
+    let isProcessing = false;
+    let redirecting = false;
+
+
+    /* ================================================================
+       REFERÊNCIAS DOM
+    ================================================================= */
+
+    const themeBtn =
+        document.getElementById('themeToggleBtn');
+
+    const institutionalKeyInput =
+        document.getElementById('institutionalKeyInput');
+
+    const pinInput =
+        document.getElementById('pinInput');
+
+    const validateBtn =
+        document.getElementById('validateBtn');
+
+    const cancelBtn =
+        document.getElementById('cancelBtn');
+
+    const verifyForm =
+        document.getElementById('verifyForm');
+
+    const globalError =
+        document.getElementById('globalErrorMessage');
+
+    const globalSuccess =
+        document.getElementById('globalSuccessMessage');
+
+    const profileBadge =
+        document.getElementById('profileBadge');
+
+    const detectedProfileName =
+        document.getElementById('detectedProfileName');
+
+    const detectedProfileRole =
+        document.getElementById('detectedProfileRole');
+
+    const detectedProfileIcon =
+        document.getElementById('detectedProfileIcon');
+
+    const keyError =
+        document.getElementById('keyError');
+
+    const pinError =
+        document.getElementById('pinError');
+
+    const validateBtnText =
+        document.getElementById('validateBtnText');
+
+    const validateSpinner =
+        document.getElementById('validateSpinner');
+
+    const welcomeText =
+        document.getElementById('welcomeText');
+
+    const togglePinBtn =
+        document.getElementById('togglePinBtn');
+
+    const i18nEls = {
+
+        verifyTitle:
+            document.getElementById('verifyTitle'),
+
+        verifySubtitle:
+            document.getElementById('verifySubtitle'),
+
+        keyLabel:
+            document.getElementById('keyLabel'),
+
+        pinLabel:
+            document.getElementById('pinLabel'),
+
+        demoNote:
+            document.getElementById('demoNote'),
+
+        keyHint:
+            document.getElementById('keyHint'),
+
+        pinHint:
+            document.getElementById('pinHint'),
+
+        cancelBtnText:
+            document.getElementById('cancelBtnText')
+    };
+
+
+    /* ================================================================
+       APLICAÇÃO DO IDIOMA
+    ================================================================= */
+
+    function applyLanguage() {
+
+        const t =
+            translations[currentLang];
+
+        if (!t) {
+            currentLang = 'pt';
+        }
+
+        const language =
+            translations[currentLang];
+
+        i18nEls.verifyTitle.innerText =
+            language.verifyTitle;
+
+        i18nEls.verifySubtitle.innerText =
+            language.verifySubtitle;
+
+        i18nEls.keyLabel.innerText =
+            language.keyLabel;
+
+        i18nEls.pinLabel.innerText =
+            language.pinLabel;
+
+        i18nEls.demoNote.innerText =
+            language.demoNote;
+
+        i18nEls.keyHint.innerHTML =
+            language.keyHint;
+
+        i18nEls.pinHint.innerHTML =
+            language.pinHint;
+
+        i18nEls.cancelBtnText.innerText =
+            language.cancelBtnText;
+
+        validateBtnText.innerText =
+            language.validateBtnText;
+
+        welcomeText.innerText =
+            language.welcomeText;
+
+        clearValidationMessages();
+    }
+
+
+    /* ================================================================
+       LIMPAR MENSAGENS
+    ================================================================= */
+
+    function clearValidationMessages() {
+
+        keyError.innerText = '';
+        pinError.innerText = '';
+
+        globalError.style.display = 'none';
+        globalSuccess.style.display = 'none';
+    }
+
+
+    /* ================================================================
+       VALIDAR CHAVE
+    ================================================================= */
+
+    function validateKey() {
+
+        const key =
+            institutionalKeyInput.value
+                .trim()
+                .toUpperCase();
+
+        if (!key) {
+
+            keyError.innerText =
+                translations[currentLang].keyRequired;
+
+            return false;
+        }
+
+        /*
+         * CORREÇÃO PRINCIPAL:
+         *
+         * Formato real:
+         * LUGAC-ADM-000001
+         *
+         * Regex anterior:
+         * /^LUGAC[A-Z]{3,4}-\d{6}$/
+         *
+         * estava incorreto porque faltava o "-" depois de LUGAC
+         * e também não aceitava corretamente o perfil.
+         */
+
+        const keyRegex =
+            /^LUGAC-[A-Z]{3,4}-\d{6}$/;
+
+        if (!keyRegex.test(key)) {
+
+            keyError.innerText =
+                translations[currentLang].keyInvalid;
+
+            return false;
+        }
+
+        keyError.innerText = '';
+
+        return true;
+    }
+
+
+    /* ================================================================
+       VALIDAR PIN
+    ================================================================= */
+
+    function validatePin() {
+
+        const pin =
+            pinInput.value.trim();
+
+        if (!pin) {
+
+            pinError.innerText =
+                translations[currentLang].pinRequired;
+
+            return false;
+        }
+
+        if (!/^\d{4,6}$/.test(pin)) {
+
+            pinError.innerText =
+                translations[currentLang].pinInvalid;
+
+            return false;
+        }
+
+        pinError.innerText = '';
+
+        return true;
+    }
+
+
+    /* ================================================================
+       MENSAGEM DE ERRO
+    ================================================================= */
+
+    function showError(message, duration = 3000) {
+
+        globalError.innerText =
+            message;
+
+        globalError.style.display =
+            'block';
+
+        globalSuccess.style.display =
+            'none';
+
+        window.clearTimeout(
+            showError.timeout
+        );
+
+        showError.timeout =
+            window.setTimeout(() => {
+
+                globalError.style.display =
+                    'none';
+
+            }, duration);
+    }
+
+
+    /* ================================================================
+       MENSAGEM DE SUCESSO
+    ================================================================= */
+
+    function showSuccess(message, duration = 3000) {
+
+        globalSuccess.innerText =
+            message;
+
+        globalSuccess.style.display =
+            'block';
+
+        globalError.style.display =
+            'none';
+
+        window.clearTimeout(
+            showSuccess.timeout
+        );
+
+        showSuccess.timeout =
+            window.setTimeout(() => {
+
+                globalSuccess.style.display =
+                    'none';
+
+            }, duration);
+    }
+
+
+    /* ================================================================
+       MOSTRAR PERFIL
+    ================================================================= */
+
+    function showProfile(data) {
+
+        detectedProfileName.innerText =
+            data.name;
+
+        detectedProfileRole.innerText =
+            data.profile;
+
+        detectedProfileIcon.className =
+            data.profileIcon || 'bi bi-person-badge';
+
+        profileBadge.style.display =
+            'block';
+    }
+
+
+    /* ================================================================
+       ESCONDER PERFIL
+    ================================================================= */
+
+    function hideProfile() {
+
+        profileBadge.style.display =
+            'none';
+    }
+
+
+    /* ================================================================
+       REDIRECIONAMENTO
+    ================================================================= */
+
+    function redirectTo(url) {
+
+        if (redirecting) {
+            return;
+        }
+
+        redirecting = true;
+
+        window.location.replace(url);
+    }
+
+
+    function redirectTo403() {
+
+        redirectTo('403.html');
+    }
+
+
+    /* ================================================================
+       ESTADO DE CARREGAMENTO
+    ================================================================= */
+
+    function setLoading(loading) {
+
+        validateBtn.disabled =
+            loading;
+
+        cancelBtn.disabled =
+            loading;
+
+        institutionalKeyInput.disabled =
+            loading;
+
+        pinInput.disabled =
+            loading;
+
+        togglePinBtn.disabled =
+            loading;
+
+        if (loading) {
+
+            validateBtnText.classList.add(
+                'd-none'
+            );
+
+            validateSpinner.classList.remove(
+                'd-none'
+            );
+
+        } else {
+
+            validateBtnText.classList.remove(
+                'd-none'
+            );
+
+            validateSpinner.classList.add(
+                'd-none'
+            );
+        }
+    }
+
+
+    /* ================================================================
+       SUBMISSÃO DO FORMULÁRIO
+    ================================================================= */
+
+    verifyForm.addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+            if (isProcessing || redirecting) {
+                return;
+            }
+
+            clearValidationMessages();
+            hideProfile();
+
+            isProcessing = true;
+
+            const keyValid =
+                validateKey();
+
+            const pinValid =
+                validatePin();
+
+            /*
+             * Se o formato estiver errado,
+             * mantém o comportamento original:
+             * envia para 403.
+             */
+
+            if (!keyValid || !pinValid) {
+
+                isProcessing = false;
+
+                window.setTimeout(() => {
+                    redirectTo403();
+                }, 250);
+
+                return;
+            }
+
+            setLoading(true);
+
+            /*
+             * Pequeno atraso visual.
+             * Em produção, substituir por chamada à API.
+             */
+
+            await new Promise(resolve => {
+                window.setTimeout(resolve, 600);
+            });
+
+            const key =
+                institutionalKeyInput.value
+                    .trim()
+                    .toUpperCase();
+
+            const pin =
+                pinInput.value.trim();
+
+            const keyData =
+                institutionalKeys[key];
+
+            /*
+             * Se a chave não existir
+             * ou o PIN não corresponder.
+             */
+
+            if (!keyData || keyData.pin !== pin) {
+
+                setLoading(false);
+
+                isProcessing = false;
+
+                redirectTo403();
+
+                return;
+            }
+
+            /*
+             * CREDENCIAL CORRETA
+             */
+
+            showProfile(keyData);
+
+            setLoading(false);
+
+            isProcessing = false;
+
+            showSuccess(
+                translations[currentLang].accessGranted,
+                2500
+            );
+
+            window.setTimeout(() => {
+
+                redirectTo(
+                    keyData.redirect
+                );
+
+            }, 1800);
+        }
+    );
+
+
+    /* ================================================================
+       CANCELAR SESSÃO
+    ================================================================= */
+
+    cancelBtn.addEventListener(
+        'click',
+        function () {
+
+            if (isProcessing || redirecting) {
+                return;
+            }
+
+            showSuccess(
+                translations[currentLang].sessionCancelled,
+                1600
+            );
+
+            window.setTimeout(() => {
+
+                redirectTo('login.html');
+
+            }, 1200);
+        }
+    );
+
+
+    /* ================================================================
+       INPUT DA CHAVE
+    ================================================================= */
+
+    institutionalKeyInput.addEventListener(
+        'input',
+        function () {
+
+            this.value =
+                this.value
+                    .toUpperCase()
+                    .replace(/\s/g, '');
+
+            keyError.innerText = '';
+
+            hideProfile();
+        }
+    );
+
+
+    /* ================================================================
+       INPUT DO PIN
+    ================================================================= */
+
+    pinInput.addEventListener(
+        'input',
+        function () {
+
+            this.value =
+                this.value
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
+
+            pinError.innerText = '';
+
+            hideProfile();
+        }
+    );
+
+
+    /* ================================================================
+       MOSTRAR / OCULTAR PIN
+    ================================================================= */
+
+    togglePinBtn.addEventListener(
+        'click',
+        function () {
+
+            const isPassword =
+                pinInput.type === 'password';
+
+            pinInput.type =
+                isPassword
+                    ? 'text'
+                    : 'password';
+
+            const icon =
+                togglePinBtn.querySelector('i');
+
+            icon.className =
+                isPassword
+                    ? 'bi bi-eye'
+                    : 'bi bi-eye-slash';
+
+            togglePinBtn.setAttribute(
+                'aria-label',
+                isPassword
+                    ? 'Ocultar PIN'
+                    : 'Mostrar PIN'
+            );
+
+            togglePinBtn.setAttribute(
+                'title',
+                isPassword
+                    ? 'Ocultar PIN'
+                    : 'Mostrar PIN'
+            );
+        }
+    );
+
+
+    /* ================================================================
+       TEMA
+    ================================================================= */
+
+    function setTheme(enableDark) {
+
+        isDark =
+            Boolean(enableDark);
+
+        if (isDark) {
+
+            document.body.classList.add(
+                'dark'
+            );
+
+            localStorage.setItem(
+                'vitalinkaTheme',
+                'dark'
+            );
+
+            const icon =
+                themeBtn.querySelector('i');
+
+            icon.className =
+                'bi bi-sun-fill';
+
+            themeBtn.setAttribute(
+                'aria-label',
+                'Ativar tema claro'
+            );
+
+            themeBtn.setAttribute(
+                'title',
+                'Ativar tema claro'
+            );
+
+        } else {
+
+            document.body.classList.remove(
+                'dark'
+            );
+
+            localStorage.setItem(
+                'vitalinkaTheme',
+                'light'
+            );
+
+            const icon =
+                themeBtn.querySelector('i');
+
+            icon.className =
+                'bi bi-moon-stars';
+
+            themeBtn.setAttribute(
+                'aria-label',
+                'Ativar tema escuro'
+            );
+
+            themeBtn.setAttribute(
+                'title',
+                'Ativar tema escuro'
+            );
+        }
+    }
+
+
+    themeBtn.addEventListener(
+        'click',
+        function () {
+
+            setTheme(!isDark);
+
+        }
+    );
+
+
+    /* ================================================================
+       IDIOMA
+    ================================================================= */
+
+    document
+        .querySelectorAll('.lang-option')
+        .forEach(option => {
+
+            option.addEventListener(
+                'click',
+                function (event) {
+
+                    event.preventDefault();
+
+                    const selectedLang =
+                        option.getAttribute(
+                            'data-lang'
+                        );
+
+                    if (
+                        !translations[selectedLang]
+                    ) {
+                        return;
+                    }
+
+                    currentLang =
+                        selectedLang;
+
+                    localStorage.setItem(
+                        'vitalinkaLang',
+                        currentLang
+                    );
+
+                    applyLanguage();
+                }
+            );
+        });
+
+
+    /* ================================================================
+       INICIALIZAÇÃO
+    ================================================================= */
+
+    setTheme(isDark);
+
+    applyLanguage();
+
+</script>
+
+</body>
+</html>
