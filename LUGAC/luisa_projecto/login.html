@@ -652,11 +652,11 @@
                             <input type="text" class="form-control" id="tokenInput" placeholder="000000" maxlength="6" inputmode="numeric">
                         </div>
                         <button type="button" id="sendCodeBtn" class="btn-outline-send">
-                            <i class="fas fa-paper-plane"></i> Enviar
+                            Solicitar Código <i class="fas fa-envelope-open-text"></i> 
                         </button>
                     </div>
                     <div class="invalid-feedback-custom" id="tokenError"></div>
-                    <small class="text-muted-custom" id="tokenHint">Clique em "Enviar" para receber (simulação) um token de 6 dígitos.</small>
+                    <small class="text-muted-custom" id="tokenHint">Clique em "Solicitar" para receber (simulação) um token de 6 dígitos.</small>
                 </div>
 
                 <button type="submit" class="btn btn-login w-100 mt-2" id="loginBtn">
@@ -691,7 +691,7 @@
             emailLabel: "E-mail",
             passwordLabel: "Senha",
             tokenLabel: "Código de verificação (2FA)",
-            tokenHint: "Clique em \"Enviar\" para receber (simulação) um token de 6 dígitos.",
+            tokenHint: "Clique em \"Solicitar Código\" para receber (simulação) um token de 6 dígitos.",
             btnText: "Entrar na plataforma",
             demoNote: "🔐 Credencial: demo@lugac.com | Senha: Demo@123",
             strengthPlaceholder: "Força: —",
@@ -703,7 +703,22 @@
             tokenInvalid: "Token deve conter 6 dígitos numéricos",
             loginError: "❌ Falha: verifique e-mail, força da senha (mín. Média), token e perfil.",
             codeSent: "📧 Código enviado para {email} (simulação): {code}",
-            profileLabel: "Perfil de acesso"
+            profileLabel: "Perfil de acesso",
+            profileRequired: "Selecione um perfil de acesso",
+            tokenMismatch: "Código inválido. Peça um novo.",
+            profilePlaceholder: "Selecione o seu perfil",
+            profileAdmin: "Administrador",
+            profileManager: "Gerente",
+            profileStockManager: "Gestor de Stock",
+            profileCook: "Cozinheiro",
+            profileAttendant: "Atendente",
+            profileClient: "Cliente",
+            sendCodeBtn: "Solicitar Código",
+            emailPlaceholder: "exemplo@dominio.com",
+            passwordPlaceholder: "••••••••",
+            tokenPlaceholder: "000000",
+            forgotLink: "🔐 Esqueci-me da senha",
+            signupLink: "📝 Criar conta"
         },
         en: {
             loginTitle: "Secure Access",
@@ -711,9 +726,9 @@
             emailLabel: "Email",
             passwordLabel: "Password",
             tokenLabel: "Verification code (2FA)",
-            tokenHint: "Click \"Send\" to receive (simulation) a 6-digit token.",
+            tokenHint: "Click \"Request Code\" to receive (simulation) a 6-digit token.",
             btnText: "Sign in",
-            demoNote: "🔐 Credential: demo@vitalinka.com | Password: Demo@123",
+            demoNote: "🔐 Credential: demo@lugac.com | Password: Demo@123",
             strengthPlaceholder: "Strength: —",
             weak: "Weak",
             medium: "Medium",
@@ -723,7 +738,22 @@
             tokenInvalid: "Token must be 6 numeric digits",
             loginError: "❌ Authentication failed: check email, password strength (min. Medium), token and profile.",
             codeSent: "📧 Code sent to {email} (simulation): {code}",
-            profileLabel: "Access profile"
+            profileLabel: "Access profile",
+            profileRequired: "Select an access profile",
+            tokenMismatch: "Invalid code. Request a new one.",
+            profilePlaceholder: "Select your profile",
+            profileAdmin: "Administrator",
+            profileManager: "Manager",
+            profileStockManager: "Stock Manager",
+            profileCook: "Cook",
+            profileAttendant: "Attendant",
+            profileClient: "Client",
+            sendCodeBtn: "Request Code",
+            emailPlaceholder: "example@domain.com",
+            passwordPlaceholder: "••••••••",
+            tokenPlaceholder: "000000",
+            forgotLink: "🔐 Forgot password",
+            signupLink: "📝 Create account"
         },
         es: {
             loginTitle: "Acceso Seguro",
@@ -731,7 +761,7 @@
             emailLabel: "Correo",
             passwordLabel: "Contraseña",
             tokenLabel: "Código de verificación (2FA)",
-            tokenHint: "Haga clic en \"Enviar\" para recibir (simulación) un token de 6 dígitos.",
+            tokenHint: "Haga clic en \"Solicitar Código\" para recibir (simulación) un token de 6 dígitos.",
             btnText: "Iniciar sesión",
             demoNote: "🔐 Credencial: demo@lugac.com | Contraseña: Demo@123",
             strengthPlaceholder: "Fortaleza: —",
@@ -743,7 +773,22 @@
             tokenInvalid: "El token debe tener 6 dígitos numéricos",
             loginError: "❌ Fallo: verifique correo, fortaleza de contraseña (min. Media), token y perfil.",
             codeSent: "📧 Código enviado a {email} (simulación): {code}",
-            profileLabel: "Perfil de acceso"
+            profileLabel: "Perfil de acceso",
+            profileRequired: "Seleccione un perfil de acceso",
+            tokenMismatch: "Código inválido. Solicite uno nuevo.",
+            profilePlaceholder: "Seleccione su perfil",
+            profileAdmin: "Administrador",
+            profileManager: "Gerente",
+            profileStockManager: "Gestor de Stock",
+            profileCook: "Cocinero",
+            profileAttendant: "Asistente",
+            profileClient: "Cliente",
+            sendCodeBtn: "Solicitar Código",
+            emailPlaceholder: "ejemplo@dominio.com",
+            passwordPlaceholder: "••••••••",
+            tokenPlaceholder: "000000",
+            forgotLink: "🔐 Olvidé mi contraseña",
+            signupLink: "📝 Crear cuenta"
         }
     };
 
@@ -774,6 +819,8 @@
     const sendCodeBtn = document.getElementById('sendCodeBtn');
     const togglePasswordBtn = document.getElementById('togglePasswordBtn');
     const globalErrorDiv = document.getElementById('globalErrorMessage');
+    const forgotLink = document.getElementById('forgotLink');
+    const signupLink = document.getElementById('signupLink');
 
     const i18nEls = {
         loginTitle: document.getElementById('loginTitle'),
@@ -812,7 +859,63 @@
         if (i18nEls.demoNote) i18nEls.demoNote.innerText = t.demoNote;
         if (i18nEls.profileLabel) i18nEls.profileLabel.innerText = t.profileLabel;
         if (btnTextSpan) btnTextSpan.innerText = t.btnText;
+        
+        // Atualizar botão de solicitar código (mantendo o ícone)
+        if (sendCodeBtn) {
+            // Preservar o ícone e substituir apenas o texto
+            const icon = sendCodeBtn.querySelector('i');
+            sendCodeBtn.innerText = t.sendCodeBtn + ' ';
+            if (icon) {
+                sendCodeBtn.appendChild(icon);
+            }
+        }
+        
+        // Atualizar placeholders
+        if (emailInput) emailInput.placeholder = t.emailPlaceholder;
+        if (passwordInput) passwordInput.placeholder = t.passwordPlaceholder;
+        if (tokenInput) tokenInput.placeholder = t.tokenPlaceholder;
+        
+        // Atualizar links
+        if (forgotLink) forgotLink.innerText = t.forgotLink;
+        if (signupLink) signupLink.innerText = t.signupLink;
+        
         updateStrengthTextAndBar();
+        updateProfileOptions();
+    }
+
+    function updateProfileOptions() {
+        const t = translations[currentLang];
+        const select = profileSelect;
+        if (!select) return;
+
+        // Guardar valor selecionado
+        const currentValue = select.value;
+
+        // Atualizar texto da opção padrão (disabled)
+        const defaultOption = select.querySelector('option[value=""]');
+        if (defaultOption) {
+            defaultOption.textContent = t.profilePlaceholder;
+        }
+
+        // Atualizar cada opção
+        const optionMap = {
+            'admin': t.profileAdmin,
+            'gerente': t.profileManager,
+            'gestor': t.profileStockManager,
+            'cozinheiro': t.profileCook,
+            'atendente': t.profileAttendant,
+            'cliente': t.profileClient
+        };
+
+        Array.from(select.options).forEach(option => {
+            const val = option.value;
+            if (val && optionMap[val]) {
+                option.textContent = optionMap[val];
+            }
+        });
+
+        // Restaurar valor selecionado
+        select.value = currentValue;
     }
 
     // ============================================================
@@ -841,7 +944,7 @@
         if (level === 'weak') { levelText = t.weak; color = 'var(--progress-weak)'; }
         else if (level === 'medium') { levelText = t.medium; color = 'var(--progress-medium)'; }
         else { levelText = t.strong; color = 'var(--progress-strong)'; }
-        strengthText.innerText = pwd ? `Força: ${levelText}` : t.strengthPlaceholder;
+        strengthText.innerText = pwd ? `${t.strengthPlaceholder.split(':')[0]}: ${levelText}` : t.strengthPlaceholder;
         strengthBar.style.backgroundColor = color;
         return level;
     }
@@ -876,7 +979,7 @@
             return false;
         }
         if (currentVerificationCode && token !== currentVerificationCode) {
-            tokenError.innerText = "Código inválido. Peça um novo.";
+            tokenError.innerText = translations[currentLang].tokenMismatch;
             return false;
         }
         tokenError.innerText = '';
@@ -886,7 +989,7 @@
     function validateProfile() {
         const profile = profileSelect.value;
         if (!profile) {
-            profileError.innerText = "Selecione um perfil de acesso";
+            profileError.innerText = translations[currentLang].profileRequired;
             return false;
         }
         profileError.innerText = '';
