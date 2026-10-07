@@ -57,7 +57,7 @@
       --gray: #6b7b8f;
     }
 
-    /* IMAGEM DE FUNDO GLOBAL */
+    /* IMAGEM DE FUNDO GLOBAL — visível em ambos os modos */
     body::before {
       content: '';
       position: fixed;
@@ -65,16 +65,16 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-image: url('images/image-cozinha.png');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      opacity: 0.08;
+      opacity: 0.18;
       z-index: -1;
       pointer-events: none;
     }
     body.dark::before {
-      opacity: 0.04;
+      opacity: 0.14;
     }
 
     /* ---------- LAYOUT PRINCIPAL ---------- */
@@ -677,6 +677,107 @@
       margin-bottom: 1rem;
       opacity: 0.4;
     }
+    /* profile modal form */
+    .profile-form .form-control,
+    .profile-form .form-select {
+      background: var(--bg-body);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .profile-form .form-control:focus,
+    .profile-form .form-select:focus {
+      background: var(--bg-body);
+      color: var(--text-primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(230, 92, 30, 0.15);
+    }
+    .profile-form label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .avatar-edit {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 1rem;
+    }
+    .avatar-edit img {
+      width: 96px;
+      height: 96px;
+      border-radius: 60px;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+    }
+    .avatar-edit .edit-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 40px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 3px solid var(--bg-card);
+      font-size: 0.8rem;
+    }
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item .act-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 40px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+    }
+    .session-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .session-stat:last-child { border-bottom: none; }
+    .session-stat .label { color: var(--text-secondary); font-size: 0.9rem; }
+    .session-stat .value { font-weight: 700; }
+
+    /* ---------- NOVO: IMAGEM DOS PRATOS (PEDIDOS PRONTOS) ---------- */
+    .prato-img {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 3px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+    .order-card-ready {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .order-card-ready .order-info {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
@@ -694,7 +795,7 @@
           <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef">
         </div>
         <div class="user-info">
-          <h6>Luisa Catendo</h6>
+          <h6>Anthony Lawrence</h6>
           <small><i class="fas fa-circle" style="font-size: 0.5rem; color: var(--success);"></i> Online</small>
         </div>
       </div>
@@ -965,7 +1066,7 @@
   </div>
 </div>
 
-<!-- MODAL PERFIL COM SUBMENU -->
+<!-- MODAL PERFIL PRINCIPAL (submenu) -->
 <div class="modal fade" id="profileModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
@@ -977,44 +1078,51 @@
         <!-- Cabeçalho do perfil -->
         <div class="profile-header">
           <div class="avatar-lg">
-            <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef">
+            <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef" id="profileModalAvatar">
           </div>
           <div>
-            <h5 class="fw-bold mb-0">António Diogo</h5>
-            <p class="text-secondary mb-1">Chef Executivo</p>
+            <h5 class="fw-bold mb-0" id="profileModalName">Anthony Lawrence</h5>
+            <p class="text-secondary mb-1" id="profileModalRole">Chef Executivo</p>
             <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> Online</span>
           </div>
         </div>
         <!-- Submenu -->
-        <div class="profile-menu-item" onclick="alert('A abrir Meu Perfil...')">
+        <div class="profile-menu-item" data-profile-action="view">
           <i class="fas fa-id-card"></i>
           <div>
             <div class="fw-bold">Meu Perfil</div>
-            <small class="text-secondary">Ver e editar informações pessoais</small>
+            <small class="text-secondary">Ver informações pessoais</small>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="alert('A abrir Estado da Sessão...')">
+        <div class="profile-menu-item" data-profile-action="edit">
+          <i class="fas fa-user-edit"></i>
+          <div>
+            <div class="fw-bold">Editar Perfil</div>
+            <small class="text-secondary">Alterar dados e fotografia</small>
+          </div>
+        </div>
+        <div class="profile-menu-item" data-profile-action="session">
           <i class="fas fa-signal"></i>
           <div>
             <div class="fw-bold">Estado da Sessão</div>
             <small class="text-secondary">Tempo restante e atividade</small>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="alert('A abrir Atividade...')">
+        <div class="profile-menu-item" data-profile-action="activity">
           <i class="fas fa-history"></i>
           <div>
             <div class="fw-bold">Atividade</div>
             <small class="text-secondary">Últimas ações realizadas</small>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="alert('A abrir Definições...')">
+        <div class="profile-menu-item" data-profile-action="settings">
           <i class="fas fa-cog"></i>
           <div>
             <div class="fw-bold">Definições</div>
             <small class="text-secondary">Preferências do sistema</small>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="alert('A abrir Ajuda...')">
+        <div class="profile-menu-item" data-profile-action="help">
           <i class="fas fa-question-circle"></i>
           <div>
             <div class="fw-bold">Ajuda & Suporte</div>
@@ -1022,13 +1130,220 @@
           </div>
         </div>
         <hr class="my-2" style="border-color: var(--border-light);">
-        <div class="profile-menu-item danger" onclick="alert('Sessão terminada. A redirecionar para login...')">
+        <div class="profile-menu-item danger" data-profile-action="logout">
           <i class="fas fa-sign-out-alt"></i>
           <div>
             <div class="fw-bold">Terminar Sessão</div>
             <small class="text-secondary">Sair da conta atual</small>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER PERFIL -->
+<div class="modal fade" id="viewProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-id-card me-2" style="color: var(--primary);"></i>Meu Perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Chef" id="viewProfileAvatar" style="width: 100px; height: 100px; border-radius: 60px; object-fit: cover; border: 4px solid var(--primary);">
+        </div>
+        <div class="session-stat"><span class="label">Nome completo</span><span class="value" id="viewProfileName">Anthony Lawrence</span></div>
+        <div class="session-stat"><span class="label">Cargo</span><span class="value" id="viewProfileRole">Chef Executivo</span></div>
+        <div class="session-stat"><span class="label">Email</span><span class="value" id="viewProfileEmail">anthony.lawrence@lugac.ao</span></div>
+        <div class="session-stat"><span class="label">Telefone</span><span class="value" id="viewProfilePhone">+351 912 345 678</span></div>
+        <div class="session-stat"><span class="label">Turno</span><span class="value" id="viewProfileShift">Manhã (08:00 – 16:00)</span></div>
+        <div class="session-stat"><span class="label">Membro desde</span><span class="value">Janeiro 2022</span></div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="viewProfileEditBtn"><i class="fas fa-user-edit me-1"></i>Editar Perfil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PERFIL -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-user-edit me-2" style="color: var(--primary);"></i>Editar Perfil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body profile-form">
+        <div class="avatar-edit">
+          <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=200&auto=format&fit=crop" alt="Avatar" id="editProfileAvatar">
+          <div class="edit-badge" title="Alterar fotografia"><i class="fas fa-camera"></i></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="editName">Nome completo</label>
+            <input type="text" class="form-control" id="editName" value="António Diogo">
+          </div>
+          <div class="col-md-6">
+            <label for="editRole">Cargo</label>
+            <input type="text" class="form-control" id="editRole" value="Chef Executivo">
+          </div>
+          <div class="col-md-6">
+            <label for="editEmail">Email</label>
+            <input type="email" class="form-control" id="editEmail" value="anthony.lowrence@lugac.ao">
+          </div>
+          <div class="col-md-6">
+            <label for="editPhone">Telefone</label>
+            <input type="tel" class="form-control" id="editPhone" value="+351 912 345 678">
+          </div>
+          <div class="col-md-6">
+            <label for="editShift">Turno</label>
+            <select class="form-select" id="editShift">
+              <option selected>Manhã (08:00 – 16:00)</option>
+              <option>Tarde (16:00 – 00:00)</option>
+              <option>Noite (00:00 – 08:00)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="editLanguage">Idioma preferido</label>
+            <select class="form-select" id="editLanguage">
+              <option selected>Português</option>
+              <option>English</option>
+              <option>Français</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label for="editBio">Biografia / Notas</label>
+            <textarea class="form-control" id="editBio" rows="3" placeholder="Breve descrição...">Chef com 10 anos de experiência em cozinha mediterrânica.</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" id="saveProfileBtn"><i class="fas fa-save me-1"></i>Guardar Alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ESTADO DA SESSÃO -->
+<div class="modal fade" id="sessionStatusModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-signal me-2" style="color: var(--primary);"></i>Estado da Sessão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="session-stat"><span class="label">Tempo restante</span><span class="value" id="sessionStatusTime">15:00</span></div>
+        <div class="session-stat"><span class="label">Início da sessão</span><span class="value" id="sessionStartTime">09:53</span></div>
+        <div class="session-stat"><span class="label">Última atividade</span><span class="value" id="sessionLastActivity">Agora</span></div>
+        <div class="session-stat"><span class="label">Estado</span><span class="value text-success"><i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>Ativa</span></div>
+        <div class="session-stat"><span class="label">Dispositivo</span><span class="value">Terminal Cozinha #04</span></div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="sessionExtendBtn">Estender Sessão</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ATIVIDADE -->
+<div class="modal fade" id="activityModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-history me-2" style="color: var(--primary);"></i>Atividade Recente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="activityModalBody">
+        <!-- preenchido via js -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DEFINIÇÕES (PERFIL) -->
+<div class="modal fade" id="settingsProfileModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-cog me-2" style="color: var(--primary);"></i>Definições</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="profileDarkMode">
+          <label class="form-check-label" for="profileDarkMode">Modo Escuro</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="profileNotifSound" checked>
+          <label class="form-check-label" for="profileNotifSound">Som de alerta</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="profileNotifLate" checked>
+          <label class="form-check-label" for="profileNotifLate">Alertas de atraso</label>
+        </div>
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="profileAutoWall" checked>
+          <label class="form-check-label" for="profileAutoWall">Modo Parede automático</label>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-primary" data-bs-dismiss="modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUDA & SUPORTE -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Ajuda & Suporte</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="profile-menu-item" onclick="alert('A abrir FAQ...')">
+          <i class="fas fa-book"></i>
+          <div><div class="fw-bold">Perguntas Frequentes</div><small class="text-secondary">Respostas rápidas</small></div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir manual...')">
+          <i class="fas fa-file-pdf"></i>
+          <div><div class="fw-bold">Manual do Utilizador</div><small class="text-secondary">Guia completo</small></div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A contactar suporte...')">
+          <i class="fas fa-headset"></i>
+          <div><div class="fw-bold">Contactar Suporte</div><small class="text-secondary">Email: suporte@lugac.ao</small></div>
+        </div>
+        <div class="profile-menu-item" onclick="alert('A abrir chat...')">
+          <i class="fas fa-comments"></i>
+          <div><div class="fw-bold">Chat em direto</div><small class="text-secondary">Disponível 24/7</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR LOGOUT -->
+<div class="modal fade" id="logoutModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 30px; background: var(--bg-card); border: none;">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold"><i class="fas fa-sign-out-alt me-2 text-danger"></i>Terminar Sessão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Tem a certeza que deseja terminar a sessão? Será redirecionado para a página de login.
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-danger" id="confirmLogoutBtn" style="border-radius: 40px; font-family: 'Times New Roman', Times, serif;">Terminar Sessão</button>
       </div>
     </div>
   </div>
@@ -1062,14 +1377,14 @@
 
     // ---------- DADOS SIMULADOS ----------
     const initialOrders = [
-      { id: 1001, mesa: 5, hora: '10:02', itens: ['Frango grelhado', 'Arroz', 'Salada'], qtd: 3, prioridade: 'alta', tempoEstimado: 20, tempoDecorrido: 14, estado: 'preparacao', obs: 'Sem picante', alergias: 'Amendoim', statusColor: 'warning' },
-      { id: 1002, mesa: 8, hora: '10:05', itens: ['Bife', 'Batata frita', 'Salada'], qtd: 3, prioridade: 'normal', tempoEstimado: 25, tempoDecorrido: 8, estado: 'novo', obs: '', alergias: '', statusColor: 'info' },
-      { id: 1003, mesa: 12, hora: '09:55', itens: ['Peixe grelhado', 'Legumes'], qtd: 2, prioridade: 'alta', tempoEstimado: 18, tempoDecorrido: 25, estado: 'atrasado', obs: 'Sem sal', alergias: 'Lactose', statusColor: 'danger' },
-      { id: 1004, mesa: 3, hora: '10:10', itens: ['Hambúrguer', 'Batata'], qtd: 2, prioridade: 'normal', tempoEstimado: 15, tempoDecorrido: 2, estado: 'novo', obs: '', alergias: '', statusColor: 'info' },
-      { id: 1005, mesa: 7, hora: '09:50', itens: ['Frango', 'Arroz', 'Salada'], qtd: 3, prioridade: 'baixa', tempoEstimado: 20, tempoDecorrido: 35, estado: 'pronto', obs: 'Molho separado', alergias: '', statusColor: 'success' },
-      { id: 1006, mesa: 2, hora: '10:12', itens: ['Caldo verde', 'Pão de alho'], qtd: 2, prioridade: 'normal', tempoEstimado: 12, tempoDecorrido: 1, estado: 'novo', obs: '', alergias: 'Glúten', statusColor: 'info' },
-      { id: 1007, mesa: 9, hora: '09:45', itens: ['Lasanha', 'Salada'], qtd: 2, prioridade: 'alta', tempoEstimado: 22, tempoDecorrido: 18, estado: 'preparacao', obs: 'Sem queijo extra', alergias: 'Lactose', statusColor: 'warning' },
-      { id: 1008, mesa: 4, hora: '10:15', itens: ['Sopa de peixe', 'Arroz'], qtd: 1, prioridade: 'baixa', tempoEstimado: 15, tempoDecorrido: 0, estado: 'novo', obs: '', alergias: '', statusColor: 'info' }
+      { id: 1001, mesa: 5, hora: '10:02', itens: ['Frango grelhado', 'Arroz', 'Salada'], qtd: 3, prioridade: 'alta', tempoEstimado: 20, tempoDecorrido: 14, estado: 'preparacao', obs: 'Sem picante', alergias: 'Amendoim', statusColor: 'warning', imgPrato: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=200&auto=format&fit=crop' },
+      { id: 1002, mesa: 8, hora: '10:05', itens: ['Bife', 'Batata frita', 'Salada'], qtd: 3, prioridade: 'normal', tempoEstimado: 25, tempoDecorrido: 8, estado: 'novo', obs: '', alergias: '', statusColor: 'info', imgPrato: 'https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=200&auto=format&fit=crop' },
+      { id: 1003, mesa: 12, hora: '09:55', itens: ['Peixe grelhado', 'Legumes'], qtd: 2, prioridade: 'alta', tempoEstimado: 18, tempoDecorrido: 25, estado: 'atrasado', obs: 'Sem sal', alergias: 'Lactose', statusColor: 'danger', imgPrato: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=200&auto=format&fit=crop' },
+      { id: 1004, mesa: 3, hora: '10:10', itens: ['Hambúrguer', 'Batata'], qtd: 2, prioridade: 'normal', tempoEstimado: 15, tempoDecorrido: 2, estado: 'novo', obs: '', alergias: '', statusColor: 'info', imgPrato: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=200&auto=format&fit=crop' },
+      { id: 1005, mesa: 7, hora: '09:50', itens: ['Frango', 'Arroz', 'Salada'], qtd: 3, prioridade: 'baixa', tempoEstimado: 20, tempoDecorrido: 35, estado: 'pronto', obs: 'Molho separado', alergias: '', statusColor: 'success', imgPrato: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?q=80&w=200&auto=format&fit=crop' },
+      { id: 1006, mesa: 2, hora: '10:12', itens: ['Caldo verde', 'Pão de alho'], qtd: 2, prioridade: 'normal', tempoEstimado: 12, tempoDecorrido: 1, estado: 'novo', obs: '', alergias: 'Glúten', statusColor: 'info', imgPrato: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=200&auto=format&fit=crop' },
+      { id: 1007, mesa: 9, hora: '09:45', itens: ['Lasanha', 'Salada'], qtd: 2, prioridade: 'alta', tempoEstimado: 22, tempoDecorrido: 18, estado: 'preparacao', obs: 'Sem queijo extra', alergias: 'Lactose', statusColor: 'warning', imgPrato: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?q=80&w=200&auto=format&fit=crop' },
+      { id: 1008, mesa: 4, hora: '10:15', itens: ['Sopa de peixe', 'Arroz'], qtd: 1, prioridade: 'baixa', tempoEstimado: 15, tempoDecorrido: 0, estado: 'novo', obs: '', alergias: '', statusColor: 'info', imgPrato: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=200&auto=format&fit=crop' }
     ];
     let orders = StorageService.get('lugac_orders', null) || initialOrders;
 
@@ -1102,15 +1417,27 @@
       { id: 4, tipo: 'info', mensagem: 'Turno da manhã iniciado', data: '08:00', lida: true }
     ];
 
+    const initialActivities = [
+      { acao: 'Pedido #1008 criado', hora: '10:15', user: 'Sistema', icon: 'fa-plus-circle' },
+      { acao: 'Pedido #1001 aceite', hora: '10:08', user: 'António Diogo', icon: 'fa-check' },
+      { acao: 'Pedido #1005 marcado como pronto', hora: '10:05', user: 'Maria Santos', icon: 'fa-check-double' },
+      { acao: 'Pedido #1003 marcado como atrasado', hora: '10:00', user: 'Sistema', icon: 'fa-exclamation-triangle' },
+      { acao: 'Ingrediente "Peixe fresco" atualizado', hora: '09:55', user: 'Carlos Silva', icon: 'fa-carrot' },
+      { acao: 'Pedido #1002 criado', hora: '10:05', user: 'Sistema', icon: 'fa-plus-circle' }
+    ];
+
     // ---------- TEMA ----------
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('lugac_theme') || 'light';
     if (savedTheme === 'dark') document.body.classList.add('dark');
+    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark');
       const isDark = document.body.classList.contains('dark');
       localStorage.setItem('lugac_theme', isDark ? 'dark' : 'light');
       themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      document.getElementById('darkModeSwitch').checked = isDark;
+      document.getElementById('profileDarkMode').checked = isDark;
     });
 
     // ---------- SIDEBAR TOGGLE ----------
@@ -1219,6 +1546,7 @@
         }
         sessionSeconds--;
         timerText.textContent = formatTime(sessionSeconds);
+        document.getElementById('sessionStatusTime').textContent = formatTime(sessionSeconds);
         if (sessionSeconds === 120 && !sessionModalShown) {
           sessionModalShown = true;
           sessionModal.show();
@@ -1383,19 +1711,23 @@
         `).join('') : '<div class="empty-state"><i class="fas fa-fire"></i><p>Nenhum pedido em preparação.</p></div>';
       }
 
-      // Prontos
+      // Prontos — AGORA COM IMAGEM DO PRATO
       const prontosList = document.getElementById('orderListProntos');
       if (prontosList) {
         const prontosOrders = orders.filter(o => o.estado === 'pronto');
         prontosList.innerHTML = prontosOrders.length ? prontosOrders.map(o => `
           <div class="col-md-6">
-            <div class="card order-card status-ready mb-2">
-              <div class="d-flex justify-content-between">
-                <span class="fw-bold">#${o.id}</span>
-                <span class="badge-status badge-green">PRONTO</span>
+            <div class="card order-card status-ready mb-2 order-card-ready">
+              <img src="${o.imgPrato}" alt="${o.itens[0]}" class="prato-img">
+              <div class="order-info">
+                <div class="d-flex justify-content-between">
+                  <span class="fw-bold">#${o.id}</span>
+                  <span class="badge-status badge-green">PRONTO</span>
+                </div>
+                <div>Mesa ${o.mesa} • ${o.hora}</div>
+                <div class="small text-secondary">${o.itens.join(', ')}</div>
+                ${o.obs ? `<div class="small text-muted mt-1"><i class="fas fa-info-circle"></i> ${o.obs}</div>` : ''}
               </div>
-              <div>Mesa ${o.mesa} • ${o.hora}</div>
-              <div class="small text-secondary">${o.itens.join(', ')}</div>
             </div>
           </div>
         `).join('') : '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum pedido pronto.</p></div>';
@@ -1560,14 +1892,126 @@
       notifModal.show();
     });
 
-    // ---------- PROFILE MODAL ----------
+    // ---------- PROFILE MODAL (submenu) ----------
     const profileModal = new bootstrap.Modal(document.getElementById('profileModal'));
+    const viewProfileModal = new bootstrap.Modal(document.getElementById('viewProfileModal'));
+    const editProfileModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    const sessionStatusModal = new bootstrap.Modal(document.getElementById('sessionStatusModal'));
+    const activityModal = new bootstrap.Modal(document.getElementById('activityModal'));
+    const settingsProfileModal = new bootstrap.Modal(document.getElementById('settingsProfileModal'));
+    const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
+    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+
     document.getElementById('profileBtn').addEventListener('click', () => {
       profileModal.show();
     });
-    // Abrir perfil pelo clique no user-profile da sidebar
     document.getElementById('userProfileSidebar')?.addEventListener('click', () => {
       profileModal.show();
+    });
+
+    // Profile submenu actions
+    document.querySelectorAll('[data-profile-action]').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.profileAction;
+        profileModal.hide();
+        if (action === 'view') {
+          viewProfileModal.show();
+        } else if (action === 'edit') {
+          editProfileModal.show();
+        } else if (action === 'session') {
+          // Update session stats before showing
+          document.getElementById('sessionStatusTime').textContent = formatTime(sessionSeconds);
+          const now = new Date();
+          document.getElementById('sessionStartTime').textContent = 
+            `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+          document.getElementById('sessionLastActivity').textContent = 'Agora';
+          sessionStatusModal.show();
+        } else if (action === 'activity') {
+          // Fill activity modal
+          const actBody = document.getElementById('activityModalBody');
+          actBody.innerHTML = initialActivities.map(a => `
+            <div class="activity-item">
+              <div class="act-icon"><i class="fas ${a.icon}"></i></div>
+              <div class="flex-grow-1">
+                <div style="font-weight: 500;">${a.acao}</div>
+                <small class="text-secondary">${a.hora} • ${a.user}</small>
+              </div>
+            </div>
+          `).join('');
+          activityModal.show();
+        } else if (action === 'settings') {
+          settingsProfileModal.show();
+        } else if (action === 'help') {
+          helpModal.show();
+        } else if (action === 'logout') {
+          logoutModal.show();
+        }
+      });
+    });
+
+    // View Profile → Edit button
+    document.getElementById('viewProfileEditBtn').addEventListener('click', () => {
+      viewProfileModal.hide();
+      editProfileModal.show();
+    });
+
+    // Save profile
+    document.getElementById('saveProfileBtn').addEventListener('click', () => {
+      const newName = document.getElementById('editName').value || 'Anthony Lawrence Diogo';
+      const newRole = document.getElementById('editRole').value || 'Chef Executivo';
+      const newEmail = document.getElementById('editEmail').value || 'anthony.lawrence@lugac.ao';
+      const newPhone = document.getElementById('editPhone').value || '+351 912 345 678';
+      const newShift = document.getElementById('editShift').value || 'Manhã (08:00 – 16:00)';
+      const newBio = document.getElementById('editBio').value || '';
+
+      // Update everywhere
+      document.getElementById('profileModalName').textContent = newName;
+      document.getElementById('profileModalRole').textContent = newRole;
+      document.getElementById('viewProfileName').textContent = newName;
+      document.getElementById('viewProfileRole').textContent = newRole;
+      document.getElementById('viewProfileEmail').textContent = newEmail;
+      document.getElementById('viewProfilePhone').textContent = newPhone;
+      document.getElementById('viewProfileShift').textContent = newShift;
+
+      StorageService.set('lugac_profile', { name: newName, role: newRole, email: newEmail, phone: newPhone, shift: newShift, bio: newBio });
+      editProfileModal.hide();
+      setTimeout(() => {
+        alert('Perfil atualizado com sucesso!');
+      }, 300);
+    });
+
+    // Load saved profile on init
+    const savedProfile = StorageService.get('lugac_profile', null);
+    if (savedProfile) {
+      document.getElementById('profileModalName').textContent = savedProfile.name;
+      document.getElementById('profileModalRole').textContent = savedProfile.role;
+      document.getElementById('viewProfileName').textContent = savedProfile.name;
+      document.getElementById('viewProfileRole').textContent = savedProfile.role;
+      document.getElementById('viewProfileEmail').textContent = savedProfile.email;
+      document.getElementById('viewProfilePhone').textContent = savedProfile.phone;
+      document.getElementById('viewProfileShift').textContent = savedProfile.shift;
+      if (savedProfile.bio) document.getElementById('editBio').value = savedProfile.bio;
+    }
+
+    // Session extend button
+    document.getElementById('sessionExtendBtn').addEventListener('click', () => {
+      resetSessionTimer();
+      sessionStatusModal.hide();
+      alert('Sessão estendida por mais 15 minutos.');
+    });
+
+    // Confirm logout
+    document.getElementById('confirmLogoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('lugac_session');
+      window.location.href = 'login.html';
+    });
+
+    // Profile settings switches sync with main settings
+    document.getElementById('profileDarkMode').addEventListener('change', function() {
+      document.body.classList.toggle('dark', this.checked);
+      localStorage.setItem('lugac_theme', this.checked ? 'dark' : 'light');
+      themeToggle.innerHTML = this.checked ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      document.getElementById('darkModeSwitch').checked = this.checked;
     });
 
     // ---------- MODO PAREDE ----------
@@ -1580,6 +2024,7 @@
       document.body.classList.toggle('dark', this.checked);
       localStorage.setItem('lugac_theme', this.checked ? 'dark' : 'light');
       themeToggle.innerHTML = this.checked ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      document.getElementById('profileDarkMode').checked = this.checked;
     });
 
     // ---------- INICIALIZAÇÃO ----------
