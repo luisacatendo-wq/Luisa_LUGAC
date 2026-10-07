@@ -557,8 +557,8 @@
                     <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
                 </button>
 
-                <a href="login.html" class="btn-outline-back">
-                    <i class="bi bi-arrow-left"></i> Voltar para o login
+                <a href="login.html" class="btn-outline-back" id="backToLoginLink">
+                    <i class="bi bi-arrow-left"></i> <span id="backToLoginText">Voltar para o login</span>
                 </a>
             </form>
 
@@ -593,7 +593,9 @@
             emailRequired: "E-mail é obrigatório",
             emailInvalid: "Formato de e-mail inválido",
             successMsg: "📧 Link de recuperação enviado para {email} (simulação). Verifique sua caixa de entrada.",
-            errorMsg: "❌ Erro: e-mail inválido ou não registado (simulação)."
+            errorMsg: "❌ Erro: e-mail inválido ou não registado (simulação).",
+            backToLogin: "Voltar para o login",
+            emailPlaceholder: "exemplo@dominio.com"
         },
         en: {
             forgotTitle: "Reset password",
@@ -604,7 +606,9 @@
             emailRequired: "Email is required",
             emailInvalid: "Invalid email format",
             successMsg: "📧 Reset link sent to {email} (simulation). Check your inbox.",
-            errorMsg: "❌ Error: invalid or unregistered email (simulation)."
+            errorMsg: "❌ Error: invalid or unregistered email (simulation).",
+            backToLogin: "Back to login",
+            emailPlaceholder: "example@domain.com"
         },
         es: {
             forgotTitle: "Recuperar contraseña",
@@ -615,7 +619,9 @@
             emailRequired: "El correo es obligatorio",
             emailInvalid: "Formato de correo inválido",
             successMsg: "📧 Enlace de recuperación enviado a {email} (simulación). Revisa tu bandeja de entrada.",
-            errorMsg: "❌ Error: correo inválido o no registrado (simulación)."
+            errorMsg: "❌ Error: correo inválido o no registrado (simulación).",
+            backToLogin: "Volver al inicio de sesión",
+            emailPlaceholder: "ejemplo@dominio.com"
         }
     };
 
@@ -638,6 +644,7 @@
     const toastMessageSpan = document.getElementById('toastMessage');
     const closeToastBtn = document.getElementById('closeToast');
     const emailError = document.getElementById('emailError');
+    const backToLoginText = document.getElementById('backToLoginText');
 
     const i18nEls = {
         forgotTitle: document.getElementById('forgotTitle'),
@@ -656,6 +663,8 @@
         if (i18nEls.emailLabel) i18nEls.emailLabel.innerText = t.emailLabel;
         if (i18nEls.demoNote) i18nEls.demoNote.innerText = t.demoNote;
         if (btnTextSpan) btnTextSpan.innerText = t.btnText;
+        if (backToLoginText) backToLoginText.innerText = t.backToLogin;
+        if (emailInput) emailInput.placeholder = t.emailPlaceholder;
     }
 
     // ============================================================
