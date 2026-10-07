@@ -24,13 +24,17 @@
       --shadow-sm:0 8px 20px rgba(0,0,0,.4); --shadow-md:0 12px 30px rgba(0,0,0,.5);
       --primary-soft:#2f221c; --gray:#6b7b8f;
     }
+    /* ===== FUNDO VISÍVEL EM AMBOS OS MODOS ===== */
     body::before{
       content:''; position:fixed; inset:0;
-      background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-image:url('images/image-client.png');
       background-size:cover; background-position:center; background-attachment:fixed;
-      opacity:.08; z-index:-1; pointer-events:none;
+      opacity:.35; z-index:-1; pointer-events:none;
     }
-    body.dark::before{ opacity:.04; }
+    body.dark::before{
+      opacity:.25; /* mantém a imagem visível também no modo escuro */
+    }
+    
     .app-wrapper{ display:flex; min-height:100vh; }
     .sidebar{
       width:var(--sidebar-width); background:var(--bg-sidebar); border-right:1px solid var(--border-light);
@@ -39,9 +43,9 @@
     }
     .sidebar.collapsed{ width:var(--sidebar-collapsed); }
     .sidebar-header{ padding:1.5rem 1rem .8rem; display:flex; flex-direction:column; gap:1.2rem; }
-    .logo-area{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.3rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; }
+    .logo-area{ display:flex; align-items:center; gap:12px; font-weight:700; font-size:1.3rem; color:var(--text-primary);
+        white-space:nowrap; overflow:hidden; }
     .logo-icon{ 
-      
       width:200px;
       height:200px;
       border-radius:90px; 
@@ -55,7 +59,8 @@
     .logo-text span{ font-weight:400; font-size:.7rem; color:var(--text-secondary); display:block; line-height:1.2; }
     .user-profile{ display:flex; align-items:center; gap:10px; padding:8px 6px; background:var(--bg-body); border-radius:40px; cursor:pointer; }
     .user-profile:hover{ background:var(--primary-soft); }
-    .user-avatar{ width:40px; height:40px; border-radius:40px; overflow:hidden; flex-shrink:0; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; }
+    .user-avatar{ width:40px; height:40px; border-radius:40px; overflow:hidden; flex-shrink:0; background:var(--primary-soft); 
+        display:flex; align-items:center; justify-content:center; }
     .user-avatar img{ width:100%; height:100%; object-fit:cover; }
     .user-info{ white-space:nowrap; overflow:hidden; }
     .user-info h6{ margin:0; font-weight:600; font-size:.9rem; }
@@ -269,6 +274,12 @@
     /* ======== QR CODE MOCK ======== */
     .qr-mock{ width:180px; height:180px; background:#fff; padding:12px; border-radius:14px; border:2px solid var(--border-light); }
     .qr-mock img{ width:100%; height:100%; object-fit:contain; }
+    /* ======== AVATAR UPLOAD ======== */
+    .avatar-upload{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .avatar-preview{ width:100px; height:100px; border-radius:50%; overflow:hidden; border:3px solid var(--primary); position:relative; background:var(--bg-body); display:flex; align-items:center; justify-content:center; }
+    .avatar-preview img{ width:100%; height:100%; object-fit:cover; }
+    .avatar-upload-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .avatar-upload-actions label{ cursor:pointer; margin:0; }
     /* ======== MOBILE ======== */
     @media (max-width:992px){
       .sidebar{ width:var(--sidebar-collapsed); }
@@ -306,7 +317,7 @@
       </div>
       <div class="user-profile" id="userProfileSidebar">
         <div class="user-avatar">
-          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt="Cliente">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" alt="Cliente" id="sidebarAvatar">
         </div>
         <div class="user-info">
           <h6 id="userName">Visitante</h6>
@@ -392,16 +403,19 @@
       </div>
       <div class="modal-body pt-0">
         <div class="profile-header">
-          <div class="avatar-lg"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt="Cliente"></div>
+          <div class="avatar-lg"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" alt="Cliente" id="profileAvatar"></div>
           <div>
             <h5 class="fw-bold mb-0" id="profileName">Visitante</h5>
             <p class="text-secondary mb-1" id="profileMode">Modo Visitante</p>
             <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i> Online</span>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="Cliente.entrarConta()"><i class="fas fa-sign-in-alt"></i><div><div class="fw-bold">Iniciar Sessão</div><small class="text-secondary">Aceder à minha conta KITCHSYNC</small></div></div>
+        <div class="profile-menu-item" onclick="Cliente.entrarConta()"><i class="fas fa-sign-in-alt"></i><div><div class="fw-bold">Iniciar Sessão</div>
+            <small class="text-secondary">Aceder à minha conta LUGAC</small></div></div>
         <div class="profile-menu-item" onclick="Cliente.criarConta()"><i class="fas fa-user-plus"></i><div><div class="fw-bold">Criar Conta</div><small class="text-secondary">Cadastro rápido por telefone</small></div></div>
-        <div class="profile-menu-item" onclick="openTab('perfil-gastronomico')"><i class="fas fa-heart"></i><div><div class="fw-bold">Perfil Gastronómico</div><small class="text-secondary">Preferências e favoritos</small></div></div>
+        <div class="profile-menu-item" onclick="Cliente.editarPerfil()"><i class="fas fa-user-edit"></i><div><div class="fw-bold">Editar Perfil</div><small class="text-secondary">Atualizar dados pessoais</small></div></div>
+        
+          <div class="profile-menu-item" onclick="openTab('perfil-gastronomico')"><i class="fas fa-heart"></i><div><div class="fw-bold">Perfil Gastronómico</div><small class="text-secondary">Preferências e favoritos</small></div></div>
         <div class="profile-menu-item" onclick="openTab('historico')"><i class="fas fa-clock-rotate-left"></i><div><div class="fw-bold">Histórico de Pedidos</div><small class="text-secondary">Consultar e repetir</small></div></div>
         <div class="profile-menu-item" onclick="Cliente.notifPrefs()"><i class="fas fa-bell"></i><div><div class="fw-bold">Notificações</div><small class="text-secondary">Escolher canais preferidos</small></div></div>
         <div class="profile-menu-item" onclick="openTab('avaliacoes')"><i class="fas fa-star"></i><div><div class="fw-bold">As Minhas Avaliações</div><small class="text-secondary">Ver o que avaliei</small></div></div>
@@ -462,11 +476,23 @@ const Toast = {
 };
 window.Toast = Toast;
 
+/* ---------- SAUDAÇÃO DINÂMICA ---------- */
+function getSaudacao(){
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 19) return 'Boa tarde';
+  return 'Boa noite';
+}
+function getSaudacaoCompleta(nome){
+  if (!nome || nome === 'Visitante') return 'Bem-vindo ao LUGAC 👋';
+  return `${getSaudacao()}, ${nome} 👋`;
+}
+
 /* ---------- ESTADO ---------- */
 const STATE = {
   user: null,
   mesa: null,
-  entrada: null, // 'qr','codigo','nfc','app','convite'
+  entrada: null,
   carrinho: [],
   pedidoAtivo: null,
   preferencias: {
@@ -474,6 +500,12 @@ const STATE = {
     sem: ['Cebola'],
     picante: 'médio',
     tamanho: 'normal'
+  },
+  notifPrefs: {
+    app: true,
+    sms: true,
+    email: false,
+    web: true
   }
 };
 
@@ -544,7 +576,7 @@ const MENU = [
   { id:'historico',   label:'Histórico',         icon:'fa-clock-rotate-left' },
   { id:'avaliacoes',  label:'Avaliações',        icon:'fa-star' },
   { id:'perfil-gastronomico', label:'Perfil Gastronómico', icon:'fa-heart' },
-  { id:'ai',          label:'Assistente KITCHSYNC', icon:'fa-robot' },
+  { id:'ai',          label:'Assistente LUGAC', icon:'fa-robot' },
   { id:'qr',          label:'QR Code / Mesa',    icon:'fa-qrcode' }
 ];
 
@@ -634,10 +666,11 @@ function renderContent(id){
    ============================================================ */
 function renderDescobrir(){
   const destaques = DB.pratos.filter(p => p.disponivel && p.tags.includes('mais-pedido'));
+  const nome = STATE.user ? STATE.user.nome : null;
   return `
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
       <div>
-        <h4 class="fw-bold mb-1" id="welcomeMsg">Bem-vindo ao KITCHSYNC 👋</h4>
+        <h4 class="fw-bold mb-1" id="welcomeMsg">${getSaudacaoCompleta(nome)}</h4>
         <p class="text-secondary mb-0">O que procura hoje?</p>
       </div>
       ${STATE.mesa ? `<span class="badge-status badge-green"><i class="fas fa-chair me-1"></i>Mesa ${STATE.mesa}</span>` : `<button class="btn btn-primary btn-sm" onclick="openTab('qr')"><i class="fas fa-qrcode me-1"></i>Identificar mesa</button>`}
@@ -675,7 +708,7 @@ function renderDescobrir(){
       <div class="d-flex gap-3 align-items-start">
         <div class="ai-avatar"><i class="fas fa-robot"></i></div>
         <div class="flex-grow-1">
-          <h6 class="fw-bold mb-1">Assistente KITCHSYNC sugere</h6>
+          <h6 class="fw-bold mb-1">Assistente LUGAC sugere</h6>
           <p class="mb-2 small text-secondary">Com base no seu histórico, experimente estas opções disponíveis agora:</p>
           <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.addToCart('P005')">🥗 Salada Caesar</button>
@@ -956,7 +989,7 @@ function renderPerfilGastronomico(){
   return `
     <h4 class="mb-3"><i class="fas fa-heart me-2" style="color:var(--primary);"></i>Perfil Gastronómico</h4>
     <div class="alert alert-info mb-3" style="border-radius:14px;">
-      <i class="fas fa-sparkles me-2"></i>O KITCHSYNC usa estas preferências para sugerir pratos e personalizar a sua experiência. Pode alterar a qualquer momento.
+      <i class="fas fa-sparkles me-2"></i>O LUGAC usa estas preferências para sugerir pratos e personalizar a sua experiência. Pode alterar a qualquer momento.
     </div>
     <div class="row g-3">
       <div class="col-md-6">
@@ -965,7 +998,7 @@ function renderPerfilGastronomico(){
           <div class="d-flex flex-wrap gap-2 mb-3">
             ${p.favoritos.map(f => `<span class="badge-status badge-green">${f}</span>`).join('')}
           </div>
-          <button class="btn btn-outline-secondary btn-sm" onclick="Toast.show('Selecionar favoritos','info')">+ Adicionar</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.editarFavoritos()">+ Adicionar</button>
         </div>
       </div>
       <div class="col-md-6">
@@ -974,7 +1007,7 @@ function renderPerfilGastronomico(){
           <div class="d-flex flex-wrap gap-2 mb-3">
             ${p.sem.map(s => `<span class="badge-status badge-red">Sem ${s}</span>`).join('')}
           </div>
-          <button class="btn btn-outline-secondary btn-sm" onclick="Toast.show('Selecionar ingredientes','info')">+ Adicionar</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.editarIngredientesEvitar()">+ Adicionar</button>
         </div>
       </div>
       <div class="col-md-6">
@@ -998,11 +1031,11 @@ function renderPerfilGastronomico(){
 }
 
 /* ============================================================
-   KITCHSYNC AI (Cliente)
+   LUGAC AI (Cliente)
    ============================================================ */
 function renderAI(){
   return `
-    <h4 class="mb-3"><i class="fas fa-robot me-2" style="color:var(--purple);"></i>Assistente KITCHSYNC</h4>
+    <h4 class="mb-3"><i class="fas fa-robot me-2" style="color:var(--purple);"></i>Assistente LUGAC</h4>
     <p class="text-secondary mb-3">Sugestões personalizadas com base apenas no <strong>menu e disponibilidade</strong>. Sem acesso a dados internos.</p>
     <div class="card">
       <div class="ai-chat">
@@ -1010,7 +1043,7 @@ function renderAI(){
           <div class="ai-msg">
             <div class="ai-avatar"><i class="fas fa-robot"></i></div>
             <div class="ai-bubble">
-              Olá! Sou o <strong>Assistente KITCHSYNC</strong>. Posso ajudar a escolher pratos, verificar disponibilidade e sugerir opções segundo as suas preferências.
+              Olá! Sou o <strong>Assistente LUGAC</strong>. Posso ajudar a escolher pratos, verificar disponibilidade e sugerir opções segundo as suas preferências.
               <div class="ai-suggestions">
                 <div class="ai-suggest" data-q="Quero algo sem picante.">Sem picante</div>
                 <div class="ai-suggest" data-q="Qual é o prato mais rápido?">Prato mais rápido</div>
@@ -1044,7 +1077,7 @@ function renderQR(){
         <div class="card text-center">
           <h6 class="fw-bold mb-3">📷 Leia o QR Code da sua mesa</h6>
           <div class="qr-mock mx-auto mb-3">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=KITCHSYNC-MESA-08" alt="QR Code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=LUGAC-MESA-08" alt="QR Code">
           </div>
           <p class="small text-secondary mb-3">Aponte a câmara para o código na mesa para identificação automática.</p>
           <button class="btn btn-primary" onclick="Cliente.identificarMesa('QR Code')"><i class="fas fa-qrcode me-1"></i>Simular leitura</button>
@@ -1125,7 +1158,6 @@ window.Cliente = {
     else STATE.carrinho.push({ id:p.id, nome:p.nome, preco:p.preco, img:p.img, qtd:1 });
     updateCartBadge(); renderCart();
     Toast.show(`+ ${p.nome}`, 'success');
-    // Sugestões inteligentes
     if (p.categoria === 'Pratos Principais' && !STATE.carrinho.some(i => i.id === 'B001' || i.id === 'B003')) {
       setTimeout(() => Cliente.sugerir('Combina bem com uma bebida. Quer adicionar?'), 600);
     }
@@ -1180,7 +1212,6 @@ window.Cliente = {
   },
   repeatOrder(id){
     const items = DB.historico.find(h => h.id === id);
-    // simular repetir
     STATE.carrinho = [];
     Cliente.addToCart('P001');
     Cliente.addToCart('P001');
@@ -1225,38 +1256,228 @@ window.Cliente = {
     }, 'Confirmar');
   },
   entrarConta(){
-    STATE.user = { nome:'António Diogo' };
-    document.getElementById('userName').textContent = 'António Diogo';
-    document.getElementById('userMode').textContent = 'Conta KITCHSYNC';
-    document.getElementById('profileName').textContent = 'António Diogo';
-    document.getElementById('profileMode').textContent = 'Conta KITCHSYNC';
-    Toast.show('✓ Bem-vindo de volta, António!','success');
+    STATE.user = { nome:'Luisa Catendo', username:'luisa', email:'luisa.catendo@lugac.ao', telefone:'+244 923 456 789', avatar:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop' };
+    document.getElementById('userName').textContent = 'Luisa Catendo';
+    document.getElementById('userMode').textContent = 'Conta LUGAC';
+    document.getElementById('profileName').textContent = 'Luisa Catendo';
+    document.getElementById('profileMode').textContent = 'Conta LUGAC';
+    Toast.show(`✓ ${getSaudacao()}, Luisa! Bem-vinda de volta.`,'success');
+    bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
   },
   criarConta(){
-    openModal('Criar Conta KITCHSYNC', `
+    openModal('Criar Conta LUGAC', `
       <div class="row g-3">
-        <div class="col-md-6"><label class="form-label">Nome *</label><input class="form-control" id="c-nome"></div>
+        <div class="col-md-6"><label class="form-label">Nome completo *</label><input class="form-control" id="c-nome" placeholder="Ex: Luisa Catendo"></div>
+        <div class="col-md-6"><label class="form-label">Nome de utilizador *</label>
+          <div class="input-group">
+            <input class="form-control" id="c-username" placeholder="Ex: luisa" readonly style="background:var(--bg-body);">
+            <span class="input-group-text" style="background:var(--bg-body);border:1px solid var(--border-light);">@lugac.ao</span>
+          </div>
+        </div>
         <div class="col-md-6"><label class="form-label">Telefone *</label><input class="form-control" id="c-tel"></div>
-        <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" id="c-email"></div>
         <div class="col-md-6"><label class="form-label">Password *</label><input type="password" class="form-control" id="c-pass"></div>
       </div>
+      <div class="mt-3 small text-secondary"><i class="fas fa-info-circle me-1"></i>O seu email será gerado automaticamente a partir do seu nome: <strong id="c-email-preview">nome@lugac.ao</strong></div>
     `, () => {
       const nome = document.getElementById('c-nome').value.trim();
+      const username = document.getElementById('c-username').value.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'');
       if (!nome){ Toast.show('Nome obrigatório','error'); return false; }
-      STATE.user = { nome };
+      if (!username){ Toast.show('Nome de utilizador obrigatório','error'); return false; }
+      // Gerar email a partir do nome (não do username)
+      const nomeNormalizado = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.');
+      const email = nomeNormalizado + '@lugac.ao';
+      STATE.user = { nome, username, email, telefone: document.getElementById('c-tel').value.trim(), avatar:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop' };
       document.getElementById('userName').textContent = nome;
-      document.getElementById('userMode').textContent = 'Conta KITCHSYNC';
-      Toast.show(`✓ Conta criada. Bem-vindo, ${nome}!`,'success');
+      document.getElementById('userMode').textContent = 'Conta LUGAC';
+      document.getElementById('profileName').textContent = nome;
+      document.getElementById('profileMode').textContent = 'Conta LUGAC';
+      Toast.show(`✓ Conta criada. ${getSaudacao()}, ${nome}!`,'success');
+      renderContent(activeTab);
       return true;
     }, 'Criar Conta');
+
+    // Email automático a partir do NOME (não do username)
+    setTimeout(() => {
+      const nomeInput = document.getElementById('c-nome');
+      const usernameInput = document.getElementById('c-username');
+      const emailPreview = document.getElementById('c-email-preview');
+      if (nomeInput && usernameInput && emailPreview) {
+        nomeInput.addEventListener('input', function(){
+          const n = this.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.');
+          const generated = (n || 'nome') + '@lugac.ao';
+          usernameInput.value = generated;
+          emailPreview.textContent = generated;
+        });
+      }
+    }, 150);
+  },
+  editarPerfil(){
+    if (!STATE.user) {
+      Toast.show('Inicie sessão para editar o perfil','warning');
+      return;
+    }
+    const u = STATE.user;
+    openModal('Editar Perfil', `
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Nome completo *</label><input class="form-control" id="e-nome" value="${u.nome || ''}"></div>
+        <div class="col-md-6"><label class="form-label">Nome de utilizador *</label>
+          <div class="input-group">
+            <input class="form-control" id="e-username" value="${u.username || ''}" placeholder="Ex: luisa" readonly style="background:var(--bg-body);">
+            <span class="input-group-text" style="background:var(--bg-body);border:1px solid var(--border-light);">@lugac.ao</span>
+          </div>
+        </div>
+        <div class="col-md-6"><label class="form-label">Telefone</label><input class="form-control" id="e-tel" value="${u.telefone || ''}"></div>
+        <div class="col-md-6"><label class="form-label">Password</label><input type="password" class="form-control" id="e-pass" placeholder="Deixe em branco para manter"></div>
+      </div>
+      <div class="mt-3">
+        <label class="form-label">Email (gerado automaticamente a partir do nome)</label>
+        <input class="form-control" id="e-email" value="${u.email || ''}" readonly style="background:var(--bg-body);">
+      </div>
+      <div class="mt-3">
+        <label class="form-label">Foto de Perfil</label>
+        <div class="avatar-upload">
+          <div class="avatar-preview" id="avatarPreview">
+            <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop'}" alt="Avatar">
+          </div>
+          <div class="avatar-upload-actions">
+            <label class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-upload me-1"></i>Carregar ficheiro
+              <input type="file" id="e-avatar-file" accept="image/*" style="display:none;">
+            </label>
+            <label class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-camera me-1"></i>Tirar foto
+              <input type="file" id="e-avatar-camera" accept="image/*" capture="user" style="display:none;">
+            </label>
+            <button class="btn btn-outline-secondary btn-sm" onclick="Cliente.removerFoto()"><i class="fas fa-trash me-1"></i>Remover</button>
+          </div>
+        </div>
+      </div>
+    `, () => {
+      const nome = document.getElementById('e-nome').value.trim();
+      const username = document.getElementById('e-username').value.trim().toLowerCase().replace(/[^a-z0-9._-]/g,'');
+      if (!nome){ Toast.show('Nome obrigatório','error'); return false; }
+      if (!username){ Toast.show('Nome de utilizador obrigatório','error'); return false; }
+      STATE.user.nome = nome;
+      STATE.user.username = username;
+      // Email gerado a partir do NOME
+      const nomeNormalizado = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u030f]/g,'').replace(/[^a-z0-9]+/g,'.');
+      STATE.user.email = nomeNormalizado + '@lugac.ao';
+      STATE.user.telefone = document.getElementById('e-tel').value.trim();
+      const pass = document.getElementById('e-pass').value.trim();
+      if (pass) STATE.user.password = pass;
+      
+      document.getElementById('userName').textContent = STATE.user.nome;
+      document.getElementById('userMode').textContent = 'Conta LUGAC';
+      document.getElementById('profileName').textContent = STATE.user.nome;
+      document.getElementById('profileMode').textContent = 'Conta LUGAC';
+      if (STATE.user.avatar) {
+        document.getElementById('profileAvatar').src = STATE.user.avatar;
+        document.getElementById('sidebarAvatar').src = STATE.user.avatar;
+      }
+      Toast.show(`✓ Perfil atualizado. ${getSaudacao()}, ${STATE.user.nome}!`,'success');
+      renderContent(activeTab);
+      return true;
+    }, 'Guardar Alterações');
+
+    // Email automático a partir do NOME (edição)
+    setTimeout(() => {
+      const nomeInput = document.getElementById('e-nome');
+      const usernameInput = document.getElementById('e-username');
+      const emailInput = document.getElementById('e-email');
+      if (nomeInput && usernameInput && emailInput) {
+        nomeInput.addEventListener('input', function(){
+          const n = this.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u030f]/g,'').replace(/[^a-z0-9]+/g,'.');
+          const generated = (n || 'nome') + '@lugac.ao';
+          usernameInput.value = generated;
+          emailInput.value = generated;
+        });
+      }
+    }, 150);
+
+    // Bind upload de ficheiros
+    setTimeout(() => {
+      const fileInput = document.getElementById('e-avatar-file');
+      const camInput = document.getElementById('e-avatar-camera');
+      const preview = document.getElementById('avatarPreview').querySelector('img');
+      const handleFile = (file) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')){ Toast.show('Selecione uma imagem válida','error'); return; }
+        if (file.size > 5*1024*1024){ Toast.show('Imagem demasiado grande (máx 5MB)','error'); return; }
+        const reader = new FileReader();
+        reader.onload = e => {
+          const dataUrl = e.target.result;
+          preview.src = dataUrl;
+          STATE.user.avatar = dataUrl;
+          document.getElementById('profileAvatar').src = dataUrl;
+          document.getElementById('sidebarAvatar').src = dataUrl;
+          Toast.show('✓ Foto carregada','success');
+        };
+        reader.readAsDataURL(file);
+      };
+      fileInput?.addEventListener('change', e => handleFile(e.target.files[0]));
+      camInput?.addEventListener('change', e => handleFile(e.target.files[0]));
+    }, 150);
+  },
+  removerFoto(){
+    if (!STATE.user) return;
+    STATE.user.avatar = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop';
+    const preview = document.getElementById('avatarPreview')?.querySelector('img');
+    if (preview) preview.src = STATE.user.avatar;
+    document.getElementById('profileAvatar').src = STATE.user.avatar;
+    document.getElementById('sidebarAvatar').src = STATE.user.avatar;
+    Toast.show('Foto removida','info');
   },
   notifPrefs(){
+    const prefs = STATE.notifPrefs;
     openModal('Preferências de Notificação', `
-      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Notificação na aplicação</label></div>
-      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">SMS</label></div>
-      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox"><label class="form-check-label">Email</label></div>
-      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" checked><label class="form-check-label">Notificação web</label></div>
-    `, null, 'Fechar');
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="np-app" ${prefs.app?'checked':''}><label class="form-check-label">Notificação na aplicação</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="np-sms" ${prefs.sms?'checked':''}><label class="form-check-label">SMS</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="np-email" ${prefs.email?'checked':''}><label class="form-check-label">Email</label></div>
+      <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" id="np-web" ${prefs.web?'checked':''}><label class="form-check-label">Notificação web</label></div>
+    `, () => {
+      STATE.notifPrefs.app = document.getElementById('np-app').checked;
+      STATE.notifPrefs.sms = document.getElementById('np-sms').checked;
+      STATE.notifPrefs.email = document.getElementById('np-email').checked;
+      STATE.notifPrefs.web = document.getElementById('np-web').checked;
+      Toast.show('✓ Preferências de notificação guardadas','success');
+      return true;
+    }, 'Guardar Preferências');
+  },
+  editarFavoritos(){
+    const favoritos = STATE.preferencias.favoritos;
+    openModal('Pratos Favoritos', `
+      <p class="text-secondary small mb-3">Selecione os pratos que deseja adicionar aos seus favoritos:</p>
+      ${DB.pratos.map(p => `
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" value="${p.nome}" id="fav-${p.id}" ${favoritos.includes(p.nome)?'checked':''}>
+          <label class="form-check-label" for="fav-${p.id}">${p.nome}</label>
+        </div>
+      `).join('')}
+    `, () => {
+      const selected = [...document.querySelectorAll('.form-check-input:checked')].map(cb => cb.value);
+      STATE.preferencias.favoritos = selected;
+      renderContent('perfil-gastronomico');
+      Toast.show('✓ Favoritos atualizados','success');
+      return true;
+    }, 'Guardar');
+  },
+  editarIngredientesEvitar(){
+    const sem = STATE.preferencias.sem;
+    openModal('Ingredientes a Evitar', `
+      <p class="text-secondary small mb-3">Selecione os ingredientes que deseja evitar:</p>
+      ${['Cebola','Alho','Glúten','Lactose','Peixe','Amendoim','Marisco','Ovo'].map(i => `
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" value="${i}" id="ing-${i.replace(/[^a-z]/gi,'')}" ${sem.includes(i)?'checked':''}>
+          <label class="form-check-label" for="ing-${i.replace(/[^a-z]/gi,'')}">${i}</label>
+        </div>
+      `).join('')}
+    `, () => {
+      const selected = [...document.querySelectorAll('.form-check-input:checked')].map(cb => cb.value);
+      STATE.preferencias.sem = selected;
+      renderContent('perfil-gastronomico');
+      Toast.show('✓ Ingredientes atualizados','success');
+      return true;
+    }, 'Guardar');
   }
 };
 
@@ -1316,7 +1537,6 @@ Cliente.confirmarPedido = function(){
     ${STATE.mesa ? `<div class="mt-1 small text-secondary"><i class="fas fa-chair me-1"></i>Mesa ${STATE.mesa}</div>` : `<div class="alert alert-warning mt-3 mb-0" style="border-radius:14px;"><i class="fas fa-triangle-exclamation me-2"></i>Sem mesa identificada. <a href="#" onclick="bootstrap.Modal.getInstance(document.getElementById('dynamicModal')).hide();openTab('qr')">Identificar</a></div>`}
     <div class="mt-3"><label class="form-label">Observações</label><textarea class="form-control" id="conf-obs" rows="2" placeholder="Ex: Sem cebola"></textarea></div>
   `, () => {
-    // criar pedido ativo
     STATE.pedidoAtivo = {
       id:'#104',
       estado:'recebido',
@@ -1338,7 +1558,6 @@ Cliente.confirmarPedido = function(){
     updateCartBadge(); closeCart();
     openTab('pedido');
     Toast.show('✓ Pedido enviado à cozinha!','success');
-    // Simular progressão
     setTimeout(() => progressOrder(), 3000);
     setTimeout(() => progressOrder(), 8000);
     setTimeout(() => progressOrder(), 14000);
@@ -1378,7 +1597,7 @@ function chatAdd(text, who){
   c.scrollTop = c.scrollHeight;
 }
 
-/* ---------- KITCHSYNC AI (Cliente) ---------- */
+/* ---------- LUGAC AI (Cliente) ---------- */
 function bindAI(){
   const send = () => {
     const inp = document.getElementById('aiInput');
@@ -1489,7 +1708,6 @@ function updateConn(){
 }
 window.addEventListener('online', updateConn); window.addEventListener('offline', updateConn); updateConn();
 
-// CART
 document.getElementById('cartBtn').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', closeCart);
 
