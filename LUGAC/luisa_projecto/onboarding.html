@@ -9,6 +9,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+          font-family:'Times New Roman', Times, serif;
         }
         body, html {
             width: 100%;
@@ -133,7 +134,8 @@
     </video>
 
     <!-- Overlay de toque (obrigatório para autoplay com som) -->
-    <div id="tapOverlay" class="tap-overlay hidden">
+    <!-- CORRIGIDO: começa VISÍVEL, não hidden -->
+    <div id="tapOverlay" class="tap-overlay">
         <div class="play-icon">▶</div>
         <p>Toque para iniciar</p>
     </div>
@@ -155,6 +157,7 @@
     var hasStarted = false;
     var fallbackTimer = null;
     var redirectTimer = null;
+    var videoDuration = 0;
 
     // ---------- REDIRECIONAMENTO ----------
     function redirectToLogin() {
@@ -191,16 +194,41 @@
         updateSoundButton();
     }, { passive: false });
 
+    // ---------- FALLBACK DE REDIRECIONAMENTO ----------
+    function scheduleFallbackRedirect() {
+        // Usa a duração conhecida ou tenta obter novamente
+        var dur = videoDuration || video.duration;
+        if (dur && isFinite(dur) && dur > 0) {
+            var safetyTime = (dur * 1000) + 3000;
+            if (fallbackTimer) clearTimeout(fallbackTimer);
+            fallbackTimer = setTimeout(function() {
+                if (!hasRedirected) {
+                    console.warn('Fallback: redirecionando após duração do vídeo');
+                    redirectToLogin();
+                }
+            }, safetyTime);
+        } else {
+            // Se não temos duração, agenda um fallback genérico de 35s
+            if (fallbackTimer) clearTimeout(fallbackTimer);
+            fallbackTimer = setTimeout(function() {
+                if (!hasRedirected) {
+                    console.warn('Fallback genérico: redirecionando');
+                    redirectToLogin();
+                }
+            }, 35000);
+        }
+    }
+
     // ---------- INICIAR VÍDEO COM SOM ----------
     function startVideo() {
-        if (hasStarted) return;
+        if (hasStarted || hasRedirected) return;
         hasStarted = true;
 
         // Esconde overlay e loading
         tapOverlay.classList.add('hidden');
         loadingIndicator.style.display = 'none';
 
-        // Tenta iniciar COM SOM
+        // Tenta iniciar COM SOM (o gesto do usuário já ocorreu)
         video.muted = false;
         video.volume = 1.0;
         updateSoundButton();
@@ -229,29 +257,24 @@
                     hasStarted = false;
                 });
             });
-        }
-    }
-
-    // ---------- FALLBACK DE REDIRECIONAMENTO ----------
-    function scheduleFallbackRedirect() {
-        if (video.duration && isFinite(video.duration)) {
-            var safetyTime = (video.duration * 1000) + 2000;
-            if (fallbackTimer) clearTimeout(fallbackTimer);
-            fallbackTimer = setTimeout(function() {
-                if (!hasRedirected) {
-                    console.warn('Fallback: redirecionando após duração do vídeo');
-                    redirectToLogin();
-                }
-            }, safetyTime);
+        } else {
+            // Navegadores antigos que não retornam Promise
+            soundBtn.classList.add('visible');
+            scheduleFallbackRedirect();
         }
     }
 
     // ---------- OVERLAY DE TOQUE ----------
+    var overlayHandled = false;
     function onTapOverlay(e) {
         if (e) {
             e.preventDefault();
             e.stopPropagation();
         }
+        // Evita duplo disparo (touch + click)
+        if (overlayHandled) return;
+        overlayHandled = true;
+        setTimeout(function() { overlayHandled = false; }, 500);
         startVideo();
     }
 
@@ -269,8 +292,13 @@
     });
 
     video.addEventListener('loadedmetadata', function() {
-        console.log('Vídeo carregado. Duração:', video.duration);
+        videoDuration = video.duration;
+        console.log('Vídeo carregado. Duração:', videoDuration);
         loadingIndicator.style.display = 'none';
+        // Se o vídeo já foi iniciado, agenda o fallback com a duração correta
+        if (hasStarted) {
+            scheduleFallbackRedirect();
+        }
     });
 
     video.addEventListener('canplaythrough', function() {
@@ -299,36 +327,34 @@
     });
 
     // ---------- FALLBACK DE SEGURANÇA ----------
-    // Se após 3 segundos o vídeo ainda não começou, mostra overlay
+    // Se após 5 segundos o vídeo ainda não começou e o overlay está visível,
+    // garante que o loading indicator não bloqueie a visão
     setTimeout(function() {
         if (!hasStarted && !hasRedirected) {
-            console.warn('Autoplay não iniciou. Mostrando overlay.');
             loadingIndicator.style.display = 'none';
             tapOverlay.classList.remove('hidden');
         }
-    }, 3000);
+    }, 5000);
 
-    // Fallback final: se nada funcionar em 40 segundos, redireciona
+    // Fallback final: se nada funcionar em 60 segundos, redireciona
     redirectTimer = setTimeout(function() {
         if (!hasRedirected) {
             console.warn('Timeout geral: redirecionando para login');
             redirectToLogin();
         }
-    }, 40000);
+    }, 60000);
 
     // ---------- VISIBILIDADE DA PÁGINA ----------
     document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && video.paused && !video.ended && hasStarted) {
+        if (!document.hidden && video.paused && !video.ended && hasStarted && !hasRedirected) {
             video.play().catch(function() {});
         }
     });
 
     // ---------- ESTADO INICIAL ----------
     updateSoundButton();
-
-    // Tenta autoplay COM SOM imediatamente (só funciona se o browser permitir)
-    // Caso contrário, o overlay aparecerá após 3s
-    startVideo();
+    // NÃO inicia automaticamente. O overlay está visível e aguarda o toque.
+    // Isso é obrigatório em navegadores modernos para autoplay com som.
 
 })();
 </script>
