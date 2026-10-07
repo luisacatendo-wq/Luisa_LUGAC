@@ -570,8 +570,8 @@
                     <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
                 </button>
 
-                <a href="login.html" class="btn-outline-back">
-                    <i class="bi bi-arrow-left"></i> Voltar para o login
+                <a href="login.html" class="btn-outline-back" id="backToLoginLink">
+                    <i class="bi bi-arrow-left"></i> <span id="backToLoginText">Voltar para o login</span>
                 </a>
             </form>
 
@@ -611,7 +611,11 @@
             confirmRequired: "Confirme sua nova senha",
             confirmMismatch: "As senhas não coincidem",
             successMsg: "✅ Senha alterada com sucesso! Sua nova senha foi atualizada.",
-            errorMsg: "❌ Falha ao alterar senha. Verifique os dados e tente novamente."
+            errorMsg: "❌ Falha ao alterar senha. Verifique os dados e tente novamente.",
+            backToLogin: "Voltar para o login",
+            currentPasswordPlaceholder: "••••••••",
+            newPasswordPlaceholder: "Mínimo 6 caracteres",
+            confirmPasswordPlaceholder: "Digite a nova senha novamente"
         },
         en: {
             changeTitle: "Change password",
@@ -627,7 +631,11 @@
             confirmRequired: "Please confirm your new password",
             confirmMismatch: "Passwords do not match",
             successMsg: "✅ Password changed successfully! Your new password has been updated.",
-            errorMsg: "❌ Failed to change password. Please check the data and try again."
+            errorMsg: "❌ Failed to change password. Please check the data and try again.",
+            backToLogin: "Back to login",
+            currentPasswordPlaceholder: "••••••••",
+            newPasswordPlaceholder: "Minimum 6 characters",
+            confirmPasswordPlaceholder: "Enter new password again"
         },
         es: {
             changeTitle: "Cambiar contraseña",
@@ -643,7 +651,11 @@
             confirmRequired: "Confirme su nueva contraseña",
             confirmMismatch: "Las contraseñas no coinciden",
             successMsg: "✅ ¡Contraseña cambiada con éxito! Su nueva contraseña ha sido actualizada.",
-            errorMsg: "❌ Error al cambiar la contraseña. Verifique los datos e intente de nuevo."
+            errorMsg: "❌ Error al cambiar la contraseña. Verifique los datos e intente de nuevo.",
+            backToLogin: "Volver al inicio de sesión",
+            currentPasswordPlaceholder: "••••••••",
+            newPasswordPlaceholder: "Mínimo 6 caracteres",
+            confirmPasswordPlaceholder: "Ingrese la nueva contraseña nuevamente"
         }
     };
 
@@ -667,6 +679,7 @@
     const toastEl = document.getElementById('notificationToast');
     const toastMessageSpan = document.getElementById('toastMessage');
     const closeToastBtn = document.getElementById('closeToast');
+    const backToLoginText = document.getElementById('backToLoginText');
 
     const currentError = document.getElementById('currentPasswordError');
     const newError = document.getElementById('newPasswordError');
@@ -693,6 +706,12 @@
         if (i18nEls.confirmPasswordLabel) i18nEls.confirmPasswordLabel.innerText = t.confirmPasswordLabel;
         if (i18nEls.demoNote) i18nEls.demoNote.innerText = t.demoNote;
         if (btnTextSpan) btnTextSpan.innerText = t.btnText;
+        if (backToLoginText) backToLoginText.innerText = t.backToLogin;
+        
+        // Atualizar placeholders
+        if (currentPasswordInput) currentPasswordInput.placeholder = t.currentPasswordPlaceholder;
+        if (newPasswordInput) newPasswordInput.placeholder = t.newPasswordPlaceholder;
+        if (confirmPasswordInput) confirmPasswordInput.placeholder = t.confirmPasswordPlaceholder;
     }
 
     // ============================================================
