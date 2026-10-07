@@ -17,21 +17,23 @@
       --primary:#e65c1e; --primary-soft:#ffefe8; --success:#2b8f5e; --warning:#e6a017;
       --danger:#d64545; --info:#2c7da0; --gray:#9aa9b9; --purple:#7c3aed;
       --sidebar-width:280px; --sidebar-collapsed:82px; --radius:20px; --radius-sm:14px;
+      --bg-overlay:rgba(244,247,252,0.88);
     }
     body.dark{
       --bg-body:#0e1217; --bg-sidebar:#161c24; --bg-card:#1e2630; --bg-topbar:#161c24;
       --text-primary:#eef2f8; --text-secondary:#a3b3c9; --border-light:#2a3440;
       --shadow-sm:0 8px 20px rgba(0,0,0,.4); --shadow-md:0 12px 30px rgba(0,0,0,.5);
       --primary-soft:#2f221c; --gray:#6b7b8f;
+      --bg-overlay:rgba(14,18,23,0.88);
     }
     body::before{
       content:''; position:fixed; inset:0;
-      background-image:url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop');
+      background-image:url('images/image-atendente.png');
       background-size:cover; background-position:center; background-attachment:fixed;
-      opacity:.08; z-index:-1; pointer-events:none;
+      opacity:.12; z-index:-2; pointer-events:none;
     }
-    body.dark::before{ opacity:.04; }
-    .app-wrapper{ display:flex; min-height:100vh; }
+    body.dark::before{ opacity:.06; }
+    .app-wrapper{ display:flex; min-height:100vh; position:relative; }
     .sidebar{
       width:var(--sidebar-width); background:var(--bg-sidebar); border-right:1px solid var(--border-light);
       display:flex; flex-direction:column; transition:width .3s cubic-bezier(.2,.9,.3,1);
@@ -43,7 +45,6 @@
     .logo-icon{  width:200px; height:200px; border-radius:90px;
       display:flex; align-items:center; justify-content:center; font-size:1.6rem; 
       flex-shrink:0;
-    
     }
     .logo-text span{ font-weight:400; font-size:.7rem; color:var(--text-secondary); display:block; line-height:1.2; }
     .user-profile{ display:flex; align-items:center; gap:10px; padding:8px 6px; background:var(--bg-body); border-radius:40px; cursor:pointer; }
@@ -201,13 +202,24 @@
     .status-chip{ display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; font-size:.75rem; font-weight:600; cursor:pointer; }
     .status-chip.active{ background:var(--primary); color:#fff; }
     /* Pedido card */
-    .pedido-card{ border-left:6px solid var(--gray); cursor:pointer; margin-bottom:12px; transition:.15s; }
+    .pedido-card{ border-left:6px solid var(--gray); cursor:pointer; margin-bottom:12px; transition:.15s; position:relative; overflow:hidden; }
     .pedido-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
     .pedido-card.novo{ border-left-color:var(--info); }
     .pedido-card.preparacao{ border-left-color:var(--warning); }
     .pedido-card.pronto{ border-left-color:var(--success); }
     .pedido-card.entregue{ border-left-color:var(--gray); }
     .pedido-card.cancelado{ border-left-color:var(--danger); opacity:.6; }
+    /* Imagem de fundo dos cards de pedido */
+    .pedido-card-img{
+      position:absolute; top:0; right:0; width:90px; height:90px; object-fit:cover;
+      border-radius:0 0 0 20px; opacity:.35; pointer-events:none;
+    }
+    .pedido-card-img-overlay{
+      position:absolute; top:0; right:0; width:90px; height:90px;
+      background:linear-gradient(135deg, transparent 30%, var(--bg-card) 100%);
+      border-radius:0 0 0 20px; pointer-events:none;
+    }
+    .pedido-card-content{ position:relative; z-index:1; }
     /* Toasts */
     .toast-container{ position:fixed; top:80px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
     .toast-custom{
@@ -231,6 +243,31 @@
       display:flex; align-items:center; gap:14px; z-index:9998; animation:slideIn .3s ease;
     }
     .notif-ready i{ font-size:1.6rem; }
+    /* Ajustes de contraste para o fundo visível */
+    .content-area, .topbar, .tabs-container {
+      position:relative;
+    }
+    .card {
+      backdrop-filter:blur(2px);
+    }
+    body:not(.dark) .card {
+      background:rgba(255,255,255,0.92);
+    }
+    body.dark .card {
+      background:rgba(30,38,48,0.92);
+    }
+    body:not(.dark) .sidebar {
+      background:rgba(255,255,255,0.95);
+    }
+    body.dark .sidebar {
+      background:rgba(22,28,36,0.95);
+    }
+    body:not(.dark) .topbar, body:not(.dark) .tabs-container {
+      background:rgba(255,255,255,0.95);
+    }
+    body.dark .topbar, body.dark .tabs-container {
+      background:rgba(22,28,36,0.95);
+    }
     @media (max-width:992px){
       .sidebar{ width:var(--sidebar-collapsed); }
       .sidebar .user-info, .sidebar .logo-text, .sidebar .nav-item span, .sidebar .nav-item .nav-badge{ display:none; }
@@ -266,7 +303,7 @@
           <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" alt="Atendimento">
         </div>
         <div class="user-info">
-          <h6>Carla Mendes</h6>
+          <h6>Carlos Mendes</h6>
           <small><i class="fas fa-circle" style="font-size:.5rem;color:var(--success);"></i> Atendimento Online</small>
         </div>
       </div>
@@ -340,26 +377,21 @@
         <div class="profile-header">
           <div class="avatar-lg"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" alt="Atendimento"></div>
           <div>
-            <h5 class="fw-bold mb-0">Carla Mendes</h5>
+            <h5 class="fw-bold mb-0">Carlos Mendes</h5>
             <p class="text-secondary mb-1">Atendimento / Empregada de Mesa</p>
             <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i> Online</span>
           </div>
         </div>
-        <div class="profile-menu-item" onclick="Toast.show('A abrir Meu Perfil...','info')"><i class="fas fa-id-card"></i><div><div class="fw-bold">Meu Perfil</div><small class="text-secondary">Ver e editar informações pessoais</small></div></div>
-        <div class="profile-menu-item" onclick="Toast.show('A abrir Estado da Sessão...','info')"><i class="fas fa-signal"></i><div><div class="fw-bold">Estado da Sessão</div><small class="text-secondary">Tempo restante e atividade</small></div></div>
-        <div class="profile-menu-item" onclick="Toast.show('A abrir Atividade...','info')"><i class="fas fa-history"></i><div><div class="fw-bold">Atividade</div><small class="text-secondary">Últimas ações realizadas</small></div></div>
-        <div class="profile-menu-item" onclick="Toast.show('A abrir As Minhas Mesas...','info')"><i class="fas fa-chair"></i><div><div class="fw-bold">As Minhas Mesas</div><small class="text-secondary">Mesas atribuídas ao meu turno</small></div></div>
-        <div class="profile-menu-item" onclick="Toast.show('A abrir Ajuda...','info')"><i class="fas fa-question-circle"></i><div><div class="fw-bold">Ajuda & Suporte</div><small class="text-secondary">FAQ e contacto</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openMeuPerfil()"><i class="fas fa-id-card"></i><div><div class="fw-bold">Meu Perfil</div><small class="text-secondary">Ver informações pessoais</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openEditarPerfil()"><i class="fas fa-user-edit"></i><div><div class="fw-bold">Editar Perfil</div><small class="text-secondary">Alterar dados pessoais</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openEstadoSessao()"><i class="fas fa-signal"></i><div><div class="fw-bold">Estado da Sessão</div><small class="text-secondary">Tempo restante e atividade</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openAtividade()"><i class="fas fa-history"></i><div><div class="fw-bold">Atividade</div><small class="text-secondary">Últimas ações realizadas</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openMinhasMesas()"><i class="fas fa-chair"></i><div><div class="fw-bold">As Minhas Mesas</div><small class="text-secondary">Mesas atribuídas ao meu turno</small></div></div>
+        <div class="profile-menu-item" onclick="Profile.openAjuda()"><i class="fas fa-question-circle"></i><div><div class="fw-bold">Ajuda & Suporte</div><small class="text-secondary">FAQ e contacto</small></div></div>
         <hr class="my-2" style="border-color:var(--border-light);">
-        <div class="profile-menu-item danger" onclick="Toast.show('Sessão terminada. A redirecionar...','warning')">
-          <i class="fas fa-sign-out-alt">
-          </i><div>
-          <div class="fw-bold">
-            <a href="logout.html">
-              Terminar Sessão
-          </a>
-          
-          </div><small class="text-secondary">Sair da conta atual</small></div></div>
+        <div class="profile-menu-item danger" onclick="Profile.terminarSessao()">
+          <i class="fas fa-sign-out-alt"></i><div><div class="fw-bold">Terminar Sessão</div><small class="text-secondary">Sair da conta atual</small></div>
+        </div>
       </div>
     </div>
   </div>
@@ -437,11 +469,11 @@ const DB = {
     { id:'D002', nome:'Gelado', preco:1500, categoria:'Sobremesas', img:'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=200&auto=format&fit=crop' }
   ],
   pedidos: [
-    { id:'#PED-00304', mesa:2, hora:'10:15', estado:'preparacao', itens:3, total:7500, cliente:'', obs:'' },
-    { id:'#PED-00305', mesa:4, hora:'10:22', estado:'pronto', itens:4, total:12400, cliente:'', obs:'Sem cebola' },
-    { id:'#PED-00306', mesa:7, hora:'10:40', estado:'preparacao', itens:2, total:6000, cliente:'', obs:'' },
-    { id:'#PED-00307', mesa:10, hora:'10:48', estado:'novo', itens:3, total:5300, cliente:'', obs:'' },
-    { id:'#PED-00308', mesa:12, hora:'10:52', estado:'novo', itens:5, total:15800, cliente:'', obs:'Aniversário' }
+    { id:'#PED-00304', mesa:2, hora:'10:15', estado:'preparacao', itens:3, total:7500, cliente:'', obs:'', img:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200&auto=format&fit=crop' },
+    { id:'#PED-00305', mesa:4, hora:'10:22', estado:'pronto', itens:4, total:12400, cliente:'', obs:'Sem cebola', img:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop' },
+    { id:'#PED-00306', mesa:7, hora:'10:40', estado:'preparacao', itens:2, total:6000, cliente:'', obs:'', img:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=200&auto=format&fit=crop' },
+    { id:'#PED-00307', mesa:10, hora:'10:48', estado:'novo', itens:3, total:5300, cliente:'', obs:'', img:'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?q=80&w=200&auto=format&fit=crop' },
+    { id:'#PED-00308', mesa:12, hora:'10:52', estado:'novo', itens:5, total:15800, cliente:'', obs:'Aniversário', img:'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=200&auto=format&fit=crop' }
   ],
   historico: [
     { id:'#PED-00298', mesa:5, hora:'09:15', estado:'entregue', total:8500 },
@@ -681,41 +713,47 @@ function renderMesas(){
 }
 
 /* ============================================================
-   PEDIDOS ATIVOS
+   PEDIDOS ATIVOS (com imagem de fundo)
    ============================================================ */
 function renderPedidosAtivos(){
   const ativos = pedidos.filter(p => p.estado==='novo'||p.estado==='preparacao'||p.estado==='pronto');
   return `
     <h4 class="mb-3">Pedidos Ativos <span class="badge-status badge-blue ms-2">${ativos.length}</span></h4>
     <div class="row g-3">
-      ${ativos.length ? ativos.map(p => `
+      ${ativos.length ? ativos.map(p => {
+        const imgUrl = p.img || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200&auto=format&fit=crop';
+        return `
         <div class="col-md-6 col-lg-4">
           <div class="card pedido-card ${p.estado}" data-pedido="${p.id}">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <strong style="font-size:1.1rem;">${p.id}</strong>
-              <span class="badge-status ${p.estado==='novo'?'badge-blue':p.estado==='preparacao'?'badge-yellow':'badge-green'}">${p.estado.toUpperCase()}</span>
-            </div>
-            <div class="mb-2"><i class="fas fa-chair me-1"></i> Mesa ${p.mesa} • ${p.hora}</div>
-            <div class="mb-2 small text-secondary">${p.itens} itens • ${formatKz(p.total)}</div>
-            ${p.obs ? `<div class="small text-warning"><i class="fas fa-comment me-1"></i>${p.obs}</div>` : ''}
-            <div class="mt-2">
-              <div class="pedido-flow">
-                <span class="flow-step ${p.estado!=='novo'?'done':'active'}">Enviado</span>
-                <i class="fas fa-arrow-right flow-arrow"></i>
-                <span class="flow-step ${p.estado==='preparacao'||p.estado==='pronto'?'done':p.estado==='novo'?'':'active'}">Preparação</span>
-                <i class="fas fa-arrow-right flow-arrow"></i>
-                <span class="flow-step ${p.estado==='pronto'?'done':'active'}">Pronto</span>
+            <img src="${imgUrl}" class="pedido-card-img" alt="Pedido ${p.id}">
+            <div class="pedido-card-img-overlay"></div>
+            <div class="pedido-card-content">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <strong style="font-size:1.1rem;">${p.id}</strong>
+                <span class="badge-status ${p.estado==='novo'?'badge-blue':p.estado==='preparacao'?'badge-yellow':'badge-green'}">${p.estado.toUpperCase()}</span>
+              </div>
+              <div class="mb-2"><i class="fas fa-chair me-1"></i> Mesa ${p.mesa} • ${p.hora}</div>
+              <div class="mb-2 small text-secondary">${p.itens} itens • ${formatKz(p.total)}</div>
+              ${p.obs ? `<div class="small text-warning"><i class="fas fa-comment me-1"></i>${p.obs}</div>` : ''}
+              <div class="mt-2">
+                <div class="pedido-flow">
+                  <span class="flow-step ${p.estado!=='novo'?'done':'active'}">Enviado</span>
+                  <i class="fas fa-arrow-right flow-arrow"></i>
+                  <span class="flow-step ${p.estado==='preparacao'||p.estado==='pronto'?'done':p.estado==='novo'?'':'active'}">Preparação</span>
+                  <i class="fas fa-arrow-right flow-arrow"></i>
+                  <span class="flow-step ${p.estado==='pronto'?'done':'active'}">Pronto</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      `).join('') : '<div class="empty-state"><i class="fas fa-receipt"></i><p>Nenhum pedido ativo.</p></div>'}
+        </div>`;
+      }).join('') : '<div class="empty-state"><i class="fas fa-receipt"></i><p>Nenhum pedido ativo.</p></div>'}
     </div>
   `;
 }
 
 /* ============================================================
-   PRONTOS A SERVIR
+   PRONTOS A SERVIR (com imagem de fundo)
    ============================================================ */
 function renderProntos(){
   const prontos = pedidos.filter(p => p.estado==='pronto');
@@ -723,20 +761,26 @@ function renderProntos(){
     <h4 class="mb-3">Prontos a Servir <span class="badge-status badge-green ms-2">${prontos.length}</span></h4>
     <div class="alert alert-success mb-3" style="border-radius:14px;"><i class="fas fa-bell me-2"></i><strong>Notificação automática:</strong> Quando um pedido fica pronto na cozinha, aparece aqui em tempo real para entrega ao cliente.</div>
     <div class="row g-3">
-      ${prontos.length ? prontos.map(p => `
+      ${prontos.length ? prontos.map(p => {
+        const imgUrl = p.img || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=200&auto=format&fit=crop';
+        return `
         <div class="col-md-6 col-lg-4">
           <div class="card pedido-card pronto">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <strong style="font-size:1.1rem;">${p.id}</strong>
-              <span class="badge-status badge-green">PRONTO</span>
+            <img src="${imgUrl}" class="pedido-card-img" alt="Pedido ${p.id}">
+            <div class="pedido-card-img-overlay"></div>
+            <div class="pedido-card-content">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <strong style="font-size:1.1rem;">${p.id}</strong>
+                <span class="badge-status badge-green">PRONTO</span>
+              </div>
+              <div class="mb-2"><i class="fas fa-chair me-1"></i> Mesa ${p.mesa} • ${p.hora}</div>
+              <div class="mb-2 small text-secondary">${p.itens} itens • ${formatKz(p.total)}</div>
+              ${p.obs ? `<div class="small text-warning"><i class="fas fa-comment me-1"></i>${p.obs}</div>` : ''}
+              <button class="btn btn-success w-100 mt-3" data-entregar="${p.id}"><i class="fas fa-check me-1"></i>Marcar como Entregue</button>
             </div>
-            <div class="mb-2"><i class="fas fa-chair me-1"></i> Mesa ${p.mesa} • ${p.hora}</div>
-            <div class="mb-2 small text-secondary">${p.itens} itens • ${formatKz(p.total)}</div>
-            ${p.obs ? `<div class="small text-warning"><i class="fas fa-comment me-1"></i>${p.obs}</div>` : ''}
-            <button class="btn btn-success w-100 mt-3" data-entregar="${p.id}"><i class="fas fa-check me-1"></i>Marcar como Entregue</button>
           </div>
-        </div>
-      `).join('') : '<div class="empty-state"><i class="fas fa-bell"></i><p>Nenhum pedido pronto neste momento.</p></div>'}
+        </div>`;
+      }).join('') : '<div class="empty-state"><i class="fas fa-bell"></i><p>Nenhum pedido pronto neste momento.</p></div>'}
     </div>
   `;
 }
@@ -808,14 +852,12 @@ function renderReservas(){
    ============================================================ */
 const binders = {
   'novo-pedido'(){
-    // pesquisar prato
     document.getElementById('pesquisaPrato')?.addEventListener('input', e => {
       const q = e.target.value.toLowerCase();
       document.querySelectorAll('#listaPratos .prato-card').forEach(el => {
         el.style.display = el.dataset.nome.includes(q) ? '' : 'none';
       });
     });
-    // categorias
     document.querySelectorAll('#catFilter .status-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('#catFilter .status-chip').forEach(c => c.classList.remove('active'));
@@ -826,23 +868,17 @@ const binders = {
         });
       });
     });
-    // adicionar prato
     document.querySelectorAll('[data-prato]').forEach(el => {
       el.addEventListener('click', () => addToCart(el.dataset.prato));
     });
-    // escolher mesa
     document.getElementById('btnEscolherMesa')?.addEventListener('click', escolherMesa);
-    // qty controls
     document.querySelectorAll('[data-cart-plus]').forEach(b => b.addEventListener('click', () => changeQty(+b.dataset.cartPlus, +1)));
     document.querySelectorAll('[data-cart-minus]').forEach(b => b.addEventListener('click', () => changeQty(+b.dataset.cartMinus, -1)));
-    // obs chips
     document.querySelectorAll('#obsChips .status-chip').forEach(c => c.addEventListener('click', () => {
       const t = document.getElementById('obsPedido');
       t.value = (t.value ? t.value + ', ' : '') + c.dataset.obs;
     }));
-    // limpar
     document.getElementById('btnLimpar')?.addEventListener('click', () => { carrinho = []; mesaSelecionada = null; renderContent('novo-pedido'); Toast.show('Carrinho limpo','info'); });
-    // enviar
     document.getElementById('btnEnviar')?.addEventListener('click', enviarPedido);
   },
   'mesas'(){
@@ -925,15 +961,15 @@ function enviarPedido(){
   const hora = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const total = cartTotal();
   const itens = carrinho.reduce((s,i)=>s+i.qtd,0);
-  pedidos.push({ id, mesa:mesaSelecionada, hora, estado:'novo', itens, total, obs, cliente:'' });
-  // atualizar mesa
+  // Escolher imagem de fundo baseada no primeiro item
+  const firstImg = carrinho.length > 0 ? carrinho[0].img : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=200&auto=format&fit=crop';
+  pedidos.push({ id, mesa:mesaSelecionada, hora, estado:'novo', itens, total, obs, cliente:'', img:firstImg });
   const mesa = mesas.find(m => m.num === mesaSelecionada);
   if (mesa){ mesa.estado = 'ocupada'; mesa.pedido = id; mesa.desde = hora; }
   persist();
   Toast.show(`✓ ${id} enviado para a cozinha!`,'success');
   carrinho = []; mesaSelecionada = null;
   openTab('pedidos-ativos');
-  // Simular progressão automática
   setTimeout(() => {
     const p = pedidos.find(x => x.id === id);
     if (p && p.estado === 'novo'){ p.estado = 'preparacao'; persist(); if (activeTab==='pedidos-ativos') renderContent('pedidos-ativos'); renderSidebar(); Toast.show(`Cozinha aceitou ${id}`,'info'); }
@@ -1071,7 +1107,169 @@ function openModal(title, body, onConfirm, confirmLabel='Fechar'){
   dynamicModalInstance.show();
 }
 
-/* ---------- SESSÃO / TEMA / ONLINE / NOTIF / PROFILE / COMMAND ---------- */
+/* ============================================================
+   PERFIL - SUBMENUS COM MODAIS
+   ============================================================ */
+const Profile = {
+  _closeProfileAndOpen(title, body, confirmLabel){
+    const pm = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+    if (pm) pm.hide();
+    setTimeout(() => {
+      openModal(title, body, null, confirmLabel || 'Fechar');
+    }, 300);
+  },
+  openMeuPerfil(){
+    const body = `
+      <div class="text-center mb-3">
+        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--primary);">
+        <h4 class="fw-bold mt-2 mb-0">Carlos Mendes</h4>
+        <p class="text-secondary mb-1">Atendimento / Empregada de Mesa</p>
+        <span class="badge-status badge-green"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i> Online</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6"><strong>ID Funcionário:</strong><br>ATD-0042</div>
+        <div class="col-md-6"><strong>Email:</strong><br>carlos.mendes@lugac.ao</div>
+        <div class="col-md-6"><strong>Telefone:</strong><br>+244 923 456 789</div>
+        <div class="col-md-6"><strong>Turno:</strong><br>Manhã (08:00 - 16:00)</div>
+        <div class="col-md-6"><strong>Data de Admissão:</strong><br>15/03/2023</div>
+        <div class="col-md-6"><strong>Mesas Atribuídas:</strong><br>1, 2, 3, 4, 5, 6</div>
+      </div>
+      <hr>
+      <div class="text-center text-secondary small">
+        <i class="fas fa-shield-alt me-1"></i> Dados protegidos pela política de privacidade LUGAC
+      </div>
+    `;
+    Profile._closeProfileAndOpen('Meu Perfil', body, 'Fechar');
+  },
+  openEditarPerfil(){
+    const body = `
+      <div class="text-center mb-3">
+        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--primary);">
+        <button class="btn btn-sm btn-outline-secondary mt-2"><i class="fas fa-camera me-1"></i>Alterar Foto</button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label fw-bold">Nome Completo</label><input class="form-control" value="Carlos Mendes"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Email</label><input class="form-control" value="carlos.mendes@lugac.ao"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Telefone</label><input class="form-control" value="+244 923 456 789"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Turno</label><select class="form-select"><option selected>Manhã (08:00 - 16:00)</option><option>Tarde (16:00 - 00:00)</option><option>Noite (00:00 - 08:00)</option></select></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Nova Password</label><input type="password" class="form-control" placeholder="Deixar em branco para manter"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Confirmar Password</label><input type="password" class="form-control" placeholder="Repetir nova password"></div>
+      </div>
+    `;
+    const pm = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+    if (pm) pm.hide();
+    setTimeout(() => {
+      openModal('Editar Perfil', body, () => {
+        Toast.show('✓ Perfil atualizado com sucesso!','success');
+        return true;
+      }, 'Guardar Alterações');
+    }, 300);
+  },
+  openEstadoSessao(){
+    const body = `
+      <div class="text-center mb-3">
+        <div style="font-size:3rem;color:var(--primary);"><i class="fas fa-signal"></i></div>
+        <h4 class="fw-bold">Sessão Ativa</h4>
+        <p class="text-secondary">Tempo restante: <strong id="sessaoTimerModal">15:00</strong></p>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6"><strong>Início:</strong><br>${new Date().toLocaleTimeString('pt-AO', {hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="col-md-6"><strong>Dispositivo:</strong><br>Desktop — Chrome</div>
+        <div class="col-md-6"><strong>IP:</strong><br>192.168.1.45</div>
+        <div class="col-md-6"><strong>Localização:</strong><br>Luanda, Angola</div>
+        <div class="col-md-6"><strong>Última Ação:</strong><br>Abrir Novo Pedido</div>
+        <div class="col-md-6"><strong>Estado:</strong><br><span class="badge-status badge-green">Conectado</span></div>
+      </div>
+      <div class="mt-3">
+        <div class="d-flex justify-content-between small"><span>Atividade da Sessão</span><span>75%</span></div>
+        <div class="progress mt-1" style="height:8px;border-radius:10px;">
+          <div class="progress-bar" style="width:75%;background:var(--primary);border-radius:10px;"></div>
+        </div>
+      </div>
+    `;
+    Profile._closeProfileAndOpen('Estado da Sessão', body, 'Fechar');
+  },
+  openAtividade(){
+    const body = `
+      <h5 class="fw-bold mb-3"><i class="fas fa-history me-2" style="color:var(--primary);"></i>Últimas Ações</h5>
+      <div class="timeline-item"><div class="timeline-icon"><i class="fas fa-plus-circle"></i></div><div><strong>Novo Pedido criado</strong><br><small class="text-secondary">#PED-00308 — Mesa 12 • há 2 min</small></div></div>
+      <div class="timeline-item"><div class="timeline-icon"><i class="fas fa-check"></i></div><div><strong>Pedido entregue</strong><br><small class="text-secondary">#PED-00298 — Mesa 5 • há 15 min</small></div></div>
+      <div class="timeline-item"><div class="timeline-icon"><i class="fas fa-chair"></i></div><div><strong>Mesa aberta</strong><br><small class="text-secondary">Mesa 7 — 4 pessoas • há 23 min</small></div></div>
+      <div class="timeline-item"><div class="timeline-icon"><i class="fas fa-calendar-check"></i></div><div><strong>Reserva confirmada</strong><br><small class="text-secondary">Mesa 5 — Sr. Silva • há 45 min</small></div></div>
+      <div class="timeline-item"><div class="timeline-icon"><i class="fas fa-sign-in-alt"></i></div><div><strong>Login efetuado</strong><br><small class="text-secondary">Sessão iniciada • há 1h 20min</small></div></div>
+    `;
+    Profile._closeProfileAndOpen('Atividade Recente', body, 'Fechar');
+  },
+  openMinhasMesas(){
+    const minhasMesas = mesas.filter(m => [1,2,3,4,5,6].includes(m.num));
+    const body = `
+      <h5 class="fw-bold mb-3"><i class="fas fa-chair me-2" style="color:var(--primary);"></i>Mesas do Meu Turno</h5>
+      <div class="mesa-grid">
+        ${minhasMesas.map(m => `
+          <div class="mesa-card ${m.estado}">
+            <div class="mesa-num">${m.num}</div>
+            <div class="mesa-status">${m.estado.toUpperCase()}</div>
+            <small class="text-secondary">${m.lugares} lugares</small>
+            ${m.pedido ? `<small style="color:var(--warning);font-weight:700;">${m.pedido}</small>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      <div class="mt-3 text-center text-secondary small">
+        <i class="fas fa-info-circle me-1"></i> Turno: Manhã (08:00 - 16:00) • ${minhasMesas.length} mesas atribuídas
+      </div>
+    `;
+    Profile._closeProfileAndOpen('As Minhas Mesas', body, 'Fechar');
+  },
+  openAjuda(){
+    const body = `
+      <h5 class="fw-bold mb-3"><i class="fas fa-question-circle me-2" style="color:var(--primary);"></i>Ajuda & Suporte</h5>
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item" style="background:var(--bg-body);border-color:var(--border-light);">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="background:var(--bg-body);color:var(--text-primary);">Como criar um novo pedido?</button></h2>
+          <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body" style="color:var(--text-secondary);">Vá ao menu "Novo Pedido", selecione uma mesa, adicione os pratos ao carrinho e clique em "Enviar p/ Cozinha".</div></div>
+        </div>
+        <div class="accordion-item" style="background:var(--bg-body);border-color:var(--border-light);">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="background:var(--bg-body);color:var(--text-primary);">Como fechar a conta de uma mesa?</button></h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body" style="color:var(--text-secondary);">No Mapa de Mesas, clique na mesa ocupada e escolha "Fechar Conta".</div></div>
+        </div>
+        <div class="accordion-item" style="background:var(--bg-body);border-color:var(--border-light);">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="background:var(--bg-body);color:var(--text-primary);">O que fazer quando um pedido fica pronto?</button></h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body" style="color:var(--text-secondary);">O sistema notifica automaticamente. Vá a "Prontos a Servir" e clique em "Marcar como Entregue".</div></div>
+        </div>
+        <div class="accordion-item" style="background:var(--bg-body);border-color:var(--border-light);">
+          <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" style="background:var(--bg-body);color:var(--text-primary);">Como fazer uma reserva?</button></h2>
+          <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body" style="color:var(--text-secondary);">Aceda a "Reservas" no menu lateral e clique em "Nova Reserva".</div></div>
+        </div>
+      </div>
+      <hr>
+      <div class="row g-3 mt-2">
+        <div class="col-md-6"><strong><i class="fas fa-phone me-2"></i>Suporte Técnico:</strong><br>+244 923 000 111</div>
+        <div class="col-md-6"><strong><i class="fas fa-envelope me-2"></i>Email:</strong><br>suporte@lugac.ao</div>
+      </div>
+    `;
+    Profile._closeProfileAndOpen('Ajuda & Suporte', body, 'Fechar');
+  },
+  terminarSessao(){
+    const pm = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+    if (pm) pm.hide();
+    setTimeout(() => {
+      openModal('Terminar Sessão', `
+        <div class="text-center py-3">
+          <div style="font-size:3rem;color:var(--danger);"><i class="fas fa-sign-out-alt"></i></div>
+          <h5 class="fw-bold mt-3">Tem a certeza?</h5>
+          <p class="text-secondary">A sua sessão será encerrada e será redirecionado para a página de login.</p>
+        </div>
+      `, () => {
+        Toast.show('Sessão terminada. A redirecionar...','warning');
+        setTimeout(() => { window.location.href = 'logout.html'; }, 1500);
+        return true;
+      }, 'Terminar Sessão');
+    }, 300);
+  }
+};
+window.Profile = Profile;
+
+/* ---------- SESSÃO / TEMA / ONLINE / NOTIF / COMMAND ---------- */
 let sessionSeconds = 15*60, sessionInterval, sessionModalShown = false;
 const timerText = document.getElementById('timerText');
 const sessionModal = new bootstrap.Modal(document.getElementById('sessionModal'));
@@ -1094,7 +1292,10 @@ document.getElementById('endSessionBtn').addEventListener('click', () => { sessi
 document.addEventListener('click', () => resetSessionTimer());
 
 const themeToggle = document.getElementById('themeToggle');
-if ((localStorage.getItem('lugac_theme')||'light') === 'dark') document.body.classList.add('dark');
+if ((localStorage.getItem('lugac_theme')||'light') === 'dark') {
+  document.body.classList.add('dark');
+  themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+}
 themeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark');
   const d = document.body.classList.contains('dark');
