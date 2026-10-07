@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Onboarding</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Times New Roman', Times, serif;
         }
         body, html {
             width: 100%;
@@ -82,12 +80,15 @@
             height: 48px;
             font-size: 24px;
             cursor: pointer;
-            display: flex;
+            display: none; /* escondido até o vídeo começar */
             align-items: center;
             justify-content: center;
             z-index: 30;
             backdrop-filter: blur(4px);
             transition: background 0.2s;
+        }
+        .sound-control.visible {
+            display: flex;
         }
         .sound-control:hover {
             background: rgba(0,0,0,0.85);
@@ -126,6 +127,7 @@
         <div>Carregando vídeo...</div>
     </div>
 
+    <!-- O vídeo NÃO começa muted. O overlay garante o gesto do utilizador. -->
     <video id="splashVideo" playsinline preload="auto" webkit-playsinline>
         <source src="video/ONBBOARDING.mp4" type="video/mp4">
     </video>
@@ -140,8 +142,6 @@
     <button id="soundToggle" class="sound-control" title="Desativar som">🔊</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
 (function() {
     'use strict';
@@ -150,9 +150,9 @@
     var soundBtn = document.getElementById('soundToggle');
     var tapOverlay = document.getElementById('tapOverlay');
     var loadingIndicator = document.getElementById('loadingIndicator');
-    
+
     var hasRedirected = false;
-    var videoReady = false;
+    var hasStarted = false;
     var fallbackTimer = null;
     var redirectTimer = null;
 
@@ -178,14 +178,29 @@
 
     function toggleSound(e) {
         e.stopPropagation();
+        e.preventDefault();
         video.muted = !video.muted;
         updateSoundButton();
     }
 
     soundBtn.addEventListener('click', toggleSound);
+    soundBtn.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        video.muted = !video.muted;
+        updateSoundButton();
+    }, { passive: false });
 
     // ---------- INICIAR VÍDEO COM SOM ----------
-    function startVideoWithSound() {
+    function startVideo() {
+        if (hasStarted) return;
+        hasStarted = true;
+
+        // Esconde overlay e loading
+        tapOverlay.classList.add('hidden');
+        loadingIndicator.style.display = 'none';
+
+        // Tenta iniciar COM SOM
         video.muted = false;
         video.volume = 1.0;
         updateSoundButton();
@@ -194,43 +209,54 @@
 
         if (playPromise !== undefined) {
             playPromise.then(function() {
-                // Vídeo iniciou com sucesso
-                tapOverlay.classList.add('hidden');
-                loadingIndicator.style.display = 'none';
-                videoReady = true;
-
-                // Fallback: se 'ended' não disparar, redireciona após a duração + margem
-                if (video.duration && isFinite(video.duration)) {
-                    var safetyTime = (video.duration * 1000) + 2000;
-                    if (fallbackTimer) clearTimeout(fallbackTimer);
-                    fallbackTimer = setTimeout(function() {
-                        if (!hasRedirected) {
-                            console.warn('Fallback: redirecionando após duração do vídeo');
-                            redirectToLogin();
-                        }
-                    }, safetyTime);
-                }
+                // Sucesso: vídeo a tocar com som
+                console.log('Vídeo iniciado com som');
+                soundBtn.classList.add('visible');
+                scheduleFallbackRedirect();
             }).catch(function(error) {
                 console.warn('Autoplay com som bloqueado:', error);
-                // Mostra overlay para o usuário tocar
-                tapOverlay.classList.remove('hidden');
-                loadingIndicator.style.display = 'none';
-                videoReady = true;
+                // Fallback: tenta com muted (autoplay silencioso)
+                video.muted = true;
+                updateSoundButton();
+                video.play().then(function() {
+                    console.log('Vídeo iniciado mudo (autoplay bloqueou som)');
+                    soundBtn.classList.add('visible');
+                    scheduleFallbackRedirect();
+                }).catch(function(err2) {
+                    console.error('Falha total ao reproduzir:', err2);
+                    // Mostra overlay novamente para o utilizador tocar
+                    tapOverlay.classList.remove('hidden');
+                    hasStarted = false;
+                });
             });
         }
     }
 
+    // ---------- FALLBACK DE REDIRECIONAMENTO ----------
+    function scheduleFallbackRedirect() {
+        if (video.duration && isFinite(video.duration)) {
+            var safetyTime = (video.duration * 1000) + 2000;
+            if (fallbackTimer) clearTimeout(fallbackTimer);
+            fallbackTimer = setTimeout(function() {
+                if (!hasRedirected) {
+                    console.warn('Fallback: redirecionando após duração do vídeo');
+                    redirectToLogin();
+                }
+            }, safetyTime);
+        }
+    }
+
     // ---------- OVERLAY DE TOQUE ----------
-    function onTapOverlay() {
-        tapOverlay.classList.add('hidden');
-        startVideoWithSound();
+    function onTapOverlay(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        startVideo();
     }
 
     tapOverlay.addEventListener('click', onTapOverlay);
-    tapOverlay.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        onTapOverlay();
-    }, { passive: false });
+    tapOverlay.addEventListener('touchstart', onTapOverlay, { passive: false });
 
     // ---------- EVENTOS DO VÍDEO ----------
     video.addEventListener('ended', function() {
@@ -239,17 +265,12 @@
 
     video.addEventListener('error', function(e) {
         console.error('Erro no vídeo:', e);
-        // Tenta redirecionar mesmo com erro após breve delay
         setTimeout(redirectToLogin, 500);
     });
 
     video.addEventListener('loadedmetadata', function() {
         console.log('Vídeo carregado. Duração:', video.duration);
         loadingIndicator.style.display = 'none';
-        videoReady = true;
-
-        // Tenta iniciar automaticamente com som
-        startVideoWithSound();
     });
 
     video.addEventListener('canplaythrough', function() {
@@ -257,34 +278,57 @@
         loadingIndicator.style.display = 'none';
     });
 
-    // ---------- FALLBACK DE SEGURANÇA ----------
-    // Se após 8 segundos o vídeo não carregou, tenta iniciar mesmo assim
-    setTimeout(function() {
-        if (!videoReady) {
-            console.warn('Timeout de carregamento. Tentando iniciar...');
-            loadingIndicator.style.display = 'none';
-            startVideoWithSound();
+    // ---------- TRATAMENTO DE CONGELAMENTO ----------
+    function tryResume() {
+        if (hasRedirected || video.ended) return;
+        if (video.paused && hasStarted) {
+            video.play().catch(function(err) {
+                console.warn('Falha ao retomar:', err);
+            });
         }
-    }, 8000);
+    }
 
-    // Fallback final: se nada funcionar em 20 segundos, redireciona
+    video.addEventListener('stalled', function() {
+        console.warn('Vídeo estagnado. Tentando retomar...');
+        setTimeout(tryResume, 1000);
+    });
+
+    video.addEventListener('waiting', function() {
+        console.warn('Vídeo à espera de dados. Retomando...');
+        setTimeout(tryResume, 500);
+    });
+
+    // ---------- FALLBACK DE SEGURANÇA ----------
+    // Se após 3 segundos o vídeo ainda não começou, mostra overlay
+    setTimeout(function() {
+        if (!hasStarted && !hasRedirected) {
+            console.warn('Autoplay não iniciou. Mostrando overlay.');
+            loadingIndicator.style.display = 'none';
+            tapOverlay.classList.remove('hidden');
+        }
+    }, 3000);
+
+    // Fallback final: se nada funcionar em 40 segundos, redireciona
     redirectTimer = setTimeout(function() {
         if (!hasRedirected) {
             console.warn('Timeout geral: redirecionando para login');
             redirectToLogin();
         }
-    }, 20000);
+    }, 40000);
 
     // ---------- VISIBILIDADE DA PÁGINA ----------
     document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && video.paused && !video.ended && videoReady) {
-            // Tenta retomar quando a página volta a ficar visível
+        if (!document.hidden && video.paused && !video.ended && hasStarted) {
             video.play().catch(function() {});
         }
     });
 
     // ---------- ESTADO INICIAL ----------
     updateSoundButton();
+
+    // Tenta autoplay COM SOM imediatamente (só funciona se o browser permitir)
+    // Caso contrário, o overlay aparecerá após 3s
+    startVideo();
 
 })();
 </script>
