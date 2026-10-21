@@ -2,23 +2,21 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Onboarding 2.1.1</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+          font-family:'Times New Roman', Times, serif;
         }
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
             background-color: #000;
-            font-family: 'Times New Roman', Times, serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: sans-serif;
         }
         .video-wrapper {
             position: relative;
@@ -35,8 +33,8 @@
             height: 100%;
             object-fit: contain;
             background-color: #000;
-            display: block;
         }
+        /* Overlay de "toque para iniciar" - necessário para autoplay com som */
         .tap-overlay {
             position: absolute;
             top: 0;
@@ -52,8 +50,6 @@
             cursor: pointer;
             z-index: 20;
             transition: opacity 0.3s;
-            -webkit-user-select: none;
-            user-select: none;
         }
         .tap-overlay.hidden {
             opacity: 0;
@@ -73,31 +69,48 @@
             0%, 100% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.8; }
         }
-        .sound-control {
+
+        /* Botões de controlo (som, retroceder, saltar) – estilo igual ao play */
+        .control-btn {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.75);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            font-size: 24px;
+            width: 80px;
+            height: 80px;
+            font-size: 48px;
             cursor: pointer;
-            display: none;
+            display: none; /* escondido até o vídeo começar */
             align-items: center;
             justify-content: center;
             z-index: 30;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.2s;
+            animation: pulse 1.5s infinite;
+            line-height: 1;
         }
-        .sound-control.visible {
+        .control-btn.visible {
             display: flex;
         }
-        .sound-control:hover {
-            background: rgba(0,0,0,0.85);
+        .control-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+        /* Posicionamento específico */
+        #soundToggle {
+            bottom: 20px;
+            right: 20px;
+        }
+        #rewindBtn {
+            bottom: 20px;
+            left: 20px;
+        }
+        #skipBtn {
+            bottom: 20px;
+            left: 120px; /* ao lado do rewind, com espaçamento */
+        }
+        /* Ajuste para o ícone de retroceder ficar visualmente centrado */
+        #rewindBtn {
+            font-size: 52px; /* ligeiramente maior para compensar o glifo */
         }
         .loading-indicator {
             position: absolute;
@@ -122,52 +135,35 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .error-msg {
-            position: absolute;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ff6b6b;
-            font-size: 13px;
-            z-index: 40;
-            text-align: center;
-            padding: 10px 20px;
-            background: rgba(0,0,0,0.7);
-            border-radius: 8px;
-            max-width: 90%;
-            display: none;
-            line-height: 1.4;
-        }
     </style>
 </head>
 <body>
 
 <div class="video-wrapper">
+    <!-- Indicador de carregamento -->
     <div id="loadingIndicator" class="loading-indicator">
         <div class="spinner"></div>
         <div>Carregando vídeo...</div>
     </div>
 
-    <!--
-        FONTES DE VÍDEO POR PRIORIDADE:
-        1. Caminho local (funciona no PC e no GitHub se o arquivo existir na pasta video/)
-        2. CDN externo (descomente e coloque o seu URL se o vídeo for grande)
-        O navegador tenta a primeira; se falhar, tenta a segunda automaticamente.
-    -->
-    <video id="splashVideo" playsinline preload="auto" webkit-playsinline muted="false">
+    <!-- O vídeo NÃO começa muted. O overlay garante o gesto do utilizador. -->
+    <video id="splashVideo" playsinline preload="auto" webkit-playsinline>
         <source src="video/ONBBOARDING.mp4" type="video/mp4">
-        <!-- Se usar CDN, descomente a linha abaixo e coloque o seu URL: -->
-        <!-- <source src="https://res.cloudinary.com/seu-cloud/video/upload/ONBBOARDING.mp4" type="video/mp4"> -->
-        Seu navegador não suporta vídeo HTML5.
     </video>
 
+    <!-- Overlay de toque (obrigatório para autoplay com som) -->
+    <!-- CORRIGIDO: começa VISÍVEL, não hidden -->
     <div id="tapOverlay" class="tap-overlay">
         <div class="play-icon">▶</div>
         <p>Toque para iniciar</p>
     </div>
 
-    <button id="soundToggle" class="sound-control" title="Desativar som">🔊</button>
-    <div id="errorMsg" class="error-msg"></div>
+    <!-- Botão de som -->
+    <button id="soundToggle" class="control-btn" title="Desativar som">🔊</button>
+    <!-- Botão de retroceder (seta circular) -->
+    <button id="rewindBtn" class="control-btn" title="Retroceder 5 segundos">↺</button>
+    <!-- Botão de saltar -->
+    <button id="skipBtn" class="control-btn" title="Saltar vídeo">⏭️</button>
 </div>
 
 <script>
@@ -176,39 +172,23 @@
 
     var video = document.getElementById('splashVideo');
     var soundBtn = document.getElementById('soundToggle');
+    var rewindBtn = document.getElementById('rewindBtn');
+    var skipBtn = document.getElementById('skipBtn');
     var tapOverlay = document.getElementById('tapOverlay');
     var loadingIndicator = document.getElementById('loadingIndicator');
-    var errorMsg = document.getElementById('errorMsg');
 
     var hasRedirected = false;
     var hasStarted = false;
     var fallbackTimer = null;
-    var loadCheckTimer = null;
+    var redirectTimer = null;
     var videoDuration = 0;
-    var lastTime = 0;
-
-    // ---------- LOG ----------
-    function log(msg) {
-        try { console.log('[Onboarding] ' + msg); } catch(e) {}
-    }
-
-    function showError(msg) {
-        errorMsg.textContent = msg;
-        errorMsg.style.display = 'block';
-        log('ERRO: ' + msg);
-    }
-
-    function hideError() {
-        errorMsg.style.display = 'none';
-    }
 
     // ---------- REDIRECIONAMENTO ----------
     function redirectToLogin() {
         if (hasRedirected) return;
         hasRedirected = true;
         if (fallbackTimer) clearTimeout(fallbackTimer);
-        if (loadCheckTimer) clearTimeout(loadCheckTimer);
-        log('Redirecionando para login.html');
+        if (redirectTimer) clearTimeout(redirectTimer);
         window.location.href = 'login.html';
     }
 
@@ -224,30 +204,80 @@
     }
 
     function toggleSound(e) {
-        if (e) {
-            e.stopPropagation();
-            e.preventDefault();
-        }
+        e.stopPropagation();
+        e.preventDefault();
         video.muted = !video.muted;
         updateSoundButton();
     }
 
     soundBtn.addEventListener('click', toggleSound);
-    soundBtn.addEventListener('touchstart', toggleSound, { passive: false });
+    soundBtn.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        video.muted = !video.muted;
+        updateSoundButton();
+    }, { passive: false });
 
-    // ---------- FALLBACK BASEADO EM DURAÇÃO ----------
+    // ---------- RETROCEDER 5 SEGUNDOS ----------
+    function rewindVideo(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (hasRedirected || !hasStarted || video.ended) return;
+        var newTime = Math.max(0, video.currentTime - 5);
+        video.currentTime = newTime;
+        // Se o vídeo estava pausado, retoma (opcional, mas mantém a fluidez)
+        if (video.paused) {
+            video.play().catch(function(err) {
+                console.warn('Falha ao retomar após retroceder:', err);
+            });
+        }
+    }
+
+    rewindBtn.addEventListener('click', rewindVideo);
+    rewindBtn.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        rewindVideo(e);
+    }, { passive: false });
+
+    // ---------- SALTAR VÍDEO (redireciona imediatamente) ----------
+    function skipVideo(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (hasRedirected) return;
+        // Redireciona imediatamente, independentemente do estado do vídeo
+        redirectToLogin();
+    }
+
+    skipBtn.addEventListener('click', skipVideo);
+    skipBtn.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        skipVideo(e);
+    }, { passive: false });
+
+    // ---------- FALLBACK DE REDIRECIONAMENTO ----------
     function scheduleFallbackRedirect() {
-        if (fallbackTimer) clearTimeout(fallbackTimer);
+        // Usa a duração conhecida ou tenta obter novamente
         var dur = videoDuration || video.duration;
         if (dur && isFinite(dur) && dur > 0) {
-            var safetyTime = (dur * 1000) + 4000;
-            log('Fallback agendado: ' + Math.round(safetyTime/1000) + 's');
+            var safetyTime = (dur * 1000) + 3000;
+            if (fallbackTimer) clearTimeout(fallbackTimer);
             fallbackTimer = setTimeout(function() {
-                if (!hasRedirected && video.ended) {
-                    log('Fallback: vídeo terminou');
+                if (!hasRedirected) {
+                    console.warn('Fallback: redirecionando após duração do vídeo');
                     redirectToLogin();
                 }
             }, safetyTime);
+        } else {
+            // Se não temos duração, agenda um fallback genérico de 35s
+            if (fallbackTimer) clearTimeout(fallbackTimer);
+            fallbackTimer = setTimeout(function() {
+                if (!hasRedirected) {
+                    console.warn('Fallback genérico: redirecionando');
+                    redirectToLogin();
+                }
+            }, 35000);
         }
     }
 
@@ -256,50 +286,48 @@
         if (hasStarted || hasRedirected) return;
         hasStarted = true;
 
+        // Esconde overlay e loading
         tapOverlay.classList.add('hidden');
         loadingIndicator.style.display = 'none';
-        hideError();
 
-        // iOS Safari exige que o play() seja chamado diretamente no gesto
+        // Tenta iniciar COM SOM (o gesto do usuário já ocorreu)
         video.muted = false;
         video.volume = 1.0;
         updateSoundButton();
 
-        var playPromise;
-        try {
-            playPromise = video.play();
-        } catch (e) {
-            log('Exceção no play(): ' + e.message);
-            playPromise = null;
-        }
+        var playPromise = video.play();
 
-        if (playPromise !== undefined && playPromise !== null) {
+        if (playPromise !== undefined) {
             playPromise.then(function() {
-                log('Vídeo iniciado com som');
+                // Sucesso: vídeo a tocar com som
+                console.log('Vídeo iniciado com som');
                 soundBtn.classList.add('visible');
+                rewindBtn.classList.add('visible');
+                skipBtn.classList.add('visible');
                 scheduleFallbackRedirect();
             }).catch(function(error) {
-                log('Autoplay com som bloqueado: ' + error.name + ' - ' + error.message);
-                // Tenta com muted
+                console.warn('Autoplay com som bloqueado:', error);
+                // Fallback: tenta com muted (autoplay silencioso)
                 video.muted = true;
                 updateSoundButton();
-                var p2 = video.play();
-                if (p2 !== undefined) {
-                    p2.then(function() {
-                        log('Vídeo iniciado mudo (autoplay bloqueou som)');
-                        soundBtn.classList.add('visible');
-                        scheduleFallbackRedirect();
-                    }).catch(function(err2) {
-                        log('Falha total: ' + err2.message);
-                        showError('Não foi possível reproduzir. Toque novamente.');
-                        tapOverlay.classList.remove('hidden');
-                        hasStarted = false;
-                    });
-                }
+                video.play().then(function() {
+                    console.log('Vídeo iniciado mudo (autoplay bloqueou som)');
+                    soundBtn.classList.add('visible');
+                    rewindBtn.classList.add('visible');
+                    skipBtn.classList.add('visible');
+                    scheduleFallbackRedirect();
+                }).catch(function(err2) {
+                    console.error('Falha total ao reproduzir:', err2);
+                    // Mostra overlay novamente para o utilizador tocar
+                    tapOverlay.classList.remove('hidden');
+                    hasStarted = false;
+                });
             });
         } else {
-            // Navegadores antigos
+            // Navegadores antigos que não retornam Promise
             soundBtn.classList.add('visible');
+            rewindBtn.classList.add('visible');
+            skipBtn.classList.add('visible');
             scheduleFallbackRedirect();
         }
     }
@@ -311,9 +339,10 @@
             e.preventDefault();
             e.stopPropagation();
         }
+        // Evita duplo disparo (touch + click)
         if (overlayHandled) return;
         overlayHandled = true;
-        setTimeout(function() { overlayHandled = false; }, 600);
+        setTimeout(function() { overlayHandled = false; }, 500);
         startVideo();
     }
 
@@ -322,88 +351,66 @@
 
     // ---------- EVENTOS DO VÍDEO ----------
     video.addEventListener('ended', function() {
-        log('Vídeo terminou');
         redirectToLogin();
     });
 
-    video.addEventListener('error', function() {
-        var err = video.error;
-        var msg = 'Erro desconhecido';
-        if (err) {
-            switch (err.code) {
-                case 1: msg = 'Carregamento abortado'; break;
-                case 2: msg = 'Erro de rede — verifique o caminho do vídeo'; break;
-                case 3: msg = 'Erro de descodificação'; break;
-                case 4: msg = 'Formato não suportado ou arquivo não encontrado'; break;
-            }
-        }
-        showError(msg);
-        log('Erro no vídeo: ' + msg);
-        // Só redireciona se o vídeo nunca começou
-        if (!hasStarted) {
-            setTimeout(redirectToLogin, 3000);
-        }
+    video.addEventListener('error', function(e) {
+        console.error('Erro no vídeo:', e);
+        setTimeout(redirectToLogin, 500);
     });
 
     video.addEventListener('loadedmetadata', function() {
         videoDuration = video.duration;
-        log('Metadata carregada. Duração: ' + videoDuration + 's');
+        console.log('Vídeo carregado. Duração:', videoDuration);
         loadingIndicator.style.display = 'none';
-        if (hasStarted) scheduleFallbackRedirect();
-    });
-
-    video.addEventListener('loadeddata', function() {
-        log('Dados carregados');
-        loadingIndicator.style.display = 'none';
-    });
-
-    video.addEventListener('canplay', function() {
-        log('Pronto para tocar');
-        loadingIndicator.style.display = 'none';
+        // Se o vídeo já foi iniciado, agenda o fallback com a duração correta
+        if (hasStarted) {
+            scheduleFallbackRedirect();
+        }
     });
 
     video.addEventListener('canplaythrough', function() {
-        log('Pronto para reprodução contínua');
+        console.log('Vídeo pronto para reprodução');
         loadingIndicator.style.display = 'none';
-    });
-
-    video.addEventListener('playing', function() {
-        log('Vídeo a tocar');
-        loadingIndicator.style.display = 'none';
-    });
-
-    video.addEventListener('timeupdate', function() {
-        lastTime = video.currentTime;
     });
 
     // ---------- TRATAMENTO DE CONGELAMENTO ----------
     function tryResume() {
-        if (hasRedirected || video.ended || !hasStarted) return;
-        if (video.paused) {
+        if (hasRedirected || video.ended) return;
+        if (video.paused && hasStarted) {
             video.play().catch(function(err) {
-                log('Falha ao retomar: ' + err.message);
+                console.warn('Falha ao retomar:', err);
             });
         }
     }
 
     video.addEventListener('stalled', function() {
-        log('Vídeo estagnado. Tentando retomar...');
+        console.warn('Vídeo estagnado. Tentando retomar...');
         setTimeout(tryResume, 1000);
     });
 
     video.addEventListener('waiting', function() {
-        log('À espera de dados...');
+        console.warn('Vídeo à espera de dados. Retomando...');
         setTimeout(tryResume, 500);
     });
 
-    // ---------- VERIFICAÇÃO DE CARREGAMENTO ----------
-    // Se o vídeo não carregar metadata em 10s, mostra erro
-    loadCheckTimer = setTimeout(function() {
-        if (!hasStarted && !hasRedirected && video.readyState === 0) {
-            showError('O vídeo não carregou. Verifique se o arquivo "video/ONBBOARDING.mp4" existe (atenção a maiúsculas/minúsculas).');
-            log('AVISO: vídeo não carregou em 10s. readyState=' + video.readyState);
+    // ---------- FALLBACK DE SEGURANÇA ----------
+    // Se após 5 segundos o vídeo ainda não começou e o overlay está visível,
+    // garante que o loading indicator não bloqueie a visão
+    setTimeout(function() {
+        if (!hasStarted && !hasRedirected) {
+            loadingIndicator.style.display = 'none';
+            tapOverlay.classList.remove('hidden');
         }
-    }, 10000);
+    }, 5000);
+
+    // Fallback final: se nada funcionar em 60 segundos, redireciona
+    redirectTimer = setTimeout(function() {
+        if (!hasRedirected) {
+            console.warn('Timeout geral: redirecionando para login');
+            redirectToLogin();
+        }
+    }, 60000);
 
     // ---------- VISIBILIDADE DA PÁGINA ----------
     document.addEventListener('visibilitychange', function() {
@@ -414,14 +421,8 @@
 
     // ---------- ESTADO INICIAL ----------
     updateSoundButton();
-    log('Página carregada. Aguardando toque do utilizador.');
-    var srcEl = video.querySelector('source');
-    if (srcEl) log('Caminho do vídeo: ' + srcEl.src);
-
-    // Se o vídeo já estiver em cache e pronto, esconde o loading
-    if (video.readyState >= 1) {
-        loadingIndicator.style.display = 'none';
-    }
+    // NÃO inicia automaticamente. O overlay está visível e aguarda o toque.
+    // Isso é obrigatório em navegadores modernos para autoplay com som.
 
 })();
 </script>
